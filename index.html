@@ -75,6 +75,30 @@
             max-width: 300px;
         }
         .menu-title { font-size: 32px; margin-bottom: 10px; font-weight: 800; color: var(--primary); }
+        
+        /* Speed Selector Styling */
+        .speed-selector {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .speed-btn {
+            background: transparent;
+            color: #888;
+            border: 1px solid #444;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .speed-btn.active {
+            color: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+
         .btn {
             background: var(--primary);
             color: #000;
@@ -84,7 +108,7 @@
             font-weight: bold;
             border-radius: 4px;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 10px;
             transition: transform 0.1s, box-shadow 0.2s;
             text-transform: uppercase;
         }
@@ -122,6 +146,13 @@
             <div class="menu-box">
                 <div class="menu-title" id="menu-text">READY?</div>
                 <div id="final-score" style="display:none; margin-bottom:10px; color:#ccc;"></div>
+                
+                <div class="speed-selector">
+                    <button class="speed-btn" data-speed="slow">SLOW</button>
+                    <button class="speed-btn" data-speed="normal">NORMAL</button>
+                    <button class="speed-btn active" data-speed="hard">HARD</button>
+                </div>
+
                 <button class="btn" id="start-btn">PLAY</button>
                 <div class="controls-hint">
                     <span class="key">WASD</span> or <span class="key">Arrows</span> to Move<br>
@@ -139,9 +170,13 @@ const CONFIG = {
     cols: 31,
     rows: 15,          
     cellSize: 0,        
-    baseSpeed: 10,      
-    speedBoost: 0.2,    
-    maxSpeed: 25,
+    // Base Speed Settings
+    speeds: {
+        slow: { base: 6, boost: 0.1, max: 12 },
+        normal: { base: 8, boost: 0.15, max: 18 },
+        hard: { base: 10, boost: 0.2, max: 25 } // This is your original code's speed
+    },
+    currentMode: 'hard',
     colors: {
         snakeHead: '#00ffcc',
         snakeBody: '#00bfa5',
@@ -175,6 +210,7 @@ const menuText = document.getElementById('menu-text');
 const scoreEl = document.getElementById('score');
 const highEl = document.getElementById('high');
 const finalScoreEl = document.getElementById('final-score');
+const speedBtns = document.querySelectorAll('.speed-btn');
 
 highEl.textContent = state.highScore;
 
@@ -195,7 +231,6 @@ resize();
 /* ================= INPUT HANDLING ================= */
 window.addEventListener('keydown', e => {
     const key = e.key.toLowerCase();
-    // Pressing R now triggers startGame which hides the UI immediately
     if (key === 'r') { startGame(); return; }
     if (state.gameOver) return;
 
@@ -215,15 +250,19 @@ window.addEventListener('keydown', e => {
     }
 });
 
+speedBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        speedBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        CONFIG.currentMode = btn.dataset.speed;
+    });
+});
+
 startBtn.addEventListener('click', startGame);
 
 /* ================= GAME LOGIC ================= */
 function initGame() {
-    state.snake = [
-        {x: 8, y: 7},
-        {x: 7, y: 7},
-        {x: 6, y: 7}
-    ];
+    state.snake = [{x: 8, y: 7}, {x: 7, y: 7}, {x: 6, y: 7}];
     state.dir = {x: 1, y: 0};
     state.nextDir = [];
     state.score = 0;
@@ -234,7 +273,6 @@ function initGame() {
 }
 
 function startGame() {
-    // Reset UI state so it doesn't show "Game Over" while playing
     menuText.textContent = "READY?";
     finalScoreEl.style.display = 'none';
     startBtn.textContent = "PLAY";
@@ -278,7 +316,6 @@ function triggerGameOver() {
         highEl.textContent = state.highScore;
     }
     setTimeout(() => {
-        // Only show if the user hasn't already restarted via 'R'
         if(state.gameOver) {
             menuText.textContent = "GAME OVER";
             finalScoreEl.textContent = "Score: " + state.score;
@@ -394,7 +431,11 @@ function loop(now) {
     const dt = now - state.lastTime;
     state.lastTime = now;
     state.accumTime += dt;
-    const stepTime = 1000 / Math.min(CONFIG.maxSpeed, CONFIG.baseSpeed + (state.score * CONFIG.speedBoost));
+    
+    // Use the selected speed profile
+    const profile = CONFIG.speeds[CONFIG.currentMode];
+    const stepTime = 1000 / Math.min(profile.max, profile.base + (state.score * profile.boost));
+    
     while (state.accumTime >= stepTime) {
         if (!state.gameOver) update();
         state.accumTime -= stepTime;
