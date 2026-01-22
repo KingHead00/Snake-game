@@ -64,7 +64,7 @@
             z-index: 20;
         }
         #ui-layer.hidden { opacity: 0; pointer-events: none; }
-       
+        
         .menu-box {
             text-align: center;
             background: var(--ui-bg);
@@ -89,7 +89,7 @@
             text-transform: uppercase;
         }
         .btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--primary); }
-       
+        
         .controls-hint {
             margin-top: 20px;
             font-size: 13px;
@@ -136,7 +136,7 @@
 <script>
 /* ================= CONFIGURATION ================= */
 const CONFIG = {
-    cols: 31,           // 25 + 3 on left + 3 on right = 31 total
+    cols: 31,
     rows: 15,          
     cellSize: 0,        
     baseSpeed: 10,      
@@ -182,7 +182,7 @@ function resize() {
     const container = document.getElementById('game-container');
     const availW = container.clientWidth - 40;
     const availH = container.clientHeight - 40;
-   
+    
     const rawSize = Math.min(availW / CONFIG.cols, availH / CONFIG.rows);
     CONFIG.cellSize = Math.floor(rawSize);
 
@@ -195,6 +195,7 @@ resize();
 /* ================= INPUT HANDLING ================= */
 window.addEventListener('keydown', e => {
     const key = e.key.toLowerCase();
+    // Pressing R now triggers startGame which hides the UI immediately
     if (key === 'r') { startGame(); return; }
     if (state.gameOver) return;
 
@@ -218,7 +219,6 @@ startBtn.addEventListener('click', startGame);
 
 /* ================= GAME LOGIC ================= */
 function initGame() {
-    // Starting coordinates shifted right by 3 to compensate for left expansion
     state.snake = [
         {x: 8, y: 7},
         {x: 7, y: 7},
@@ -234,6 +234,11 @@ function initGame() {
 }
 
 function startGame() {
+    // Reset UI state so it doesn't show "Game Over" while playing
+    menuText.textContent = "READY?";
+    finalScoreEl.style.display = 'none';
+    startBtn.textContent = "PLAY";
+    
     initGame();
     state.gameOver = false;
     state.lastTime = performance.now();
@@ -273,11 +278,14 @@ function triggerGameOver() {
         highEl.textContent = state.highScore;
     }
     setTimeout(() => {
-        menuText.textContent = "GAME OVER";
-        finalScoreEl.textContent = "Score: " + state.score;
-        finalScoreEl.style.display = 'block';
-        startBtn.textContent = "TRY AGAIN";
-        uiLayer.classList.remove('hidden');
+        // Only show if the user hasn't already restarted via 'R'
+        if(state.gameOver) {
+            menuText.textContent = "GAME OVER";
+            finalScoreEl.textContent = "Score: " + state.score;
+            finalScoreEl.style.display = 'block';
+            startBtn.textContent = "TRY AGAIN";
+            uiLayer.classList.remove('hidden');
+        }
     }, 500);
 }
 
