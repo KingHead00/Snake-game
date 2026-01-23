@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - Skins Are Back</title>
+    <title>Neon Snake - Pure Edition</title>
     
     <style>
         :root {
@@ -27,23 +27,42 @@
 
         header {
             padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: #111; border-bottom: 1px solid #333; z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #111;
+            border-bottom: 1px solid #333;
+            z-index: 10;
         }
         h1 { font-size: 20px; margin: 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
         .stats { font-family: monospace; font-size: 16px; color: #ccc; }
 
         #game-container {
-            flex: 1; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden;
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
 
         canvas {
-            background: #000; display: block; border: 3px solid #fff; border-radius: 4px;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); transition: transform 0.1s ease-out;
+            background: #000;
+            display: block;
+            border: 3px solid #fff;
+            border-radius: 4px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            transition: transform 0.1s ease-out;
         }
 
-        canvas.pulse { transform: scale(1.025); box-shadow: 0 0 50px #fff, inset 0 0 25px #fff; }
-        canvas.death-pulse { animation: deathGlowRed 1.2s ease-out forwards; }
+        canvas.pulse {
+            transform: scale(1.025);
+            box-shadow: 0 0 50px #fff, inset 0 0 25px #fff;
+        }
+
+        canvas.death-pulse {
+            animation: deathGlowRed 1.2s ease-out forwards;
+        }
 
         @keyframes deathGlowRed {
             0% { box-shadow: 0 0 80px var(--danger), inset 0 0 40px var(--danger); border-color: var(--danger); transform: scale(1.04); }
@@ -51,7 +70,8 @@
         }
 
         #ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
             transition: opacity 0.3s; z-index: 20;
@@ -63,36 +83,26 @@
             border: 1px solid #444; border-radius: 12px; width: 320px;
             max-height: 90vh; overflow-y: auto;
         }
-        .menu-title { font-size: 28px; margin-bottom: 5px; color: var(--primary); font-weight: 800; }
-        
-        .user-input-container { margin: 10px 0; }
-        #username-in {
-            background: #000; border: 1px solid #444; color: var(--primary);
-            padding: 8px; border-radius: 4px; text-align: center;
-            font-family: inherit; width: 85%; outline: none; font-weight: bold;
-        }
+        .menu-title { font-size: 28px; margin-bottom: 15px; color: var(--primary); font-weight: 800; }
 
-        /* SHOP STYLES */
-        .shop-btn { 
-            background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 10px; 
-            width: 100%; margin-top: 10px; cursor: pointer; border-radius: 6px; 
-            font-weight: bold; font-size: 12px; display: flex; justify-content: space-between; 
-        }
+        .btn { background: var(--primary); color: #000; border: none; padding: 12px; font-size: 18px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; width: 100%; }
+        
+        .shop-btn { background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 10px; width: 100%; margin-top: 10px; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 12px; display: flex; justify-content: space-between; }
         .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: #000; }
-        .shop-content.open { max-height: 300px; padding: 10px 0; border: 1px solid #444; border-top: none; }
+        .shop-content.open { max-height: 350px; padding: 10px 0; border: 1px solid #444; border-top: none; }
+        
         .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 10px; }
         .skin-card { background: #111; border: 1px solid #333; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; }
         .skin-card.selected { border-color: var(--primary); background: #001a11; }
         .swatch { width: 12px; height: 12px; margin: 0 auto 4px; border-radius: 2px; }
 
-        .btn { background: var(--primary); color: #000; border: none; padding: 12px; font-size: 18px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; width: 100%; }
-        
-        .speed-selector { margin: 10px 0; display: flex; justify-content: center; gap: 8px; }
-        .speed-btn { background: transparent; color: #888; border: 1px solid #444; padding: 5px 10px; font-size: 11px; cursor: pointer; border-radius: 4px; }
+        .speed-selector { margin: 10px 0; display: flex; justify-content: center; gap: 5px; }
+        .speed-btn { background: transparent; color: #888; border: 1px solid #444; padding: 4px 8px; font-size: 11px; cursor: pointer; border-radius: 4px; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
         
+        .controls-hint { font-size: 11px; color: #aaa; margin-top: 12px; font-weight: bold; }
+        .exit-hint { font-size: 9px; color: #555; margin-top: 5px; }
         footer { padding: 8px; text-align: center; font-size: 11px; color: #444; background: #080808; }
-        .hint-text { font-size: 10px; color: #555; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -107,10 +117,6 @@
         <div id="ui-layer">
             <div class="menu-box">
                 <div class="menu-title" id="menu-text">READY?</div>
-                
-                <div class="user-input-container">
-                    <input type="text" id="username-in" placeholder="YOUR NAME" maxlength="12">
-                </div>
 
                 <div class="speed-selector">
                     <button class="speed-btn" data-speed="slow">SLOW</button>
@@ -118,13 +124,19 @@
                     <button class="speed-btn active" data-speed="hard">HARD</button>
                 </div>
 
-                <button class="shop-btn" onclick="toggleShop()">SNAKE SKINS <span>▼</span></button>
-                <div id="shop-panel" class="shop-content">
-                    <div class="skin-grid" id="skin-grid"></div>
+                <button class="shop-btn" onclick="toggleShop('snake-shop')">SNAKE SKINS <span>▼</span></button>
+                <div id="snake-shop" class="shop-content">
+                    <div class="skin-grid" id="snake-grid"></div>
+                </div>
+
+                <button class="shop-btn" onclick="toggleShop('ball-shop')">BALL SKINS <span>▼</span></button>
+                <div id="ball-shop" class="shop-content">
+                    <div class="skin-grid" id="food-grid"></div>
                 </div>
 
                 <button class="btn" id="start-btn">PLAY</button>
-                <div class="hint-text">R TO RESTART | Q TO EXIT</div>
+                <div class="controls-hint">R OR SPACE TO RESTART</div>
+                <div class="exit-hint">Press 'Q' to Quick Exit</div>
             </div>
         </div>
     </div>
@@ -136,66 +148,34 @@ const SNAKE_SKINS = [
     { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
     { id: 's2', name: 'GOLD', head: '#ff9900', body: '#cc7700', price: 15 },
     { id: 's3', name: 'RUBY', head: '#ff0000', body: '#aa0000', price: 30 },
-    { id: 's4', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 100 }
+    { id: 's4', name: 'COBALT', head: '#0066ff', body: '#0044aa', price: 45 },
+    { id: 's5', name: 'GHOST', head: '#ffffff', body: '#cccccc', price: 75 },
+    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 100 }
+];
+
+const FOOD_SKINS = [
+    { id: 'f1', name: 'PURPLE', color: '#ff00ff', price: 0 },
+    { id: 'f2', name: 'ORANGE', color: '#ff9900', price: 15 },
+    { id: 'f3', name: 'RED', color: '#ff0000', price: 30 },
+    { id: 'f4', name: 'BLUE', color: '#0066ff', price: 45 },
+    { id: 'f5', name: 'WHITE', color: '#ffffff', price: 75 },
+    { id: 'f6', name: 'RAINBOW', color: 'rainbow', price: 100 }
 ];
 
 const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
     score: 0,
-    wallet: parseInt(localStorage.getItem('neon_wallet') || '0'),
-    username: localStorage.getItem('neon_user') || 'ANON',
-    ownedSkins: JSON.parse(localStorage.getItem('neon_owned') || '["s1"]'),
-    activeSkin: JSON.parse(localStorage.getItem('neon_active_s')) || SNAKE_SKINS[0],
+    wallet: parseInt(localStorage.getItem('neon_v3_wallet') || '0'),
+    ownedSkins: JSON.parse(localStorage.getItem('neon_v3_owned') || '["s1", "f1"]'),
+    activeSnake: JSON.parse(localStorage.getItem('neon_v3_active_s')) || SNAKE_SKINS[0],
+    activeFood: JSON.parse(localStorage.getItem('neon_v3_active_f')) || FOOD_SKINS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null
 };
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
 const highEl = document.getElementById('high');
-const userIn = document.getElementById('username-in');
-
 highEl.textContent = state.wallet;
-userIn.value = state.username;
-
-userIn.oninput = (e) => {
-    state.username = e.target.value.toUpperCase() || 'ANON';
-    localStorage.setItem('neon_user', state.username);
-};
-
-function toggleShop() {
-    document.getElementById('shop-panel').classList.toggle('open');
-}
-
-function renderShop() {
-    const grid = document.getElementById('skin-grid');
-    grid.innerHTML = '';
-    SNAKE_SKINS.forEach(skin => {
-        const isOwned = state.ownedSkins.includes(skin.id);
-        const isSel = state.activeSkin.id === skin.id;
-        const card = document.createElement('div');
-        card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        const color = (skin.head === 'rainbow') ? 'linear-gradient(to right, red, violet)' : skin.head;
-        card.innerHTML = `<div class="swatch" style="background:${color}"></div>
-            <b>${skin.name}</b><br>${isSel ? 'ACTIVE' : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
-        card.onclick = (e) => {
-            if (isOwned) state.activeSkin = skin;
-            else if (state.wallet >= skin.price) { 
-                state.wallet -= skin.price; 
-                state.ownedSkins.push(skin.id); 
-                state.activeSkin = skin; 
-                highEl.textContent = state.wallet;
-            }
-            save(); renderShop();
-        };
-        grid.appendChild(card);
-    });
-}
-
-function save() {
-    localStorage.setItem('neon_wallet', state.wallet);
-    localStorage.setItem('neon_owned', JSON.stringify(state.ownedSkins));
-    localStorage.setItem('neon_active_s', JSON.stringify(state.activeSkin));
-}
 
 function triggerPulse(type = 'ball') {
     canvas.classList.remove('pulse', 'death-pulse');
@@ -208,9 +188,52 @@ function triggerPulse(type = 'ball') {
     }
 }
 
+function save() {
+    localStorage.setItem('neon_v3_wallet', state.wallet);
+    localStorage.setItem('neon_v3_owned', JSON.stringify(state.ownedSkins));
+    localStorage.setItem('neon_v3_active_s', JSON.stringify(state.activeSnake));
+    localStorage.setItem('neon_v3_active_f', JSON.stringify(state.activeFood));
+}
+
+function toggleShop(id) {
+    const el = document.getElementById(id);
+    const isOpen = el.classList.contains('open');
+    document.querySelectorAll('.shop-content').forEach(s => s.classList.remove('open'));
+    if (!isOpen) el.classList.add('open');
+}
+
+function renderShops() {
+    const build = (list, gridId, activeObj, type) => {
+        const grid = document.getElementById(gridId);
+        grid.innerHTML = '';
+        list.forEach(skin => {
+            const isOwned = state.ownedSkins.includes(skin.id);
+            const isSel = activeObj.id === skin.id;
+            const card = document.createElement('div');
+            card.className = `skin-card ${isSel ? 'selected' : ''}`;
+            const swatchColor = (skin.color === 'rainbow' || skin.head === 'rainbow') ? 'linear-gradient(to right, red, orange, yellow, green, blue, violet)' : (skin.head || skin.color);
+            card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
+                <b>${skin.name}</b><br>${isSel ? 'ACTIVE' : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
+            card.onclick = (e) => {
+                e.stopPropagation();
+                if (isOwned) { if (type === 's') state.activeSnake = skin; else state.activeFood = skin; }
+                else if (state.wallet >= skin.price) { state.wallet -= skin.price; state.ownedSkins.push(skin.id); if (type === 's') state.activeSnake = skin; else state.activeFood = skin; highEl.textContent = state.wallet; }
+                save(); renderShops();
+            };
+            grid.appendChild(card);
+        });
+    };
+    build(SNAKE_SKINS, 'snake-grid', state.activeSnake, 's');
+    build(FOOD_SKINS, 'food-grid', state.activeFood, 'f');
+}
+
 const CONFIG = {
-    cols: 31, rows: 15, cellSize: 20,
-    speeds: { slow: { base: 6, boost: 0.1, max: 12 }, normal: { base: 8, boost: 0.15, max: 18 }, hard: { base: 13, boost: 0.3, max: 30 } },
+    cols: 31, rows: 15, cellSize: 0,
+    speeds: { 
+        slow: { base: 6, boost: 0.1, max: 12 }, 
+        normal: { base: 8, boost: 0.15, max: 18 }, 
+        hard: { base: 13, boost: 0.3, max: 30 } 
+    },
     currentMode: 'hard'
 };
 
@@ -230,7 +253,6 @@ function spawnFood() {
 }
 
 function startGame() {
-    userIn.blur();
     clearTimeout(state.deathTimer);
     canvas.classList.remove('pulse', 'death-pulse');
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
@@ -245,35 +267,46 @@ function startGame() {
 
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
-    if (document.activeElement === userIn) return;
     if (k === 'q') { window.location.href = "https://www.google.com"; return; }
     if (k === 'r' || (k === ' ' && state.gameOver)) { startGame(); return; }
     if (state.gameOver) return;
-    
     let nD = null;
     if (k === 'w' || k === 'arrowup') nD = {x:0, y:-1};
     if (k === 's' || k === 'arrowdown') nD = {x:0, y:1};
     if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0};
     if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
-    
     if (nD && state.nextDir.length < 2) {
         const last = state.nextDir.length > 0 ? state.nextDir[state.nextDir.length-1] : state.dir;
         if (nD.x !== -last.x || nD.y !== -last.y) state.nextDir.push(nD);
     }
 });
 
+function drawRoundedRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x+radius, y); ctx.lineTo(x+width-radius, y);
+    ctx.quadraticCurveTo(x+width, y, x+width, y+radius);
+    ctx.lineTo(x+width, y+height-radius);
+    ctx.quadraticCurveTo(x+width, y+height, x+width-radius, y+height);
+    ctx.lineTo(x+radius, y+height);
+    ctx.quadraticCurveTo(x, y+height, x, y+height-radius);
+    ctx.lineTo(x, y+radius); ctx.quadraticCurveTo(x, y, x+radius, y);
+    ctx.closePath(); ctx.fill();
+}
+
 function update() {
     if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
     
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
-        state.gameOver = true; state.shake = 15; triggerPulse('death'); 
-        state.wallet += state.score;
+        state.gameOver = true; state.shake = 15; 
+        triggerPulse('death'); 
+        state.wallet += state.score; 
         save();
         state.deathTimer = setTimeout(() => {
+            if (!state.gameOver) return;
             document.getElementById('menu-text').textContent = "CRASHED!";
             document.getElementById('high').textContent = state.wallet;
-            renderShop();
+            renderShops();
             document.getElementById('ui-layer').classList.remove('hidden');
         }, 800);
         return;
@@ -281,8 +314,10 @@ function update() {
 
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
-        state.score++; document.getElementById('score').textContent = state.score;
-        triggerPulse('ball'); spawnFood();
+        state.score++; 
+        document.getElementById('score').textContent = state.score;
+        triggerPulse('ball'); 
+        spawnFood();
     } else state.snake.pop();
 }
 
@@ -291,22 +326,32 @@ function render(now) {
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
     ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    const ballPulse = 0.95 + Math.sin(now / 150) * 0.15;
-    ctx.fillStyle = '#ff00ff'; ctx.shadowBlur = 15; ctx.shadowColor = '#ff00ff';
-    ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.5) * ballPulse, 0, Math.PI*2); ctx.fill();
-    ctx.shadowBlur = 0;
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath();
+    for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
+    for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
+    ctx.stroke();
 
     const rainbowHue = (now / 5) % 360;
+
+    const ballPulse = 0.95 + Math.sin(now / 150) * 0.15;
+    let fColor = state.activeFood.color === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeFood.color;
+    ctx.fillStyle = fColor; ctx.shadowBlur = 15; ctx.shadowColor = fColor;
+    ctx.beginPath(); 
+    ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.5) * ballPulse, 0, Math.PI*2); 
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
     state.snake.forEach((seg, i) => {
-        let sHead = state.activeSkin.head === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeSkin.head;
-        let sBody = state.activeSkin.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSkin.body;
-        ctx.fillStyle = i === 0 ? sHead : sBody;
+        let sHead = state.activeSnake.head === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeSnake.head;
+        let sBody = state.activeSnake.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
+        ctx.fillStyle = (i === 0) ? sHead : sBody;
         if(i===0) { ctx.shadowBlur = 10; ctx.shadowColor = sHead; }
-        ctx.fillRect(seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2);
+        drawRoundedRect(ctx, seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4);
         ctx.shadowBlur = 0;
-        
+
         if(i===0) {
-            ctx.fillStyle='#000'; const sz=CONFIG.cellSize-2; const off=sz/4;
+            ctx.fillStyle='#000'; 
+            const sz=CONFIG.cellSize-2; const off=sz/4;
             let ex1 = seg.x*CONFIG.cellSize+sz-off, ey1 = seg.y*CONFIG.cellSize+off;
             let ex2 = seg.x*CONFIG.cellSize+sz-off, ey2 = seg.y*CONFIG.cellSize+sz-off;
             if(state.dir.x===-1){ ex1-=sz/2; ex2-=sz/2; }
@@ -334,7 +379,7 @@ document.querySelectorAll('.speed-btn').forEach(btn => {
     });
 });
 document.getElementById('start-btn').onclick = startGame;
-renderShop();
+renderShops();
 </script>
 </body>
 </html>
