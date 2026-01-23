@@ -3,17 +3,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - Gold Master v2</title>
+    <title>Neon Snake - Gold Master</title>
     
     <style>
         :root {
             --bg: #050505;
             --grid: #1a1a1a;
             --primary: #00ffcc;
-            --secondary: #bd00ff; /* Trial Purple */
             --text: #ffffff;
             --ui-bg: rgba(0, 0, 0, 0.95);
             --danger: #ff0044;
+            --trial: #bd00ff;
         }
 
         html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); }
@@ -106,12 +106,12 @@
         .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; transition: all 0.2s; }
         .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--primary); }
         
-        /* Trial Button Styles */
+        /* Trial Button Style */
         .trial-btn { 
-            background: linear-gradient(45deg, var(--secondary), #0088ff); 
+            background: linear-gradient(45deg, var(--trial), #0088ff); 
             color: #fff; border: none; padding: 12px; margin-top: 10px; 
             width: 100%; border-radius: 10px; font-weight: 900; cursor: pointer;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: 0.2s;
+            transition: 0.2s;
         }
         .trial-btn:hover { filter: brightness(1.2); transform: scale(1.02); }
 
@@ -123,6 +123,7 @@
         
         .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 15px; }
         .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 11px; transition: 0.2s; }
+        .skin-card:hover { border-color: #444; }
         .skin-card.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
         .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
 
@@ -161,7 +162,7 @@
                     <div class="skin-grid" id="snake-grid"></div>
                 </div>
 
-                <button class="trial-btn" onclick="startTrial()">✨ ONE-TIME FREE TRIAL ✨</button>
+                <button class="trial-btn" onclick="startTrial()">✨ FREE RAINBOW TRIAL ✨</button>
 
                 <button class="btn" id="start-btn">START GAME</button>
                 <div class="controls-hint">R or SPACE to Restart | Q to Exit</div>
@@ -187,7 +188,7 @@ const state = {
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
-    isTrial: false, // Flag for session-only skins
+    isTrial: false, // Prevents saving the skin to local storage
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null
 };
 
@@ -196,11 +197,10 @@ const ctx = canvas.getContext('2d', { alpha: false });
 const highEl = document.getElementById('high');
 highEl.textContent = state.wallet;
 
+// Activates temporary rainbow mode
 function startTrial() {
-    // Equips the Rainbow Prism immediately
     state.activeSnake = SNAKE_SKINS[5];
     state.isTrial = true;
-    alert("Trial Active! Rainbow Prism equipped for this session only.");
     renderShops();
 }
 
@@ -218,7 +218,7 @@ function triggerPulse(type = 'ball') {
 function save() {
     localStorage.setItem('neon_v4_best', state.wallet);
     localStorage.setItem('neon_v4_owned', JSON.stringify(state.ownedSkins));
-    // If it's a trial, we DON'T save the active rainbow skin to localStorage
+    // ONLY save the active skin if we are NOT in trial mode
     if (!state.isTrial) {
         localStorage.setItem('neon_v4_active_s', JSON.stringify(state.activeSnake));
     }
@@ -241,15 +241,15 @@ function renderShops() {
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
         const swatchColor = skin.head === 'rainbow' ? 'linear-gradient(45deg, red, blue, green)' : skin.head;
         card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
-            <b>${skin.name}</b><br>${isSel ? (state.isTrial && skin.id === 's6' ? 'TRIAL' : 'ACTIVE') : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
+            <b>${skin.name}</b><br>${isSel ? (state.isTrial && skin.id==='s6' ? 'TRIAL' : 'ACTIVE') : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
         card.onclick = (e) => {
             if (isOwned) {
                 state.activeSnake = skin;
-                state.isTrial = false; // Buying/Switching to owned cancels trial mode
+                state.isTrial = false; // Manually picking a skin ends the trial
             }
             else if (state.wallet >= skin.price) { 
                 state.ownedSkins.push(skin.id); 
-                state.activeSnake = skin;
+                state.activeSnake = skin; 
                 state.isTrial = false;
             }
             save(); renderShops();
@@ -358,12 +358,11 @@ function render(now) {
     ctx.stroke();
 
     const rainbowHue = (now / 5) % 360;
+    const glowStr = 10 + Math.min(state.score, 40);
 
-    // Food (Becomes Rainbow if Trial or Prism skin is active)
-    const isRainbowActive = state.activeSnake.id === 's6';
+    // Food (Rainbow if trial mode is on)
     const ballPulse = 0.9 + Math.sin(now / 150) * 0.1;
-    let ballColor = isRainbowActive ? `hsl(${rainbowHue}, 100%, 60%)` : '#ff00ff';
-    
+    let ballColor = (state.isTrial) ? `hsl(${rainbowHue}, 100%, 60%)` : '#ff00ff';
     ctx.fillStyle = ballColor; ctx.shadowBlur = 15; ctx.shadowColor = ballColor;
     ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*ballPulse, 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
@@ -373,7 +372,7 @@ function render(now) {
         let sHead = state.activeSnake.head === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeSnake.head;
         let sBody = state.activeSnake.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
         ctx.fillStyle = (i === 0) ? sHead : sBody;
-        if(i===0) { ctx.shadowBlur = 15; ctx.shadowColor = sHead; }
+        if(i===0) { ctx.shadowBlur = glowStr; ctx.shadowColor = sHead; }
         drawRoundedRect(ctx, seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4);
         ctx.shadowBlur = 0;
 
