@@ -79,7 +79,6 @@
             transition: transform 0.1s ease-out;
         }
 
-        /* BRIGHTER & LONGER PULSE */
         canvas.pulse { 
             animation: flashWhite 0.4s ease-out forwards;
         }
@@ -108,6 +107,7 @@
         .menu-box {
             text-align: center; background: var(--ui-bg); padding: 35px;
             border: 1px solid #333; border-radius: 20px; width: 340px;
+            max-height: 90vh; overflow-y: auto;
             box-shadow: 0 30px 60px rgba(0,0,0,0.8);
         }
         .menu-title { font-size: 36px; margin-bottom: 25px; color: var(--primary); font-weight: 900; text-transform: uppercase; }
@@ -127,7 +127,7 @@
         .shop-btn:hover { border-color: #555; background: #1a1a1a; }
         
         .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1); background: #000; border-radius: 0 0 10px 10px; }
-        .shop-content.open { max-height: 400px; padding: 15px 0; border: 1px solid #333; border-top: none; }
+        .shop-content.open { max-height: 400px; padding: 15px 0; border: 1px solid #333; border-top: none; overflow-y: auto; }
         
         .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 15px; }
         .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 11px; transition: 0.2s; }
@@ -170,6 +170,11 @@
                     <div class="skin-grid" id="snake-grid"></div>
                 </div>
 
+                <button class="shop-btn" onclick="toggleShop('ball-shop')">BALL COLORS <span>▼</span></button>
+                <div id="ball-shop" class="shop-content">
+                    <div class="skin-grid" id="ball-grid"></div>
+                </div>
+
                 <button class="trial-btn" onclick="startTrial()">✨ FREE RAINBOW TRIAL ✨</button>
 
                 <button class="btn" id="start-btn">START GAME</button>
@@ -190,12 +195,22 @@ const SNAKE_SKINS = [
     { id: 's6', name: 'PRISM', head: 'rainbow', body: 'rainbow', price: 100 }
 ];
 
+const BALL_COLORS = [
+    { id: 'b1', name: 'MAGENTA', color: '#ff00ff', price: 0 },
+    { id: 'b2', name: 'CYAN', color: '#00ffff', price: 10 },
+    { id: 'b3', name: 'LIME', color: '#00ff00', price: 20 },
+    { id: 'b4', name: 'ORANGE', color: '#ff8800', price: 30 },
+    { id: 'b5', name: 'PRISM', color: 'rainbow', price: 50 }
+];
+
 const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
     score: 0,
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
+    ownedBalls: JSON.parse(localStorage.getItem('neon_v4_balls') || '["b1"]'),
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
+    activeBall: JSON.parse(localStorage.getItem('neon_v4_active_b')) || BALL_COLORS[0],
     isTrial: false,
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null
 };
@@ -207,6 +222,7 @@ highEl.textContent = state.wallet;
 
 function startTrial() {
     state.activeSnake = SNAKE_SKINS[5];
+    state.activeBall = BALL_COLORS[4]; // Also trial rainbow ball
     state.isTrial = true;
     renderShops();
 }
@@ -216,7 +232,6 @@ function triggerPulse(type = 'ball') {
     void canvas.offsetWidth; 
     if (type === 'ball') {
         canvas.classList.add('pulse');
-        // Animation duration set to 400ms in CSS, clearing it after
         setTimeout(() => canvas.classList.remove('pulse'), 400);
     } else {
         canvas.classList.add('death-pulse');
@@ -226,8 +241,10 @@ function triggerPulse(type = 'ball') {
 function save() {
     localStorage.setItem('neon_v4_best', state.wallet);
     localStorage.setItem('neon_v4_owned', JSON.stringify(state.ownedSkins));
+    localStorage.setItem('neon_v4_balls', JSON.stringify(state.ownedBalls));
     if (!state.isTrial) {
         localStorage.setItem('neon_v4_active_s', JSON.stringify(state.activeSnake));
+        localStorage.setItem('neon_v4_active_b', JSON.stringify(state.activeBall));
     }
 }
 
@@ -239,8 +256,9 @@ function toggleShop(id) {
 }
 
 function renderShops() {
-    const grid = document.getElementById('snake-grid');
-    grid.innerHTML = '';
+    // Render Snake Skins
+    const sGrid = document.getElementById('snake-grid');
+    sGrid.innerHTML = '';
     SNAKE_SKINS.forEach(skin => {
         const isOwned = state.ownedSkins.includes(skin.id);
         const isSel = state.activeSnake.id === skin.id;
@@ -249,16 +267,31 @@ function renderShops() {
         const swatchColor = skin.head === 'rainbow' ? 'linear-gradient(45deg, red, blue, green)' : skin.head;
         card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
             <b>${skin.name}</b><br>${isSel ? (state.isTrial && skin.id==='s6' ? 'TRIAL' : 'ACTIVE') : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
-        card.onclick = (e) => {
+        card.onclick = () => {
             if (isOwned) { state.activeSnake = skin; state.isTrial = false; }
-            else if (state.wallet >= skin.price) { 
-                state.ownedSkins.push(skin.id); 
-                state.activeSnake = skin; 
-                state.isTrial = false;
-            }
+            else if (state.wallet >= skin.price) { state.ownedSkins.push(skin.id); state.activeSnake = skin; state.isTrial = false; }
             save(); renderShops();
         };
-        grid.appendChild(card);
+        sGrid.appendChild(card);
+    });
+
+    // Render Ball Colors
+    const bGrid = document.getElementById('ball-grid');
+    bGrid.innerHTML = '';
+    BALL_COLORS.forEach(ball => {
+        const isOwned = state.ownedBalls.includes(ball.id);
+        const isSel = state.activeBall.id === ball.id;
+        const card = document.createElement('div');
+        card.className = `skin-card ${isSel ? 'selected' : ''}`;
+        const swatchColor = ball.color === 'rainbow' ? 'linear-gradient(45deg, red, blue, green)' : ball.color;
+        card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
+            <b>${ball.name}</b><br>${isSel ? (state.isTrial && ball.id==='b5' ? 'TRIAL' : 'ACTIVE') : (isOwned ? 'OWNED' : ball.price + ' pts')}`;
+        card.onclick = () => {
+            if (isOwned) { state.activeBall = ball; state.isTrial = false; }
+            else if (state.wallet >= ball.price) { state.ownedBalls.push(ball.id); state.activeBall = ball; state.isTrial = false; }
+            save(); renderShops();
+        };
+        bGrid.appendChild(card);
     });
 }
 
@@ -354,7 +387,6 @@ function render(now) {
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
     ctx.fillStyle = '#050505'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    // CONSISTENT BRIGHT GRID
     ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
@@ -363,9 +395,10 @@ function render(now) {
     const rainbowHue = (now / 5) % 360;
     const glowStr = 10 + Math.min(state.score, 40);
 
-    // Food
+    // Dynamic Food Color
     const ballPulse = 0.9 + Math.sin(now / 150) * 0.1;
-    let ballColor = (state.isTrial) ? `hsl(${rainbowHue}, 100%, 60%)` : '#ff00ff';
+    let ballColor = state.activeBall.color === 'rainbow' ? `hsl(${rainbowHue}, 100%, 60%)` : state.activeBall.color;
+    
     ctx.fillStyle = ballColor; ctx.shadowBlur = 15; ctx.shadowColor = ballColor;
     ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*ballPulse, 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
