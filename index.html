@@ -9,7 +9,7 @@
         :root {
             --bg: #050505;
             --grid: #1a1a1a;
-            --primary: #ffffff;
+            --primary: #00ffcc;
             --text: #ffffff;
             --ui-bg: rgba(0, 0, 0, 0.95);
             --danger: #ff0044;
@@ -79,7 +79,16 @@
             transition: transform 0.1s ease-out;
         }
 
-        canvas.pulse { transform: scale(1.02); border-color: #fff; box-shadow: 0 0 40px rgba(255,255,255,0.2); }
+        /* BRIGHTER & LONGER PULSE */
+        canvas.pulse { 
+            animation: flashWhite 0.4s ease-out forwards;
+        }
+
+        @keyframes flashWhite {
+            0% { transform: scale(1.03); border-color: #fff; box-shadow: 0 0 50px #fff; filter: brightness(1.5); }
+            100% { transform: scale(1); border-color: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); filter: brightness(1); }
+        }
+
         canvas.death-pulse { animation: deathGlowRed 0.8s ease-out forwards; }
 
         @keyframes deathGlowRed {
@@ -207,7 +216,8 @@ function triggerPulse(type = 'ball') {
     void canvas.offsetWidth; 
     if (type === 'ball') {
         canvas.classList.add('pulse');
-        setTimeout(() => canvas.classList.remove('pulse'), 150);
+        // Animation duration set to 400ms in CSS, clearing it after
+        setTimeout(() => canvas.classList.remove('pulse'), 400);
     } else {
         canvas.classList.add('death-pulse');
     }
@@ -344,7 +354,7 @@ function render(now) {
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
     ctx.fillStyle = '#050505'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    // BRIGHT GRID - Consistent #222 rendering
+    // CONSISTENT BRIGHT GRID
     ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
@@ -388,7 +398,6 @@ function loop(now) {
     const step = 1000 / Math.min(p.max, p.base + (state.score * p.boost));
     while (state.accumTime >= step) { if (!state.gameOver) update(); state.accumTime -= step; }
     render(now);
-    // Always keep requestAnimationFrame running for grid rendering consistency
     requestAnimationFrame(loop);
 }
 
