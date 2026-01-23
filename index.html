@@ -78,7 +78,6 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* Flash effects from the provided design */
         canvas.pulse { animation: flashWhite 0.4s ease-out forwards; }
         @keyframes flashWhite {
             0% { transform: scale(1.03); border-color: #fff; box-shadow: 0 0 50px #fff; }
@@ -201,6 +200,16 @@ const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
 document.getElementById('high').textContent = state.wallet;
 
+function save() {
+    localStorage.setItem('neon_v4_best', state.wallet);
+    localStorage.setItem('neon_v4_owned', JSON.stringify(state.ownedSkins));
+    localStorage.setItem('neon_v4_balls', JSON.stringify(state.ownedBalls));
+    if (!state.isTrial) {
+        localStorage.setItem('neon_v4_active_s', JSON.stringify(state.activeSnake));
+        localStorage.setItem('neon_v4_active_b', JSON.stringify(state.activeBall));
+    }
+}
+
 function startTrial() {
     state.activeSnake = SNAKE_SKINS[5];
     state.activeBall = BALL_COLORS[4];
@@ -222,6 +231,8 @@ function toggleShop(id) {
 }
 
 function renderShops() {
+    document.getElementById('high').textContent = state.wallet;
+    
     const sGrid = document.getElementById('snake-grid');
     sGrid.innerHTML = '';
     SNAKE_SKINS.forEach(skin => {
@@ -233,9 +244,16 @@ function renderShops() {
         card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
             <b>${skin.name}</b><br>${isSel ? (state.isTrial && skin.id==='s6' ? 'TRIAL' : 'ACTIVE') : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
         card.onclick = () => {
-            if (isOwned) { state.activeSnake = skin; state.isTrial = false; }
-            else if (state.wallet >= skin.price) { state.ownedSkins.push(skin.id); state.activeSnake = skin; state.isTrial = false; }
-            renderShops();
+            if (isOwned) { 
+                state.activeSnake = skin; 
+                state.isTrial = false; 
+            } else if (state.wallet >= skin.price) { 
+                state.wallet -= skin.price; // ACTUALLY MINUS MONEY
+                state.ownedSkins.push(skin.id); 
+                state.activeSnake = skin; 
+                state.isTrial = false; 
+            }
+            save(); renderShops();
         };
         sGrid.appendChild(card);
     });
@@ -251,9 +269,16 @@ function renderShops() {
         card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
             <b>${ball.name}</b><br>${isSel ? (state.isTrial && ball.id==='b5' ? 'TRIAL' : 'ACTIVE') : (isOwned ? 'OWNED' : ball.price + ' pts')}`;
         card.onclick = () => {
-            if (isOwned) { state.activeBall = ball; state.isTrial = false; }
-            else if (state.wallet >= ball.price) { state.ownedBalls.push(ball.id); state.activeBall = ball; state.isTrial = false; }
-            renderShops();
+            if (isOwned) { 
+                state.activeBall = ball; 
+                state.isTrial = false; 
+            } else if (state.wallet >= ball.price) { 
+                state.wallet -= ball.price; // ACTUALLY MINUS MONEY
+                state.ownedBalls.push(ball.id); 
+                state.activeBall = ball; 
+                state.isTrial = false; 
+            }
+            save(); renderShops();
         };
         bGrid.appendChild(card);
     });
@@ -321,7 +346,8 @@ function update() {
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 15; triggerPulse('death');
-        if (state.score > state.wallet) { state.wallet = state.score; localStorage.setItem('neon_v4_best', state.wallet); }
+        if (state.score > state.wallet) { state.wallet = state.score; }
+        save();
         setTimeout(() => { 
             document.getElementById('menu-text').textContent = "CRASHED!";
             document.getElementById('high').textContent = state.wallet;
