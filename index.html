@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - Brutal Hard Mode</title>
+    <title>Neon Snake - Pulse Edition</title>
     
     <style>
         :root {
@@ -45,13 +45,22 @@
             overflow: hidden;
         }
 
-        /* BRIGHT WHITE NEON BORDER */
+        /* DYNAMIC BORDER & SHADOW */
         canvas {
             background: #000;
             display: block;
             border: 4px solid #fff;
-            box-shadow: 0 0 25px #fff, inset 0 0 15px rgba(255,255,255,0.3);
             border-radius: 4px;
+            /* Base Glow */
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+        }
+
+        /* Pulsing class triggered in JS */
+        canvas.pulse {
+            transform: scale(1.02);
+            box-shadow: 0 0 40px #fff, inset 0 0 20px #fff;
+            border-color: #fff;
         }
 
         #ui-layer {
@@ -86,7 +95,6 @@
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
 
         .btn { background: var(--primary); color: #000; border: none; padding: 12px; font-size: 18px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; width: 100%; }
-        .mode-warning { font-size: 11px; color: #ff00ff; margin-top: 8px; font-weight: bold; letter-spacing: 0.5px; }
         footer { padding: 10px; text-align: center; font-size: 12px; color: #555; background: #080808; }
     </style>
 </head>
@@ -109,7 +117,6 @@
                     <button class="speed-btn" data-speed="normal">NORMAL</button>
                     <button class="speed-btn active" data-speed="hard">HARD</button>
                 </div>
-                <div class="mode-warning">WALLET ONLY UPDATES IN HARD MODE</div>
 
                 <button class="shop-btn" onclick="toggleShop('snake-shop')">SNAKE SKINS <span>▼</span></button>
                 <div id="snake-shop" class="shop-content">
@@ -129,7 +136,7 @@
     <footer>HAPPY BIRTHDAY SANJIT</footer>
 
 <script>
-/* ================= DATA & STATE ================= */
+/* ================= STATE & DATA ================= */
 const SNAKE_SKINS = [
     { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
     { id: 's2', name: 'GOLD', head: '#ff9900', body: '#cc7700', price: 15 },
@@ -162,6 +169,13 @@ const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
 const highEl = document.getElementById('high');
 highEl.textContent = state.wallet;
+
+function triggerPulse() {
+    canvas.classList.remove('pulse');
+    void canvas.offsetWidth; // Force reflow
+    canvas.classList.add('pulse');
+    setTimeout(() => canvas.classList.remove('pulse'), 200);
+}
 
 function save() {
     localStorage.setItem('neon_v3_wallet', state.wallet);
@@ -202,13 +216,13 @@ function renderShops() {
     build(FOOD_SKINS, 'food-grid', state.activeFood, 'f');
 }
 
-/* ================= HARDER CORE LOGIC ================= */
+/* ================= GAME CORE ================= */
 const CONFIG = {
     cols: 31, rows: 15, cellSize: 0,
     speeds: { 
         slow: { base: 6, boost: 0.1, max: 12 }, 
         normal: { base: 8, boost: 0.15, max: 18 }, 
-        hard: { base: 13, boost: 0.3, max: 30 } // CRANKED UP
+        hard: { base: 13, boost: 0.3, max: 30 } 
     },
     currentMode: 'hard'
 };
@@ -230,6 +244,7 @@ function spawnFood() {
 
 function startGame() {
     clearTimeout(state.deathTimer);
+    canvas.classList.remove('pulse');
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0;
     document.getElementById('score').textContent = '0';
@@ -270,15 +285,15 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 function update() {
     if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
+    
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 15; 
-        let msg = "Score: " + state.score;
-        if (CONFIG.currentMode === 'hard' && state.score > state.wallet) { state.wallet = state.score; msg = "NEW RECORD! Wallet: " + state.wallet; }
+        if (CONFIG.currentMode === 'hard' && state.score > state.wallet) { state.wallet = state.score; }
         save();
         state.deathTimer = setTimeout(() => {
             if (!state.gameOver) return;
             document.getElementById('menu-text').textContent = "GAME OVER";
-            document.getElementById('final-score').textContent = msg;
+            document.getElementById('final-score').textContent = "Score: " + state.score;
             document.getElementById('final-score').style.display = 'block';
             document.getElementById('high').textContent = state.wallet;
             renderShops();
@@ -286,9 +301,12 @@ function update() {
         }, 500);
         return;
     }
+
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
-        state.score++; document.getElementById('score').textContent = state.score;
+        state.score++; 
+        document.getElementById('score').textContent = state.score;
+        triggerPulse(); // BORDER PULSE TRIGGER
         spawnFood();
     } else state.snake.pop();
 }
@@ -319,16 +337,6 @@ function render() {
         if(i===0) { ctx.shadowBlur = 10; ctx.shadowColor = sHead; }
         drawRoundedRect(ctx, seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4);
         ctx.shadowBlur = 0;
-        if(i===0) {
-            ctx.fillStyle='#000'; const sz=CONFIG.cellSize-2; const off=sz/4;
-            let ex1 = seg.x*CONFIG.cellSize+sz-off, ey1 = seg.y*CONFIG.cellSize+off;
-            let ex2 = seg.x*CONFIG.cellSize+sz-off, ey2 = seg.y*CONFIG.cellSize+sz-off;
-            if(state.dir.x===-1){ ex1-=sz/2; ex2-=sz/2; }
-            if(state.dir.y===-1){ ey1=seg.y*CONFIG.cellSize+off; ey2=ey1; ex1=seg.x*CONFIG.cellSize+off; ex2=seg.x*CONFIG.cellSize+sz-off; }
-            if(state.dir.y===1){ ey1=seg.y*CONFIG.cellSize+sz-off; ey2=ey1; ex1=seg.x*CONFIG.cellSize+off; ex2=seg.x*CONFIG.cellSize+sz-off; }
-            ctx.beginPath(); ctx.arc(ex1,ey1,sz/8,0,Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(ex2,ey2,sz/8,0,Math.PI*2); ctx.fill();
-        }
     });
 }
 
