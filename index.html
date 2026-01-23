@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     <title>Neon Snake</title>
     
-    <link rel="icon" type="image/png" href="logo.png">
-    <link rel="apple-touch-icon" href="logo.png">
-
     <style>
         :root {
             --bg: #050505;
@@ -64,7 +61,7 @@
             align-items: center;
             background: rgba(0,0,0,0.7);
             backdrop-filter: blur(4px);
-            transition: opacity 0.3s;
+            transition: opacity 0.2s;
             z-index: 20;
         }
         #ui-layer.hidden { opacity: 0; pointer-events: none; }
@@ -179,7 +176,7 @@
                 <button class="btn" id="start-btn">PLAY</button>
                 <div class="controls-hint">
                     <span class="key">WASD</span> or <span class="key">Arrows</span> to Move<br>
-                    <span class="key">R</span> to Reset | <span class="key">Q</span> to Quick Exit
+                    <span class="key">R</span> or <span class="key">Space</span> to Reset | <span class="key">Q</span> to Quick Exit
                 </div>
             </div>
         </div>
@@ -207,7 +204,7 @@ const FOOD_SKINS = [
     { id: 'f6', name: 'RAINBOW', color: 'rainbow', price: 100 }
 ];
 
-/* ================= STATE (v3 Reset) ================= */
+/* ================= STATE ================= */
 const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
     particles: [], score: 0,
@@ -215,7 +212,8 @@ const state = {
     ownedSkins: JSON.parse(localStorage.getItem('neon_v3_owned') || '["s1", "f1"]'),
     activeSnake: JSON.parse(localStorage.getItem('neon_v3_active_s')) || SNAKE_SKINS[0],
     activeFood: JSON.parse(localStorage.getItem('neon_v3_active_f')) || FOOD_SKINS[0],
-    lastTime: 0, accumTime: 0, gameOver: true, shake: 0
+    lastTime: 0, accumTime: 0, gameOver: true, shake: 0,
+    deathTimer: null // For managing the menu delay
 };
 
 const canvas = document.getElementById('c');
@@ -293,6 +291,7 @@ function spawnFood() {
 }
 
 function startGame() {
+    clearTimeout(state.deathTimer); // Prevent Game Over menu from showing if we reset early
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0; state.particles = [];
     document.getElementById('score').textContent = '0';
@@ -305,14 +304,23 @@ function startGame() {
 
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
+    
+    // Global Actions
     if (k === 'q') window.location.href = "https://google.com";
-    if (k === 'r') startGame();
+    if (k === 'r' || (k === ' ' && state.gameOver)) {
+        startGame();
+        return;
+    }
+
     if (state.gameOver) return;
+
+    // Movement
     let nD = null;
     if (k === 'w' || k === 'arrowup') nD = {x:0, y:-1};
     if (k === 's' || k === 'arrowdown') nD = {x:0, y:1};
     if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0};
     if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
+    
     if (nD && state.nextDir.length < 2) {
         const last = state.nextDir.length > 0 ? state.nextDir[state.nextDir.length-1] : state.dir;
         if (nD.x !== -last.x || nD.y !== -last.y) state.nextDir.push(nD);
@@ -336,10 +344,11 @@ function update() {
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
     
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
-        state.gameOver = true; state.shake = 15; 
+        state.gameOver = true; 
+        state.shake = 15; 
         
+        // Handle Points logic
         let msg = "Score: " + state.score;
-        // HARD MODE RECORD ONLY
         if (CONFIG.currentMode === 'hard' && state.score > state.wallet) {
             state.wallet = state.score;
             msg = "NEW RECORD! Wallet Updated: " + state.wallet;
@@ -348,7 +357,10 @@ function update() {
         }
         
         save();
-        setTimeout(() => {
+
+        // Delay menu showing, but allow R/Space to interrupt this
+        state.deathTimer = setTimeout(() => {
+            if (!state.gameOver) return; // User already restarted
             document.getElementById('menu-text').textContent = "GAME OVER";
             document.getElementById('final-score').textContent = msg;
             document.getElementById('final-score').style.display = 'block';
@@ -371,7 +383,9 @@ function render() {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
     ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.beginPath();
+    
+    // Grid
+    ctx.strokeStyle = '#181818'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
@@ -420,12 +434,13 @@ function render() {
 }
 
 function loop(now) {
+    if (state.gameOver && state.shake < 0.1 && state.particles.length === 0) return;
     const dt = now - state.lastTime; state.lastTime = now; state.accumTime += dt;
     const p = CONFIG.speeds[CONFIG.currentMode];
     const step = 1000 / Math.min(p.max, p.base + (state.score * p.boost));
     while (state.accumTime >= step) { if (!state.gameOver) update(); state.accumTime -= step; }
     render();
-    if (!state.gameOver || state.shake > 0.1 || state.particles.length > 0) requestAnimationFrame(loop);
+    requestAnimationFrame(loop);
 }
 
 document.querySelectorAll('.speed-btn').forEach(btn => {
