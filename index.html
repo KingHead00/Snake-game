@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - Gold Master</title>
+    <title>Neon Snake - New skins</title>
     
     <style>
         :root {
@@ -106,7 +106,6 @@
         .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; transition: all 0.2s; }
         .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--primary); }
         
-        /* Trial Button Style */
         .trial-btn { 
             background: linear-gradient(45deg, var(--trial), #0088ff); 
             color: #fff; border: none; padding: 12px; margin-top: 10px; 
@@ -188,7 +187,7 @@ const state = {
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
-    isTrial: false, // Prevents saving the skin to local storage
+    isTrial: false,
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null
 };
 
@@ -197,7 +196,6 @@ const ctx = canvas.getContext('2d', { alpha: false });
 const highEl = document.getElementById('high');
 highEl.textContent = state.wallet;
 
-// Activates temporary rainbow mode
 function startTrial() {
     state.activeSnake = SNAKE_SKINS[5];
     state.isTrial = true;
@@ -218,7 +216,6 @@ function triggerPulse(type = 'ball') {
 function save() {
     localStorage.setItem('neon_v4_best', state.wallet);
     localStorage.setItem('neon_v4_owned', JSON.stringify(state.ownedSkins));
-    // ONLY save the active skin if we are NOT in trial mode
     if (!state.isTrial) {
         localStorage.setItem('neon_v4_active_s', JSON.stringify(state.activeSnake));
     }
@@ -243,10 +240,7 @@ function renderShops() {
         card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
             <b>${skin.name}</b><br>${isSel ? (state.isTrial && skin.id==='s6' ? 'TRIAL' : 'ACTIVE') : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
         card.onclick = (e) => {
-            if (isOwned) {
-                state.activeSnake = skin;
-                state.isTrial = false; // Manually picking a skin ends the trial
-            }
+            if (isOwned) { state.activeSnake = skin; state.isTrial = false; }
             else if (state.wallet >= skin.price) { 
                 state.ownedSkins.push(skin.id); 
                 state.activeSnake = skin; 
@@ -326,7 +320,6 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 function update() {
     if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
-    
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 15; triggerPulse('death'); 
         if (state.score > state.wallet) state.wallet = state.score;
@@ -339,7 +332,6 @@ function update() {
         }, 800);
         return;
     }
-
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; document.getElementById('score').textContent = state.score;
@@ -352,7 +344,8 @@ function render(now) {
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
     ctx.fillStyle = '#050505'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    ctx.strokeStyle = '#111'; ctx.lineWidth = 1; ctx.beginPath();
+    // Grid (Restored Brightness to #222)
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
@@ -360,7 +353,7 @@ function render(now) {
     const rainbowHue = (now / 5) % 360;
     const glowStr = 10 + Math.min(state.score, 40);
 
-    // Food (Rainbow if trial mode is on)
+    // Food
     const ballPulse = 0.9 + Math.sin(now / 150) * 0.1;
     let ballColor = (state.isTrial) ? `hsl(${rainbowHue}, 100%, 60%)` : '#ff00ff';
     ctx.fillStyle = ballColor; ctx.shadowBlur = 15; ctx.shadowColor = ballColor;
@@ -375,7 +368,6 @@ function render(now) {
         if(i===0) { ctx.shadowBlur = glowStr; ctx.shadowColor = sHead; }
         drawRoundedRect(ctx, seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4);
         ctx.shadowBlur = 0;
-
         if(i===0) {
             ctx.fillStyle='#000';
             const sz=CONFIG.cellSize-2; const off=sz/4;
