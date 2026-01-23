@@ -314,6 +314,8 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
     ctx.lineTo(x+radius, y+height);
     ctx.quadraticCurveTo(x, y+height, x, y+height-radius);
     ctx.lineTo(x, y+radius); ctx.quadraticCurveTo(x, y, x+radius, y);
+    // Grid fix: ensure grid lines are always visible by filling with background color first if needed, 
+    // but here we just fill the snake segment.
     ctx.closePath(); ctx.fill();
 }
 
@@ -342,10 +344,15 @@ function update() {
 function render(now) {
     ctx.setTransform(1,0,0,1,0,0);
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
-    ctx.fillStyle = '#050505'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    // Grid (Restored Brightness to #222)
-    ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath();
+    // Background
+    ctx.fillStyle = '#050505'; 
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    
+    // Persistent Bright Grid
+    ctx.strokeStyle = '#222'; 
+    ctx.lineWidth = 1; 
+    ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
@@ -383,12 +390,21 @@ function render(now) {
 }
 
 function loop(now) {
-    const dt = now - state.lastTime; state.lastTime = now; state.accumTime += dt;
+    const dt = now - state.lastTime; 
+    state.lastTime = now; 
+    state.accumTime += dt;
     const p = CONFIG.speeds[CONFIG.currentMode];
     const step = 1000 / Math.min(p.max, p.base + (state.score * p.boost));
-    while (state.accumTime >= step) { if (!state.gameOver) update(); state.accumTime -= step; }
+    
+    // Physics/Logic steps
+    while (state.accumTime >= step) { 
+        if (!state.gameOver) update(); 
+        state.accumTime -= step; 
+    }
+    
+    // Always render every frame to keep the grid and animations (food pulse) smooth
     render(now);
-    if (!state.gameOver || state.shake > 0.1) requestAnimationFrame(loop);
+    requestAnimationFrame(loop);
 }
 
 document.querySelectorAll('.speed-btn').forEach(btn => {
