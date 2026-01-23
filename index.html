@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - Logo Edition</title>
+    <title>Neon Snake - Logo Integrated</title>
     
     <style>
         :root {
@@ -25,9 +25,9 @@
             user-select: none;
         }
 
-        /* --- LOGO & HEADER STYLES --- */
+        /* LOGO SECTION */
         header {
-            padding: 10px 20px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -36,49 +36,30 @@
             z-index: 10;
         }
 
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .logo-wrap { display: flex; align-items: center; gap: 15px; }
 
-        .neon-logo {
-            width: 32px;
-            height: 32px;
+        .neon-icon {
+            width: 30px;
+            height: 30px;
             border: 2px solid var(--primary);
-            border-radius: 8px;
+            border-radius: 6px;
             position: relative;
             box-shadow: 0 0 10px var(--primary);
-            animation: logoPulse 2s infinite ease-in-out;
+            animation: pulseLogo 2s infinite ease-in-out;
+        }
+        .neon-icon::before {
+            content: ''; position: absolute; width: 12px; height: 12px;
+            background: var(--primary); top: 4px; left: 4px; border-radius: 2px;
         }
 
-        .neon-logo::after {
-            content: '';
-            position: absolute;
-            width: 14px;
-            height: 4px;
-            background: var(--primary);
-            top: 8px; left: 8px;
-            border-radius: 2px;
-            box-shadow: 0 8px 0 var(--primary);
+        @keyframes pulseLogo {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
         }
 
-        @keyframes logoPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 10px var(--primary); }
-            50% { transform: scale(1.05); box-shadow: 0 0 20px var(--primary); }
-        }
-
-        h1 { 
-            font-size: 18px; 
-            margin: 0; 
-            color: var(--primary); 
-            text-shadow: 0 0 10px var(--primary);
-            letter-spacing: 2px;
-        }
-
+        h1 { font-size: 20px; margin: 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
         .stats { font-family: monospace; font-size: 16px; color: #ccc; }
 
-        /* --- GAME STYLES --- */
         #game-container {
             flex: 1;
             position: relative;
@@ -97,14 +78,8 @@
             transition: transform 0.1s ease-out;
         }
 
-        canvas.pulse {
-            transform: scale(1.025);
-            box-shadow: 0 0 50px #fff, inset 0 0 25px #fff;
-        }
-
-        canvas.death-pulse {
-            animation: deathGlowRed 1.2s ease-out forwards;
-        }
+        canvas.pulse { transform: scale(1.025); box-shadow: 0 0 50px #fff, inset 0 0 25px #fff; }
+        canvas.death-pulse { animation: deathGlowRed 1.2s ease-out forwards; }
 
         @keyframes deathGlowRed {
             0% { box-shadow: 0 0 80px var(--danger), inset 0 0 40px var(--danger); border-color: var(--danger); transform: scale(1.04); }
@@ -150,8 +125,8 @@
 <body>
 
     <header>
-        <div class="logo-container">
-            <div class="neon-logo"></div>
+        <div class="logo-wrap">
+            <div class="neon-icon"></div>
             <h1>NEON SNAKE</h1>
         </div>
         <div class="stats">SCORE: <span id="score">0</span> &nbsp;|&nbsp; BEST: <span id="high">0</span></div>
@@ -174,6 +149,11 @@
                     <div class="skin-grid" id="snake-grid"></div>
                 </div>
 
+                <button class="shop-btn" onclick="toggleShop('ball-shop')">BALL SKINS <span>▼</span></button>
+                <div id="ball-shop" class="shop-content">
+                    <div class="skin-grid" id="food-grid"></div>
+                </div>
+
                 <button class="btn" id="start-btn">PLAY</button>
                 <div class="controls-hint">R OR SPACE TO RESTART</div>
                 <div class="exit-hint">Press 'Q' to Quick Exit</div>
@@ -184,7 +164,6 @@
     <footer>HAPPY BIRTHDAY SANJIT</footer>
 
 <script>
-// Logic remains fixed: Wallet = High Score, 0 reset for new ID.
 const SNAKE_SKINS = [
     { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
     { id: 's2', name: 'GOLD', head: '#ff9900', body: '#cc7700', price: 15 },
@@ -194,12 +173,22 @@ const SNAKE_SKINS = [
     { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 100 }
 ];
 
+const FOOD_SKINS = [
+    { id: 'f1', name: 'PURPLE', color: '#ff00ff', price: 0 },
+    { id: 'f2', name: 'ORANGE', color: '#ff9900', price: 15 },
+    { id: 'f3', name: 'RED', color: '#ff0000', price: 30 },
+    { id: 'f4', name: 'BLUE', color: '#0066ff', price: 45 },
+    { id: 'f5', name: 'WHITE', color: '#ffffff', price: 75 },
+    { id: 'f6', name: 'RAINBOW', color: 'rainbow', price: 100 }
+];
+
 const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
     score: 0,
-    wallet: parseInt(localStorage.getItem('neon_v5_best') || '0'), 
-    ownedSkins: JSON.parse(localStorage.getItem('neon_v5_owned') || '["s1"]'),
-    activeSnake: JSON.parse(localStorage.getItem('neon_v5_active_s')) || SNAKE_SKINS[0],
+    wallet: parseInt(localStorage.getItem('neon_v6_best') || '0'),
+    ownedSkins: JSON.parse(localStorage.getItem('neon_v6_owned') || '["s1", "f1"]'),
+    activeSnake: JSON.parse(localStorage.getItem('neon_v6_active_s')) || SNAKE_SKINS[0],
+    activeFood: JSON.parse(localStorage.getItem('neon_v6_active_f')) || FOOD_SKINS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null
 };
 
@@ -220,9 +209,10 @@ function triggerPulse(type = 'ball') {
 }
 
 function save() {
-    localStorage.setItem('neon_v5_best', state.wallet);
-    localStorage.setItem('neon_v5_owned', JSON.stringify(state.ownedSkins));
-    localStorage.setItem('neon_v5_active_s', JSON.stringify(state.activeSnake));
+    localStorage.setItem('neon_v6_best', state.wallet);
+    localStorage.setItem('neon_v6_owned', JSON.stringify(state.ownedSkins));
+    localStorage.setItem('neon_v6_active_s', JSON.stringify(state.activeSnake));
+    localStorage.setItem('neon_v6_active_f', JSON.stringify(state.activeFood));
 }
 
 function toggleShop(id) {
@@ -233,27 +223,31 @@ function toggleShop(id) {
 }
 
 function renderShops() {
-    const grid = document.getElementById('snake-grid');
-    grid.innerHTML = '';
-    SNAKE_SKINS.forEach(skin => {
-        const isOwned = state.ownedSkins.includes(skin.id);
-        const isSel = state.activeSnake.id === skin.id;
-        const card = document.createElement('div');
-        card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        const swatchColor = skin.head === 'rainbow' ? 'linear-gradient(to right, red, orange, yellow, green, blue, violet)' : skin.head;
-        card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
-            <b>${skin.name}</b><br>${isSel ? 'ACTIVE' : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
-        card.onclick = (e) => {
-            e.stopPropagation();
-            if (isOwned) { state.activeSnake = skin; }
-            else if (state.wallet >= skin.price) { 
-                state.ownedSkins.push(skin.id); 
-                state.activeSnake = skin; 
-            }
-            save(); renderShops();
-        };
-        grid.appendChild(card);
-    });
+    const build = (list, gridId, activeObj, type) => {
+        const grid = document.getElementById(gridId);
+        grid.innerHTML = '';
+        list.forEach(skin => {
+            const isOwned = state.ownedSkins.includes(skin.id);
+            const isSel = activeObj.id === skin.id;
+            const card = document.createElement('div');
+            card.className = `skin-card ${isSel ? 'selected' : ''}`;
+            const swatchColor = (skin.color === 'rainbow' || skin.head === 'rainbow') ? 'linear-gradient(to right, red, orange, yellow, green, blue, violet)' : (skin.head || skin.color);
+            card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
+                <b>${skin.name}</b><br>${isSel ? 'ACTIVE' : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
+            card.onclick = (e) => {
+                e.stopPropagation();
+                if (isOwned) { if (type === 's') state.activeSnake = skin; else state.activeFood = skin; }
+                else if (state.wallet >= skin.price) { 
+                    state.ownedSkins.push(skin.id); 
+                    if (type === 's') state.activeSnake = skin; else state.activeFood = skin; 
+                }
+                save(); renderShops();
+            };
+            grid.appendChild(card);
+        });
+    };
+    build(SNAKE_SKINS, 'snake-grid', state.activeSnake, 's');
+    build(FOOD_SKINS, 'food-grid', state.activeFood, 'f');
 }
 
 const CONFIG = {
@@ -329,7 +323,7 @@ function update() {
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 15; 
         triggerPulse('death'); 
-        if (state.score > state.wallet) { state.wallet = state.score; }
+        if (state.score > state.wallet) state.wallet = state.score;
         save();
         state.deathTimer = setTimeout(() => {
             if (!state.gameOver) return;
@@ -362,7 +356,8 @@ function render(now) {
 
     const rainbowHue = (now / 5) % 360;
     const ballPulse = 0.95 + Math.sin(now / 150) * 0.15;
-    ctx.fillStyle = '#ff00ff'; ctx.shadowBlur = 15; ctx.shadowColor = '#ff00ff';
+    let fColor = state.activeFood.color === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeFood.color;
+    ctx.fillStyle = fColor; ctx.shadowBlur = 15; ctx.shadowColor = fColor;
     ctx.beginPath(); 
     ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.5) * ballPulse, 0, Math.PI*2); 
     ctx.fill();
