@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - Pure Edition</title>
+    <title>Neon Snake - Balanced Hard Mode</title>
     
     <style>
         :root {
@@ -227,12 +227,13 @@ function renderShops() {
     build(FOOD_SKINS, 'food-grid', state.activeFood, 'f');
 }
 
+// TUNED SPEEDS FOR HARD MODE
 const CONFIG = {
     cols: 31, rows: 15, cellSize: 0,
     speeds: { 
         slow: { base: 6, boost: 0.1, max: 12 }, 
         normal: { base: 8, boost: 0.15, max: 18 }, 
-        hard: { base: 13, boost: 0.3, max: 30 } 
+        hard: { base: 11, boost: 0.15, max: 22 } // Lowered base/boost/max for better balance
     },
     currentMode: 'hard'
 };
