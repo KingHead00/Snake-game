@@ -3,17 +3,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - Enhanced Detail</title>
+    <title>Neon Snake - Gold Master v2</title>
     
     <style>
-        /* CSS Variables for easy color management across the whole app */
         :root {
             --bg: #050505;
-            --grid: #333333;
-            --primary: #00ffcc; /* Neon Cyan */
+            --grid: #1a1a1a;
+            --primary: #00ffcc;
+            --secondary: #bd00ff; /* Trial Purple */
             --text: #ffffff;
             --ui-bg: rgba(0, 0, 0, 0.95);
-            --danger: #ff0044; /* Death Glow Red */
+            --danger: #ff0044;
         }
 
         html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); }
@@ -22,23 +22,21 @@
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
-            user-select: none; /* Prevents text selection while playing */
+            user-select: none;
         }
 
-        /* HEADER SECTION: Title, Logo, and Score Tracking */
         header {
             padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #111;
-            border-bottom: 1px solid #333;
+            background: #0a0a0a;
+            border-bottom: 1px solid #222;
             z-index: 10;
         }
 
         .header-left { display: flex; align-items: center; gap: 15px; }
 
-        /* THE LOGO: A CSS-only animated neon snake icon */
         .logo-box {
             width: 26px; height: 26px;
             border: 2px solid var(--primary);
@@ -50,18 +48,18 @@
         .logo-box::after {
             content: ''; position: absolute; width: 10px; height: 4px;
             background: var(--primary); top: 7px; left: 7px; border-radius: 1px;
-            box-shadow: 0 7px 0 var(--primary); /* Creates the second 'segment' of the logo snake */
+            box-shadow: 0 7px 0 var(--primary);
         }
         
         @keyframes logoPulse {
             0%, 100% { opacity: 1; transform: scale(1); filter: brightness(1); }
-            50% { opacity: 0.8; transform: scale(1.08); filter: brightness(1.2); }
+            50% { opacity: 0.8; transform: scale(1.1); filter: brightness(1.3); }
         }
 
         h1 { font-size: 20px; margin: 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 1px; }
-        .stats { font-family: 'Courier New', monospace; font-size: 16px; color: #ccc; font-weight: bold; }
+        .stats { font-family: 'Courier New', monospace; font-size: 16px; color: #888; font-weight: bold; }
+        #score, #high { color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
 
-        /* GAME AREA: Handles the Canvas and the UI overlays */
         #game-container {
             flex: 1;
             position: relative;
@@ -75,58 +73,65 @@
         canvas {
             background: #000;
             display: block;
-            border: 3px solid #fff;
-            border-radius: 4px;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-            transition: transform 0.1s ease-out; /* Smooth transition for the 'eat' pulse */
+            border: 2px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.1s ease-out;
         }
 
-        /* Animations for Game Feedback */
-        canvas.pulse { transform: scale(1.02); box-shadow: 0 0 40px #fff; }
-        canvas.death-pulse { animation: deathGlowRed 1.2s ease-out forwards; }
+        canvas.pulse { transform: scale(1.02); border-color: #fff; box-shadow: 0 0 40px rgba(255,255,255,0.2); }
+        canvas.death-pulse { animation: deathGlowRed 0.8s ease-out forwards; }
 
         @keyframes deathGlowRed {
-            0% { box-shadow: 0 0 80px var(--danger); border-color: var(--danger); transform: scale(1.05); }
-            100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); border-color: #ffffff; transform: scale(1); }
+            0% { box-shadow: 0 0 100px var(--danger); border-color: var(--danger); transform: scale(1.05); }
+            100% { box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-color: #333; transform: scale(1); }
         }
 
-        /* UI OVERLAY: Menus, Shop, and Start Screens */
         #ui-layer {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
-            transition: opacity 0.3s; z-index: 20;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+            transition: opacity 0.4s; z-index: 20;
         }
         #ui-layer.hidden { opacity: 0; pointer-events: none; }
         
         .menu-box {
-            text-align: center; background: var(--ui-bg); padding: 30px;
-            border: 1px solid #444; border-radius: 16px; width: 340px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            text-align: center; background: var(--ui-bg); padding: 35px;
+            border: 1px solid #333; border-radius: 20px; width: 340px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
         }
-        .menu-title { font-size: 32px; margin-bottom: 20px; color: var(--primary); font-weight: 900; }
+        .menu-title { font-size: 36px; margin-bottom: 25px; color: var(--primary); font-weight: 900; text-transform: uppercase; }
 
-        .btn { background: var(--primary); color: #000; border: none; padding: 14px; font-size: 20px; font-weight: 800; border-radius: 6px; cursor: pointer; margin-top: 15px; width: 100%; transition: 0.2s; }
-        .btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; transition: all 0.2s; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--primary); }
         
-        /* SHOP STYLES */
-        .shop-btn { background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 12px; width: 100%; margin-top: 12px; cursor: pointer; border-radius: 8px; font-weight: bold; display: flex; justify-content: space-between; }
-        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); background: #000; border-radius: 0 0 8px 8px; }
-        .shop-content.open { max-height: 400px; padding: 15px 0; border: 1px solid #444; border-top: none; }
-        
-        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 15px; }
-        .skin-card { background: #111; border: 1px solid #333; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: 0.2s; }
-        .skin-card.selected { border-color: var(--primary); background: #001a11; }
-        .swatch { width: 14px; height: 14px; margin: 0 auto 6px; border-radius: 3px; }
+        /* Trial Button Styles */
+        .trial-btn { 
+            background: linear-gradient(45deg, var(--secondary), #0088ff); 
+            color: #fff; border: none; padding: 12px; margin-top: 10px; 
+            width: 100%; border-radius: 10px; font-weight: 900; cursor: pointer;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: 0.2s;
+        }
+        .trial-btn:hover { filter: brightness(1.2); transform: scale(1.02); }
 
-        /* SPEED SETTINGS */
-        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 8px; }
-        .speed-btn { background: transparent; color: #666; border: 1px solid #333; padding: 6px 12px; font-size: 12px; cursor: pointer; border-radius: 6px; font-weight: bold; }
+        .shop-btn { background: #111; color: #fff; border: 1px solid #333; padding: 14px; width: 100%; margin-top: 12px; cursor: pointer; border-radius: 10px; font-weight: bold; display: flex; justify-content: space-between; transition: 0.2s; }
+        .shop-btn:hover { border-color: #555; background: #1a1a1a; }
+        
+        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1); background: #000; border-radius: 0 0 10px 10px; }
+        .shop-content.open { max-height: 400px; padding: 15px 0; border: 1px solid #333; border-top: none; }
+        
+        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 15px; }
+        .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 11px; transition: 0.2s; }
+        .skin-card.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
+        .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+
+        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 10px; }
+        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 16px; font-size: 12px; cursor: pointer; border-radius: 8px; font-weight: bold; transition: 0.2s; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); background: rgba(0, 255, 204, 0.05); }
         
-        .controls-hint { font-size: 12px; color: #888; margin-top: 15px; }
-        footer { padding: 12px; text-align: center; font-size: 12px; color: #444; background: #080808; border-top: 1px solid #111; }
+        .controls-hint { font-size: 12px; color: #555; margin-top: 20px; font-style: italic; }
+        footer { padding: 15px; text-align: center; font-size: 12px; color: #333; background: #050505; letter-spacing: 2px; }
     </style>
 </head>
 <body>
@@ -156,10 +161,7 @@
                     <div class="skin-grid" id="snake-grid"></div>
                 </div>
 
-                <button class="shop-btn" onclick="toggleShop('ball-shop')">BALL SKINS <span>▼</span></button>
-                <div id="ball-shop" class="shop-content">
-                    <div class="skin-grid" id="food-grid"></div>
-                </div>
+                <button class="trial-btn" onclick="startTrial()">✨ ONE-TIME FREE TRIAL ✨</button>
 
                 <button class="btn" id="start-btn">START GAME</button>
                 <div class="controls-hint">R or SPACE to Restart | Q to Exit</div>
@@ -170,40 +172,22 @@
     <footer>HAPPY BIRTHDAY SANJIT</footer>
 
 <script>
-/** * SKIN DEFINITIONS
- * Head: Hex color or 'rainbow'
- * Body: Hex color or 'rainbow'
- * Price: Points needed in Best Score to unlock
- */
 const SNAKE_SKINS = [
     { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
-    { id: 's2', name: 'GOLD', head: '#ff9900', body: '#cc7700', price: 15 },
-    { id: 's3', name: 'RUBY', head: '#ff0000', body: '#aa0000', price: 30 },
-    { id: 's4', name: 'COBALT', head: '#0066ff', body: '#0044aa', price: 45 },
-    { id: 's5', name: 'GHOST', head: '#ffffff', body: '#cccccc', price: 75 },
-    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 100 }
+    { id: 's2', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 15 },
+    { id: 's3', name: 'RUBY', head: '#ff0044', body: '#990022', price: 30 },
+    { id: 's4', name: 'COBALT', head: '#0088ff', body: '#0044aa', price: 45 },
+    { id: 's5', name: 'GHOST', head: '#ffffff', body: '#888888', price: 75 },
+    { id: 's6', name: 'PRISM', head: 'rainbow', body: 'rainbow', price: 100 }
 ];
 
-const FOOD_SKINS = [
-    { id: 'f1', name: 'PURPLE', color: '#ff00ff', price: 0 },
-    { id: 'f2', name: 'ORANGE', color: '#ff9900', price: 15 },
-    { id: 'f3', name: 'RED', color: '#ff0000', price: 30 },
-    { id: 'f4', name: 'BLUE', color: '#0066ff', price: 45 },
-    { id: 'f5', name: 'WHITE', color: '#ffffff', price: 75 },
-    { id: 'f6', name: 'RAINBOW', color: 'rainbow', price: 100 }
-];
-
-/**
- * GAME STATE MANAGEMENT
- * wallet: Tied to high score
- */
 const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
     score: 0,
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
-    ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1", "f1"]'),
+    ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
-    activeFood: JSON.parse(localStorage.getItem('neon_v4_active_f')) || FOOD_SKINS[0],
+    isTrial: false, // Flag for session-only skins
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null
 };
 
@@ -212,10 +196,17 @@ const ctx = canvas.getContext('2d', { alpha: false });
 const highEl = document.getElementById('high');
 highEl.textContent = state.wallet;
 
-/** Visual Effects: Pulse on eat, Red flash on death */
+function startTrial() {
+    // Equips the Rainbow Prism immediately
+    state.activeSnake = SNAKE_SKINS[5];
+    state.isTrial = true;
+    alert("Trial Active! Rainbow Prism equipped for this session only.");
+    renderShops();
+}
+
 function triggerPulse(type = 'ball') {
     canvas.classList.remove('pulse', 'death-pulse');
-    void canvas.offsetWidth; // Force CSS reflow to restart animation
+    void canvas.offsetWidth; 
     if (type === 'ball') {
         canvas.classList.add('pulse');
         setTimeout(() => canvas.classList.remove('pulse'), 150);
@@ -224,12 +215,13 @@ function triggerPulse(type = 'ball') {
     }
 }
 
-/** Persistence */
 function save() {
     localStorage.setItem('neon_v4_best', state.wallet);
     localStorage.setItem('neon_v4_owned', JSON.stringify(state.ownedSkins));
-    localStorage.setItem('neon_v4_active_s', JSON.stringify(state.activeSnake));
-    localStorage.setItem('neon_v4_active_f', JSON.stringify(state.activeFood));
+    // If it's a trial, we DON'T save the active rainbow skin to localStorage
+    if (!state.isTrial) {
+        localStorage.setItem('neon_v4_active_s', JSON.stringify(state.activeSnake));
+    }
 }
 
 function toggleShop(id) {
@@ -239,33 +231,31 @@ function toggleShop(id) {
     if (!isOpen) el.classList.add('open');
 }
 
-/** Dynamic Shop Rendering */
 function renderShops() {
-    const build = (list, gridId, activeObj, type) => {
-        const grid = document.getElementById(gridId);
-        grid.innerHTML = '';
-        list.forEach(skin => {
-            const isOwned = state.ownedSkins.includes(skin.id);
-            const isSel = activeObj.id === skin.id;
-            const card = document.createElement('div');
-            card.className = `skin-card ${isSel ? 'selected' : ''}`;
-            const swatchColor = (skin.color === 'rainbow' || skin.head === 'rainbow') ? 'linear-gradient(to right, red, orange, yellow, green, blue, violet)' : (skin.head || skin.color);
-            card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
-                <b>${skin.name}</b><br>${isSel ? 'ACTIVE' : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
-            card.onclick = (e) => {
-                e.stopPropagation();
-                if (isOwned) { if (type === 's') state.activeSnake = skin; else state.activeFood = skin; }
-                else if (state.wallet >= skin.price) { 
-                    state.ownedSkins.push(skin.id); 
-                    if (type === 's') state.activeSnake = skin; else state.activeFood = skin; 
-                }
-                save(); renderShops();
-            };
-            grid.appendChild(card);
-        });
-    };
-    build(SNAKE_SKINS, 'snake-grid', state.activeSnake, 's');
-    build(FOOD_SKINS, 'food-grid', state.activeFood, 'f');
+    const grid = document.getElementById('snake-grid');
+    grid.innerHTML = '';
+    SNAKE_SKINS.forEach(skin => {
+        const isOwned = state.ownedSkins.includes(skin.id);
+        const isSel = state.activeSnake.id === skin.id;
+        const card = document.createElement('div');
+        card.className = `skin-card ${isSel ? 'selected' : ''}`;
+        const swatchColor = skin.head === 'rainbow' ? 'linear-gradient(45deg, red, blue, green)' : skin.head;
+        card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
+            <b>${skin.name}</b><br>${isSel ? (state.isTrial && skin.id === 's6' ? 'TRIAL' : 'ACTIVE') : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
+        card.onclick = (e) => {
+            if (isOwned) {
+                state.activeSnake = skin;
+                state.isTrial = false; // Buying/Switching to owned cancels trial mode
+            }
+            else if (state.wallet >= skin.price) { 
+                state.ownedSkins.push(skin.id); 
+                state.activeSnake = skin;
+                state.isTrial = false;
+            }
+            save(); renderShops();
+        };
+        grid.appendChild(card);
+    });
 }
 
 const CONFIG = {
@@ -278,10 +268,9 @@ const CONFIG = {
     currentMode: 'hard'
 };
 
-/** Viewport Scaling */
 function resize() {
     const container = document.getElementById('game-container');
-    const rawSize = Math.min((container.clientWidth-60)/CONFIG.cols, (container.clientHeight-60)/CONFIG.rows);
+    const rawSize = Math.min((container.clientWidth-40)/CONFIG.cols, (container.clientHeight-40)/CONFIG.rows);
     CONFIG.cellSize = Math.floor(rawSize);
     canvas.width = CONFIG.cols * CONFIG.cellSize;
     canvas.height = CONFIG.rows * CONFIG.cellSize;
@@ -296,7 +285,6 @@ function spawnFood() {
 
 function startGame() {
     clearTimeout(state.deathTimer);
-    canvas.classList.remove('pulse', 'death-pulse');
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0;
     document.getElementById('score').textContent = '0';
@@ -307,7 +295,6 @@ function startGame() {
     requestAnimationFrame(loop);
 }
 
-/** Key Handling: Q for Exit, Arrow/WASD for movement */
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
     if (k === 'q') { window.location.href = "https://www.google.com"; return; }
@@ -318,7 +305,7 @@ window.addEventListener('keydown', e => {
     if (k === 's' || k === 'arrowdown') nD = {x:0, y:1};
     if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0};
     if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
-    if (nD && state.nextDir.length < 2) {
+    if (nD) {
         const last = state.nextDir.length > 0 ? state.nextDir[state.nextDir.length-1] : state.dir;
         if (nD.x !== -last.x || nD.y !== -last.y) state.nextDir.push(nD);
     }
@@ -336,19 +323,15 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
     ctx.closePath(); ctx.fill();
 }
 
-/** Core Gameplay Logic */
 function update() {
     if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
     
-    // Collision Checks (Walls or Self)
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
-        state.gameOver = true; state.shake = 15; 
-        triggerPulse('death'); 
-        if (state.score > state.wallet) { state.wallet = state.score; }
+        state.gameOver = true; state.shake = 15; triggerPulse('death'); 
+        if (state.score > state.wallet) state.wallet = state.score;
         save();
         state.deathTimer = setTimeout(() => {
-            if (!state.gameOver) return;
             document.getElementById('menu-text').textContent = "CRASHED!";
             document.getElementById('high').textContent = state.wallet;
             renderShops();
@@ -358,63 +341,56 @@ function update() {
     }
 
     state.snake.unshift(head);
-    // Food Consumption
     if (head.x === state.food.x && head.y === state.food.y) {
-        state.score++; 
-        document.getElementById('score').textContent = state.score;
-        triggerPulse('ball'); 
-        spawnFood();
+        state.score++; document.getElementById('score').textContent = state.score;
+        triggerPulse('ball'); spawnFood();
     } else state.snake.pop();
 }
 
-/** Drawing Logic */
 function render(now) {
     ctx.setTransform(1,0,0,1,0,0);
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
-    ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#050505'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    // Draw Grid Lines
-    ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath();
+    ctx.strokeStyle = '#111'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
 
     const rainbowHue = (now / 5) % 360;
 
-    // Render Food (Ball)
-    const ballPulse = 0.95 + Math.sin(now / 150) * 0.15;
-    let fColor = state.activeFood.color === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeFood.color;
-    ctx.fillStyle = fColor; ctx.shadowBlur = 15; ctx.shadowColor = fColor;
-    ctx.beginPath(); 
-    ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.5) * ballPulse, 0, Math.PI*2); 
-    ctx.fill();
+    // Food (Becomes Rainbow if Trial or Prism skin is active)
+    const isRainbowActive = state.activeSnake.id === 's6';
+    const ballPulse = 0.9 + Math.sin(now / 150) * 0.1;
+    let ballColor = isRainbowActive ? `hsl(${rainbowHue}, 100%, 60%)` : '#ff00ff';
+    
+    ctx.fillStyle = ballColor; ctx.shadowBlur = 15; ctx.shadowColor = ballColor;
+    ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*ballPulse, 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Render Snake
+    // Snake
     state.snake.forEach((seg, i) => {
         let sHead = state.activeSnake.head === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeSnake.head;
         let sBody = state.activeSnake.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
         ctx.fillStyle = (i === 0) ? sHead : sBody;
-        if(i===0) { ctx.shadowBlur = 10; ctx.shadowColor = sHead; }
+        if(i===0) { ctx.shadowBlur = 15; ctx.shadowColor = sHead; }
         drawRoundedRect(ctx, seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4);
         ctx.shadowBlur = 0;
 
-        // Snake Eyes
         if(i===0) {
-            ctx.fillStyle='#000'; 
+            ctx.fillStyle='#000';
             const sz=CONFIG.cellSize-2; const off=sz/4;
             let ex1 = seg.x*CONFIG.cellSize+sz-off, ey1 = seg.y*CONFIG.cellSize+off;
             let ex2 = seg.x*CONFIG.cellSize+sz-off, ey2 = seg.y*CONFIG.cellSize+sz-off;
             if(state.dir.x===-1){ ex1-=sz/2; ex2-=sz/2; }
             if(state.dir.y===-1){ ey1=seg.y*CONFIG.cellSize+off; ey2=ey1; ex1=seg.x*CONFIG.cellSize+off; ex2=seg.x*CONFIG.cellSize+sz-off; }
             if(state.dir.y===1){ ey1=seg.y*CONFIG.cellSize+sz-off; ey2=ey1; ex1=seg.x*CONFIG.cellSize+off; ex2=seg.x*CONFIG.cellSize+sz-off; }
-            ctx.beginPath(); ctx.arc(ex1,ey1,sz/8,0,Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(ex2,ey2,sz/8,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(ex1,ey1,sz/10,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(ex2,ey2,sz/10,0,Math.PI*2); ctx.fill();
         }
     });
 }
 
-/** Game Loop using requestAnimationFrame for 60fps smoothness */
 function loop(now) {
     const dt = now - state.lastTime; state.lastTime = now; state.accumTime += dt;
     const p = CONFIG.speeds[CONFIG.currentMode];
@@ -424,7 +400,6 @@ function loop(now) {
     if (!state.gameOver || state.shake > 0.1) requestAnimationFrame(loop);
 }
 
-// Initial Events
 document.querySelectorAll('.speed-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
