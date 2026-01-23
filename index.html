@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - Double Pulse Edition</title>
+    <title>Neon Snake - Breathing Ball Edition</title>
     
     <style>
         :root {
@@ -54,16 +54,16 @@
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
         }
 
-        /* "BEEP BEEP" DOUBLE PULSE */
+        /* COLLECTION DOUBLE PULSE */
         canvas.pulse {
             animation: beepBeep 0.3s ease-out forwards;
         }
 
         @keyframes beepBeep {
             0% { transform: scale(1.03); box-shadow: 0 0 40px #fff, inset 0 0 20px #fff; }
-            40% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); }
+            40% { transform: scale(1); }
             60% { transform: scale(1.02); box-shadow: 0 0 35px #fff, inset 0 0 15px #fff; }
-            100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); }
+            100% { transform: scale(1); }
         }
 
         /* RED DEATH PULSE */
@@ -326,7 +326,7 @@ function update() {
     } else state.snake.pop();
 }
 
-function render() {
+function render(now) {
     ctx.setTransform(1,0,0,1,0,0);
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
     ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -336,11 +336,21 @@ function render() {
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
 
-    const rainbowHue = (performance.now() / 5) % 360;
+    const rainbowHue = (now / 5) % 360;
 
+    // BREATHING BALL LOGIC
+    // Uses sine wave to calculate a scale between 0.8 and 1.1
+    const ballPulse = 0.95 + Math.sin(now / 150) * 0.15;
     let fColor = state.activeFood.color === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeFood.color;
     ctx.fillStyle = fColor; ctx.shadowBlur = 15; ctx.shadowColor = fColor;
-    ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, CONFIG.cellSize/2.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); 
+    ctx.arc(
+        state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, 
+        state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, 
+        (CONFIG.cellSize/2.5) * ballPulse, 
+        0, Math.PI*2
+    ); 
+    ctx.fill();
     ctx.shadowBlur = 0;
 
     state.snake.forEach((seg, i) => {
@@ -370,7 +380,7 @@ function loop(now) {
     const p = CONFIG.speeds[CONFIG.currentMode];
     const step = 1000 / Math.min(p.max, p.base + (state.score * p.boost));
     while (state.accumTime >= step) { if (!state.gameOver) update(); state.accumTime -= step; }
-    render();
+    render(now);
     if (!state.gameOver || state.shake > 0.1) requestAnimationFrame(loop);
 }
 
