@@ -7,11 +7,11 @@
     
     <style>
         :root {
-            --bg: #050505;
-            --grid: #1a1a1a;
+            --bg: #030303;
+            --grid: #151515;
             --primary: #00ffcc;
             --text: #ffffff;
-            --ui-bg: rgba(0, 0, 0, 0.95);
+            --ui-bg: rgba(5, 5, 5, 0.9);
             --danger: #ff0044;
             --trial: #bd00ff;
         }
@@ -26,39 +26,28 @@
         }
 
         header {
-            padding: 15px 20px;
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #0a0a0a;
-            border-bottom: 1px solid #222;
+            background: #080808;
+            border-bottom: 1px solid #1a1a1a;
             z-index: 10;
         }
 
         .header-left { display: flex; align-items: center; gap: 15px; }
 
         .logo-box {
-            width: 26px; height: 26px;
+            width: 24px; height: 24px;
             border: 2px solid var(--primary);
             border-radius: 6px;
             position: relative;
-            box-shadow: 0 0 10px var(--primary);
-            animation: logoPulse 2s infinite ease-in-out;
-        }
-        .logo-box::after {
-            content: ''; position: absolute; width: 10px; height: 4px;
-            background: var(--primary); top: 7px; left: 7px; border-radius: 1px;
-            box-shadow: 0 7px 0 var(--primary);
+            box-shadow: 0 0 8px var(--primary);
         }
         
-        @keyframes logoPulse {
-            0%, 100% { opacity: 1; transform: scale(1); filter: brightness(1); }
-            50% { opacity: 0.8; transform: scale(1.1); filter: brightness(1.3); }
-        }
-
-        h1 { font-size: 20px; margin: 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 1px; }
-        .stats { font-family: 'Courier New', monospace; font-size: 16px; color: #888; font-weight: bold; }
-        #score, #high { color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
+        h1 { font-size: 18px; margin: 0; color: var(--primary); text-shadow: 0 0 8px var(--primary); letter-spacing: 1px; }
+        .stats { font-family: 'Courier New', monospace; font-size: 14px; color: #666; font-weight: bold; }
+        #score, #high { color: #fff; }
 
         #game-container {
             flex: 1;
@@ -67,71 +56,62 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            padding: 20px;
+            padding: 10px;
         }
 
         canvas {
             background: #000;
             display: block;
-            border: 2px solid #333;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: transform 0.1s ease-out;
-        }
-
-        canvas.pulse { transform: scale(1.02); border-color: #fff; box-shadow: 0 0 40px rgba(255,255,255,0.2); }
-        canvas.death-pulse { animation: deathGlowRed 0.8s ease-out forwards; }
-
-        @keyframes deathGlowRed {
-            0% { box-shadow: 0 0 100px var(--danger); border-color: var(--danger); transform: scale(1.05); }
-            100% { box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-color: #333; transform: scale(1); }
+            border: 1px solid #222;
+            border-radius: 4px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
         }
 
         #ui-layer {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
-            transition: opacity 0.4s; z-index: 20;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            transition: opacity 0.3s; z-index: 20;
         }
         #ui-layer.hidden { opacity: 0; pointer-events: none; }
         
         .menu-box {
-            text-align: center; background: var(--ui-bg); padding: 35px;
-            border: 1px solid #333; border-radius: 20px; width: 340px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            text-align: center; background: var(--ui-bg); padding: 30px;
+            border: 1px solid #222; border-radius: 15px; width: 300px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.9);
         }
-        .menu-title { font-size: 36px; margin-bottom: 25px; color: var(--primary); font-weight: 900; text-transform: uppercase; }
+        .menu-title { font-size: 28px; margin-bottom: 20px; color: var(--primary); font-weight: 800; }
 
-        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; transition: all 0.2s; }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--primary); }
+        .btn { 
+            background: #00ffcc; color: #000; border: none; padding: 14px; 
+            font-size: 18px; font-weight: 800; border-radius: 8px; cursor: pointer; 
+            margin-top: 15px; width: 100%; transition: 0.2s;
+        }
+        .btn:hover { background: #00e6b8; transform: scale(1.02); }
         
         .trial-btn { 
-            background: linear-gradient(45deg, var(--trial), #0088ff); 
-            color: #fff; border: none; padding: 12px; margin-top: 10px; 
-            width: 100%; border-radius: 10px; font-weight: 900; cursor: pointer;
-            transition: 0.2s;
+            background: transparent; color: var(--trial); border: 1px solid var(--trial);
+            padding: 10px; margin-top: 10px; width: 100%; border-radius: 8px; 
+            font-weight: bold; cursor: pointer; transition: 0.2s;
         }
-        .trial-btn:hover { filter: brightness(1.2); transform: scale(1.02); }
+        .trial-btn:hover { background: rgba(189, 0, 255, 0.1); }
 
-        .shop-btn { background: #111; color: #fff; border: 1px solid #333; padding: 14px; width: 100%; margin-top: 12px; cursor: pointer; border-radius: 10px; font-weight: bold; display: flex; justify-content: space-between; transition: 0.2s; }
-        .shop-btn:hover { border-color: #555; background: #1a1a1a; }
+        .shop-btn { background: #111; color: #aaa; border: 1px solid #222; padding: 12px; width: 100%; margin-top: 10px; cursor: pointer; border-radius: 8px; display: flex; justify-content: space-between; }
         
-        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1); background: #000; border-radius: 0 0 10px 10px; }
-        .shop-content.open { max-height: 400px; padding: 15px 0; border: 1px solid #333; border-top: none; }
+        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: #050505; }
+        .shop-content.open { max-height: 300px; padding: 10px 0; border: 1px solid #222; border-top: none; }
         
-        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 15px; }
-        .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 11px; transition: 0.2s; }
-        .skin-card:hover { border-color: #444; }
-        .skin-card.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
-        .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 10px; }
+        .skin-card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; }
+        .skin-card.selected { border-color: var(--primary); }
+        .swatch { width: 14px; height: 14px; margin: 0 auto 5px; border-radius: 3px; }
 
-        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 10px; }
-        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 16px; font-size: 12px; cursor: pointer; border-radius: 8px; font-weight: bold; transition: 0.2s; }
-        .speed-btn.active { color: var(--primary); border-color: var(--primary); background: rgba(0, 255, 204, 0.05); }
+        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 8px; }
+        .speed-btn { background: #111; color: #555; border: 1px solid #222; padding: 6px 12px; font-size: 11px; cursor: pointer; border-radius: 6px; }
+        .speed-btn.active { color: var(--primary); border-color: var(--primary); }
         
-        .controls-hint { font-size: 12px; color: #555; margin-top: 20px; font-style: italic; }
-        footer { padding: 15px; text-align: center; font-size: 12px; color: #333; background: #050505; letter-spacing: 2px; }
+        footer { padding: 10px; text-align: center; font-size: 11px; color: #222; background: #030303; }
     </style>
 </head>
 <body>
@@ -141,7 +121,7 @@
             <div class="logo-box"></div>
             <h1>NEON SNAKE</h1>
         </div>
-        <div class="stats">SCORE: <span id="score">0</span> &nbsp;|&nbsp; BEST: <span id="high">0</span></div>
+        <div class="stats">PTS: <span id="score">0</span> | BEST: <span id="high">0</span></div>
     </header>
 
     <div id="game-container">
@@ -149,22 +129,17 @@
         <div id="ui-layer">
             <div class="menu-box">
                 <div class="menu-title" id="menu-text">READY?</div>
-
                 <div class="speed-selector">
                     <button class="speed-btn" data-speed="slow">SLOW</button>
                     <button class="speed-btn" data-speed="normal">NORMAL</button>
                     <button class="speed-btn active" data-speed="hard">HARD</button>
                 </div>
-
                 <button class="shop-btn" onclick="toggleShop('snake-shop')">SNAKE SKINS <span>▼</span></button>
                 <div id="snake-shop" class="shop-content">
                     <div class="skin-grid" id="snake-grid"></div>
                 </div>
-
-                <button class="trial-btn" onclick="startTrial()">✨ FREE RAINBOW TRIAL ✨</button>
-
-                <button class="btn" id="start-btn">START GAME</button>
-                <div class="controls-hint">R or SPACE to Restart | Q to Exit</div>
+                <button class="trial-btn" onclick="startTrial()">FREE RAINBOW TRIAL</button>
+                <button class="btn" id="start-btn">START</button>
             </div>
         </div>
     </div>
@@ -188,44 +163,18 @@ const state = {
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
     isTrial: false,
-    lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null
+    lastTime: 0, accumTime: 0, gameOver: true, shake: 0
 };
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
-const highEl = document.getElementById('high');
-highEl.textContent = state.wallet;
+document.getElementById('high').textContent = state.wallet;
 
-function startTrial() {
-    state.activeSnake = SNAKE_SKINS[5];
-    state.isTrial = true;
-    renderShops();
-}
-
-function triggerPulse(type = 'ball') {
-    canvas.classList.remove('pulse', 'death-pulse');
-    void canvas.offsetWidth; 
-    if (type === 'ball') {
-        canvas.classList.add('pulse');
-        setTimeout(() => canvas.classList.remove('pulse'), 150);
-    } else {
-        canvas.classList.add('death-pulse');
-    }
-}
-
-function save() {
-    localStorage.setItem('neon_v4_best', state.wallet);
-    localStorage.setItem('neon_v4_owned', JSON.stringify(state.ownedSkins));
-    if (!state.isTrial) {
-        localStorage.setItem('neon_v4_active_s', JSON.stringify(state.activeSnake));
-    }
-}
+function startTrial() { state.activeSnake = SNAKE_SKINS[5]; state.isTrial = true; renderShops(); }
 
 function toggleShop(id) {
     const el = document.getElementById(id);
-    const isOpen = el.classList.contains('open');
-    document.querySelectorAll('.shop-content').forEach(s => s.classList.remove('open'));
-    if (!isOpen) el.classList.add('open');
+    el.classList.toggle('open');
 }
 
 function renderShops() {
@@ -239,32 +188,35 @@ function renderShops() {
         const swatchColor = skin.head === 'rainbow' ? 'linear-gradient(45deg, red, blue, green)' : skin.head;
         card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
             <b>${skin.name}</b><br>${isSel ? (state.isTrial && skin.id==='s6' ? 'TRIAL' : 'ACTIVE') : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
-        card.onclick = (e) => {
+        card.onclick = () => {
             if (isOwned) { state.activeSnake = skin; state.isTrial = false; }
             else if (state.wallet >= skin.price) { 
                 state.ownedSkins.push(skin.id); 
                 state.activeSnake = skin; 
                 state.isTrial = false;
+                save();
             }
-            save(); renderShops();
+            renderShops();
         };
         grid.appendChild(card);
     });
 }
 
+function save() {
+    localStorage.setItem('neon_v4_best', state.wallet);
+    localStorage.setItem('neon_v4_owned', JSON.stringify(state.ownedSkins));
+    if (!state.isTrial) localStorage.setItem('neon_v4_active_s', JSON.stringify(state.activeSnake));
+}
+
 const CONFIG = {
-    cols: 31, rows: 15, cellSize: 0,
-    speeds: { 
-        slow: { base: 6, boost: 0.1, max: 12 }, 
-        normal: { base: 8, boost: 0.15, max: 18 }, 
-        hard: { base: 11, boost: 0.15, max: 22 }
-    },
+    cols: 25, rows: 15, cellSize: 0,
+    speeds: { slow: 120, normal: 90, hard: 65 },
     currentMode: 'hard'
 };
 
 function resize() {
     const container = document.getElementById('game-container');
-    const rawSize = Math.min((container.clientWidth-40)/CONFIG.cols, (container.clientHeight-40)/CONFIG.rows);
+    const rawSize = Math.min((container.clientWidth-20)/CONFIG.cols, (container.clientHeight-20)/CONFIG.rows);
     CONFIG.cellSize = Math.floor(rawSize);
     canvas.width = CONFIG.cols * CONFIG.cellSize;
     canvas.height = CONFIG.rows * CONFIG.cellSize;
@@ -278,7 +230,6 @@ function spawnFood() {
 }
 
 function startGame() {
-    clearTimeout(state.deathTimer);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0;
     document.getElementById('score').textContent = '0';
@@ -291,7 +242,6 @@ function startGame() {
 
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
-    if (k === 'q') { window.location.href = "https://www.google.com"; return; }
     if (k === 'r' || (k === ' ' && state.gameOver)) { startGame(); return; }
     if (state.gameOver) return;
     let nD = null;
@@ -305,66 +255,46 @@ window.addEventListener('keydown', e => {
     }
 });
 
-function drawRoundedRect(ctx, x, y, width, height, radius) {
-    ctx.beginPath();
-    ctx.moveTo(x+radius, y); ctx.lineTo(x+width-radius, y);
-    ctx.quadraticCurveTo(x+width, y, x+width, y+radius);
-    ctx.lineTo(x+width, y+height-radius);
-    ctx.quadraticCurveTo(x+width, y+height, x+width-radius, y+height);
-    ctx.lineTo(x+radius, y+height);
-    ctx.quadraticCurveTo(x, y+height, x, y+height-radius);
-    ctx.lineTo(x, y+radius); ctx.quadraticCurveTo(x, y, x+radius, y);
-    // Grid fix: ensure grid lines are always visible by filling with background color first if needed, 
-    // but here we just fill the snake segment.
-    ctx.closePath(); ctx.fill();
-}
-
 function update() {
     if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
-        state.gameOver = true; state.shake = 15; triggerPulse('death'); 
+        state.gameOver = true;
         if (state.score > state.wallet) state.wallet = state.score;
         save();
-        state.deathTimer = setTimeout(() => {
-            document.getElementById('menu-text').textContent = "CRASHED!";
+        setTimeout(() => {
+            document.getElementById('menu-text').textContent = "BOOM!";
             document.getElementById('high').textContent = state.wallet;
             renderShops();
             document.getElementById('ui-layer').classList.remove('hidden');
-        }, 800);
+        }, 500);
         return;
     }
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; document.getElementById('score').textContent = state.score;
-        triggerPulse('ball'); spawnFood();
+        spawnFood();
     } else state.snake.pop();
 }
 
 function render(now) {
-    ctx.setTransform(1,0,0,1,0,0);
-    if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
+    ctx.fillStyle = '#050505'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    // Background
-    ctx.fillStyle = '#050505'; 
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    
-    // Persistent Bright Grid
-    ctx.strokeStyle = '#222'; 
-    ctx.lineWidth = 1; 
-    ctx.beginPath();
+    // Clean Grid
+    ctx.strokeStyle = '#151515'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
 
     const rainbowHue = (now / 5) % 360;
-    const glowStr = 10 + Math.min(state.score, 40);
 
-    // Food
-    const ballPulse = 0.9 + Math.sin(now / 150) * 0.1;
-    let ballColor = (state.isTrial) ? `hsl(${rainbowHue}, 100%, 60%)` : '#ff00ff';
-    ctx.fillStyle = ballColor; ctx.shadowBlur = 15; ctx.shadowColor = ballColor;
-    ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*ballPulse, 0, Math.PI*2); ctx.fill();
+    // Vibrant Food (Vibrant Magenta)
+    let ballColor = state.isTrial ? `hsl(${rainbowHue}, 100%, 60%)` : '#ff00ff';
+    ctx.fillStyle = ballColor;
+    ctx.shadowBlur = 12; ctx.shadowColor = ballColor;
+    ctx.beginPath();
+    ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, CONFIG.cellSize/3, 0, Math.PI*2);
+    ctx.fill();
     ctx.shadowBlur = 0;
 
     // Snake
@@ -372,37 +302,18 @@ function render(now) {
         let sHead = state.activeSnake.head === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeSnake.head;
         let sBody = state.activeSnake.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
         ctx.fillStyle = (i === 0) ? sHead : sBody;
-        if(i===0) { ctx.shadowBlur = glowStr; ctx.shadowColor = sHead; }
-        drawRoundedRect(ctx, seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4);
+        if(i === 0) { ctx.shadowBlur = 10; ctx.shadowColor = sHead; }
+        ctx.fillRect(seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2);
         ctx.shadowBlur = 0;
-        if(i===0) {
-            ctx.fillStyle='#000';
-            const sz=CONFIG.cellSize-2; const off=sz/4;
-            let ex1 = seg.x*CONFIG.cellSize+sz-off, ey1 = seg.y*CONFIG.cellSize+off;
-            let ex2 = seg.x*CONFIG.cellSize+sz-off, ey2 = seg.y*CONFIG.cellSize+sz-off;
-            if(state.dir.x===-1){ ex1-=sz/2; ex2-=sz/2; }
-            if(state.dir.y===-1){ ey1=seg.y*CONFIG.cellSize+off; ey2=ey1; ex1=seg.x*CONFIG.cellSize+off; ex2=seg.x*CONFIG.cellSize+sz-off; }
-            if(state.dir.y===1){ ey1=seg.y*CONFIG.cellSize+sz-off; ey2=ey1; ex1=seg.x*CONFIG.cellSize+off; ex2=seg.x*CONFIG.cellSize+sz-off; }
-            ctx.beginPath(); ctx.arc(ex1,ey1,sz/10,0,Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(ex2,ey2,sz/10,0,Math.PI*2); ctx.fill();
-        }
     });
 }
 
 function loop(now) {
-    const dt = now - state.lastTime; 
-    state.lastTime = now; 
+    const dt = now - state.lastTime;
+    state.lastTime = now;
     state.accumTime += dt;
-    const p = CONFIG.speeds[CONFIG.currentMode];
-    const step = 1000 / Math.min(p.max, p.base + (state.score * p.boost));
-    
-    // Physics/Logic steps
-    while (state.accumTime >= step) { 
-        if (!state.gameOver) update(); 
-        state.accumTime -= step; 
-    }
-    
-    // Always render every frame to keep the grid and animations (food pulse) smooth
+    const step = CONFIG.speeds[CONFIG.currentMode];
+    while (state.accumTime >= step) { if (!state.gameOver) update(); state.accumTime -= step; }
     render(now);
     requestAnimationFrame(loop);
 }
