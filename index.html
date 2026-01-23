@@ -58,7 +58,7 @@
 
         h1 { font-size: 20px; margin: 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 1px; }
         .stats { font-family: 'Courier New', monospace; font-size: 16px; color: #888; font-weight: bold; }
-        #score, #high { color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
+        #score, #high { color: #fff; }
 
         #game-container {
             flex: 1;
@@ -76,20 +76,15 @@
             border: 2px solid #333;
             border-radius: 8px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: transform 0.1s ease-out;
         }
 
-        canvas.pulse { 
-            animation: flashWhite 0.4s ease-out forwards;
-        }
-
+        /* Flash effects from the provided design */
+        canvas.pulse { animation: flashWhite 0.4s ease-out forwards; }
         @keyframes flashWhite {
-            0% { transform: scale(1.03); border-color: #fff; box-shadow: 0 0 50px #fff; filter: brightness(1.5); }
-            100% { transform: scale(1); border-color: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); filter: brightness(1); }
+            0% { transform: scale(1.03); border-color: #fff; box-shadow: 0 0 50px #fff; }
+            100% { transform: scale(1); border-color: #333; }
         }
-
         canvas.death-pulse { animation: deathGlowRed 0.8s ease-out forwards; }
-
         @keyframes deathGlowRed {
             0% { box-shadow: 0 0 100px var(--danger); border-color: var(--danger); transform: scale(1.05); }
             100% { box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-color: #333; transform: scale(1); }
@@ -108,42 +103,36 @@
             text-align: center; background: var(--ui-bg); padding: 35px;
             border: 1px solid #333; border-radius: 20px; width: 340px;
             max-height: 85vh; overflow-y: auto;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
             scrollbar-width: none;
         }
         .menu-box::-webkit-scrollbar { display: none; }
 
-        .menu-title { font-size: 36px; margin-bottom: 25px; color: var(--primary); font-weight: 900; text-transform: uppercase; }
+        .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
 
-        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; transition: all 0.2s; }
+        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; transition: 0.2s; }
         .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--primary); }
-        
+
         .trial-btn { 
             background: linear-gradient(45deg, var(--trial), #0088ff); 
             color: #fff; border: none; padding: 12px; margin-top: 10px; 
             width: 100%; border-radius: 10px; font-weight: 900; cursor: pointer;
             transition: 0.2s;
         }
-        .trial-btn:hover { filter: brightness(1.2); transform: scale(1.02); }
 
-        .shop-btn { background: #111; color: #fff; border: 1px solid #333; padding: 14px; width: 100%; margin-top: 12px; cursor: pointer; border-radius: 10px; font-weight: bold; display: flex; justify-content: space-between; transition: 0.2s; outline: none; }
-        .shop-btn:hover { border-color: #555; background: #1a1a1a; }
+        .shop-btn { background: #111; color: #fff; border: 1px solid #333; padding: 14px; width: 100%; margin-top: 12px; cursor: pointer; border-radius: 10px; font-weight: bold; display: flex; justify-content: space-between; }
+        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #000; }
+        .shop-content.open { max-height: 400px; border: 1px solid #333; border-top: none; padding-bottom: 10px; }
         
-        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #000; border-radius: 0 0 10px 10px; }
-        .shop-content.open { max-height: 400px; padding-bottom: 15px; border-left: 1px solid #333; border-right: 1px solid #333; border-bottom: 1px solid #333; }
-        
-        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px 15px 0; }
-        .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 11px; transition: 0.2s; }
-        .skin-card:hover { border-color: #444; }
+        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+        .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 11px; }
         .skin-card.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
-        .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+        .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; }
 
         .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 10px; }
-        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 16px; font-size: 12px; cursor: pointer; border-radius: 8px; font-weight: bold; transition: 0.2s; }
-        .speed-btn.active { color: var(--primary); border-color: var(--primary); background: rgba(0, 255, 204, 0.05); }
+        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 16px; cursor: pointer; border-radius: 8px; font-size: 12px; }
+        .speed-btn.active { color: var(--primary); border-color: var(--primary); }
         
-        .controls-hint { font-size: 12px; color: #555; margin-top: 20px; font-style: italic; }
-        footer { padding: 15px; text-align: center; font-size: 12px; color: #333; background: #050505; letter-spacing: 2px; }
+        footer { padding: 15px; text-align: center; font-size: 12px; color: #333; background: #050505; }
     </style>
 </head>
 <body>
@@ -161,27 +150,17 @@
         <div id="ui-layer">
             <div class="menu-box">
                 <div class="menu-title" id="menu-text">READY?</div>
-
                 <div class="speed-selector">
                     <button class="speed-btn" data-speed="slow">SLOW</button>
                     <button class="speed-btn" data-speed="normal">NORMAL</button>
                     <button class="speed-btn active" data-speed="hard">HARD</button>
                 </div>
-
                 <button class="shop-btn" onclick="toggleShop('snake-shop')">SNAKE SKINS <span>▼</span></button>
-                <div id="snake-shop" class="shop-content">
-                    <div class="skin-grid" id="snake-grid"></div>
-                </div>
-
+                <div id="snake-shop" class="shop-content"><div class="skin-grid" id="snake-grid"></div></div>
                 <button class="shop-btn" onclick="toggleShop('ball-shop')">BALL COLORS <span>▼</span></button>
-                <div id="ball-shop" class="shop-content">
-                    <div class="skin-grid" id="ball-grid"></div>
-                </div>
-
+                <div id="ball-shop" class="shop-content"><div class="skin-grid" id="ball-grid"></div></div>
                 <button class="trial-btn" onclick="startTrial()">✨ FREE RAINBOW TRIAL ✨</button>
-
                 <button class="btn" id="start-btn">START GAME</button>
-                <div class="controls-hint">R or SPACE to Restart | Q to Exit</div>
             </div>
         </div>
     </div>
@@ -215,13 +194,12 @@ const state = {
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
     activeBall: JSON.parse(localStorage.getItem('neon_v4_active_b')) || BALL_COLORS[0],
     isTrial: false,
-    lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null
+    lastTime: 0, accumTime: 0, gameOver: true, shake: 0
 };
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
-const highEl = document.getElementById('high');
-highEl.textContent = state.wallet;
+document.getElementById('high').textContent = state.wallet;
 
 function startTrial() {
     state.activeSnake = SNAKE_SKINS[5];
@@ -233,22 +211,7 @@ function startTrial() {
 function triggerPulse(type = 'ball') {
     canvas.classList.remove('pulse', 'death-pulse');
     void canvas.offsetWidth; 
-    if (type === 'ball') {
-        canvas.classList.add('pulse');
-        setTimeout(() => canvas.classList.remove('pulse'), 400);
-    } else {
-        canvas.classList.add('death-pulse');
-    }
-}
-
-function save() {
-    localStorage.setItem('neon_v4_best', state.wallet);
-    localStorage.setItem('neon_v4_owned', JSON.stringify(state.ownedSkins));
-    localStorage.setItem('neon_v4_balls', JSON.stringify(state.ownedBalls));
-    if (!state.isTrial) {
-        localStorage.setItem('neon_v4_active_s', JSON.stringify(state.activeSnake));
-        localStorage.setItem('neon_v4_active_b', JSON.stringify(state.activeBall));
-    }
+    canvas.classList.add(type === 'ball' ? 'pulse' : 'death-pulse');
 }
 
 function toggleShop(id) {
@@ -272,7 +235,7 @@ function renderShops() {
         card.onclick = () => {
             if (isOwned) { state.activeSnake = skin; state.isTrial = false; }
             else if (state.wallet >= skin.price) { state.ownedSkins.push(skin.id); state.activeSnake = skin; state.isTrial = false; }
-            save(); renderShops();
+            renderShops();
         };
         sGrid.appendChild(card);
     });
@@ -290,16 +253,16 @@ function renderShops() {
         card.onclick = () => {
             if (isOwned) { state.activeBall = ball; state.isTrial = false; }
             else if (state.wallet >= ball.price) { state.ownedBalls.push(ball.id); state.activeBall = ball; state.isTrial = false; }
-            save(); renderShops();
+            renderShops();
         };
         bGrid.appendChild(card);
     });
 }
 
-const CONFIG = {
-    cols: 31, rows: 15, cellSize: 0,
-    speeds: { slow: { base: 6, boost: 0.1, max: 12 }, normal: { base: 8, boost: 0.15, max: 18 }, hard: { base: 11, boost: 0.15, max: 22 } },
-    currentMode: 'hard'
+const CONFIG = { 
+    cols: 31, rows: 15, cellSize: 0, 
+    speeds: { slow: { base: 6, boost: 0.1, max: 12 }, normal: { base: 8, boost: 0.15, max: 18 }, hard: { base: 11, boost: 0.15, max: 22 } }, 
+    currentMode: 'hard' 
 };
 
 function resize() {
@@ -318,21 +281,17 @@ function spawnFood() {
 }
 
 function startGame() {
-    clearTimeout(state.deathTimer);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0;
     document.getElementById('score').textContent = '0';
-    spawnFood();
-    state.gameOver = false;
-    state.lastTime = performance.now();
+    spawnFood(); state.gameOver = false; state.lastTime = performance.now();
     document.getElementById('ui-layer').classList.add('hidden');
     requestAnimationFrame(loop);
 }
 
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
-    if (k === 'q') { window.location.href = "https://www.google.com"; return; }
-    if (k === 'r' || (k === ' ' && state.gameOver)) { startGame(); return; }
+    if (k === 'r' || (k === ' ' && state.gameOver)) startGame();
     if (state.gameOver) return;
     let nD = null;
     if (k === 'w' || k === 'arrowup') nD = {x:0, y:-1};
@@ -361,14 +320,13 @@ function update() {
     if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
-        state.gameOver = true; state.shake = 15; triggerPulse('death'); 
-        if (state.score > state.wallet) state.wallet = state.score;
-        save();
-        state.deathTimer = setTimeout(() => {
+        state.gameOver = true; state.shake = 15; triggerPulse('death');
+        if (state.score > state.wallet) { state.wallet = state.score; localStorage.setItem('neon_v4_best', state.wallet); }
+        setTimeout(() => { 
             document.getElementById('menu-text').textContent = "CRASHED!";
             document.getElementById('high').textContent = state.wallet;
-            renderShops();
-            document.getElementById('ui-layer').classList.remove('hidden');
+            document.getElementById('ui-layer').classList.remove('hidden'); 
+            renderShops(); 
         }, 800);
         return;
     }
@@ -384,7 +342,6 @@ function render(now) {
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
     ctx.fillStyle = '#050505'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    // DIMMER GRID
     ctx.strokeStyle = '#151515'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
@@ -393,22 +350,21 @@ function render(now) {
     const rainbowHue = (now / 5) % 360;
     const glowStr = 10 + Math.min(state.score, 40);
 
-    const ballPulse = 0.9 + Math.sin(now / 150) * 0.1;
     let ballColor = state.activeBall.color === 'rainbow' ? `hsl(${rainbowHue}, 100%, 60%)` : state.activeBall.color;
-    
     ctx.fillStyle = ballColor; ctx.shadowBlur = 15; ctx.shadowColor = ballColor;
-    ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*ballPulse, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); 
+    ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, CONFIG.cellSize/2.8, 0, Math.PI*2); 
+    ctx.fill();
     ctx.shadowBlur = 0;
 
     state.snake.forEach((seg, i) => {
-        let sHead = state.activeSnake.head === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeSnake.head;
-        let sBody = state.activeSnake.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
-        ctx.fillStyle = (i === 0) ? sHead : sBody;
-        if(i===0) { ctx.shadowBlur = glowStr; ctx.shadowColor = sHead; }
+        let sH = state.activeSnake.head === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeSnake.head;
+        let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
+        ctx.fillStyle = (i === 0) ? sH : sB;
+        if(i === 0) { ctx.shadowBlur = glowStr; ctx.shadowColor = sH; }
         drawRoundedRect(ctx, seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4);
         ctx.shadowBlur = 0;
 
-        // SNAKE EYES (FROM ENHANCED DETAIL VERSION)
         if(i===0) {
             ctx.fillStyle='#000';
             const sz=CONFIG.cellSize-2; const off=sz/4;
@@ -429,7 +385,7 @@ function loop(now) {
     const step = 1000 / Math.min(p.max, p.base + (state.score * p.boost));
     while (state.accumTime >= step) { if (!state.gameOver) update(); state.accumTime -= step; }
     render(now);
-    requestAnimationFrame(loop);
+    if (!state.gameOver) requestAnimationFrame(loop);
 }
 
 document.querySelectorAll('.speed-btn').forEach(btn => {
