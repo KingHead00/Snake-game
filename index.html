@@ -26,6 +26,7 @@
             display: flex;
             flex-direction: column;
             user-select: none;
+            -webkit-user-select: none;
         }
 
         header {
@@ -33,12 +34,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #111;
+            background: linear-gradient(to bottom, #111, #050505);
             border-bottom: 1px solid #333;
             z-index: 10;
         }
-        h1 { font-size: 20px; margin: 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        h1 { font-size: 20px; margin: 0; letter-spacing: 1px; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
         .stats { font-family: monospace; font-size: 16px; color: #ccc; }
+        .stats span { color: #fff; font-weight: bold; }
 
         #game-container {
             flex: 1;
@@ -46,38 +48,74 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #000;
+            overflow: hidden;
         }
-        canvas { display: block; background: #0a0a0a; }
+        canvas {
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            display: block;
+        }
 
         #ui-layer {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s;
             z-index: 20;
         }
-        #ui-layer.hidden { display: none; }
+        #ui-layer.hidden { opacity: 0; pointer-events: none; }
         
         .menu-box {
             text-align: center;
             background: var(--ui-bg);
             padding: 40px;
-            border: 1px solid var(--primary);
+            border: 1px solid #333;
             border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.1);
+            max-width: 300px;
         }
+        .menu-title { font-size: 32px; margin-bottom: 10px; font-weight: 800; color: var(--primary); }
         
-        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 10px; }
-        .speed-btn {
-            background: transparent; color: #888; border: 1px solid #444;
-            padding: 5px 10px; cursor: pointer; border-radius: 4px;
+        .speed-selector {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
         }
-        .speed-btn.active { color: var(--primary); border-color: var(--primary); }
+        .speed-btn {
+            background: transparent;
+            color: #888;
+            border: 1px solid #444;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .speed-btn.active {
+            color: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
 
         .btn {
-            background: var(--primary); color: #000; border: none;
-            padding: 12px 24px; font-weight: bold; border-radius: 4px; cursor: pointer;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.1s, box-shadow 0.2s;
+            text-transform: uppercase;
         }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--primary); }
     </style>
 </head>
 <body>
@@ -91,61 +129,81 @@
         <canvas id="c"></canvas>
         <div id="ui-layer">
             <div class="menu-box">
-                <h2 id="menu-text">READY?</h2>
-                <div id="final-score" style="display:none; margin-bottom:10px;"></div>
+                <div class="menu-title" id="menu-text">READY?</div>
+                <div id="final-score" style="display:none; margin-bottom:10px; color:#ccc;"></div>
+                
                 <div class="speed-selector">
-                    <button class="speed-btn" onclick="setSpeed('slow', this)">SLOW</button>
-                    <button class="speed-btn" onclick="setSpeed('normal', this)">NORMAL</button>
-                    <button class="speed-btn active" onclick="setSpeed('hard', this)">HARD</button>
+                    <button class="speed-btn" id="btn-slow" onclick="updateSpeed('slow')">SLOW</button>
+                    <button class="speed-btn" id="btn-normal" onclick="updateSpeed('normal')">NORMAL</button>
+                    <button class="speed-btn active" id="btn-hard" onclick="updateSpeed('hard')">HARD</button>
                 </div>
-                <button class="btn" onclick="startGame()">PLAY</button>
+
+                <button class="btn" id="start-btn">PLAY</button>
             </div>
         </div>
     </div>
 
 <script>
 const CONFIG = {
-    cols: 30, rows: 20,
+    cols: 31, rows: 15, cellSize: 0,
     speeds: {
         slow: { base: 6, boost: 0.1, max: 12 },
         normal: { base: 8, boost: 0.15, max: 18 },
         hard: { base: 10, boost: 0.2, max: 25 }
     },
-    currentMode: 'hard'
+    currentMode: 'hard',
+    colors: { snakeHead: '#00ffcc', snakeBody: '#00bfa5', food: '#ff00ff', grid: '#333333', bg: '#0a0a0a' }
 };
 
 const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
-    score: 0, highScore: parseInt(localStorage.getItem('snake_hi') || '0'),
-    gameOver: true, lastTime: 0, accumTime: 0
+    particles: [], score: 0, highScore: parseInt(localStorage.getItem('neon_snake_high') || '0'),
+    lastTime: 0, accumTime: 0, gameOver: true, shake: 0
 };
 
 const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d', { alpha: false });
 const scoreEl = document.getElementById('score');
 const highEl = document.getElementById('high');
+
 highEl.textContent = state.highScore;
 
-function setSpeed(mode, btn) {
+function updateSpeed(mode) {
     CONFIG.currentMode = mode;
     document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    document.getElementById('btn-' + mode).classList.add('active');
 }
 
 function resize() {
-    const size = Math.min((window.innerWidth-40)/CONFIG.cols, (window.innerHeight-150)/CONFIG.rows);
-    CONFIG.cellSize = Math.floor(size);
+    const container = document.getElementById('game-container');
+    const rawSize = Math.min((container.clientWidth-40)/CONFIG.cols, (container.clientHeight-40)/CONFIG.rows);
+    CONFIG.cellSize = Math.floor(rawSize);
     canvas.width = CONFIG.cols * CONFIG.cellSize;
     canvas.height = CONFIG.rows * CONFIG.cellSize;
 }
-window.onresize = resize;
+window.addEventListener('resize', resize);
 resize();
 
+document.getElementById('start-btn').onclick = startGame;
+
+window.onkeydown = e => {
+    const key = e.key.toLowerCase();
+    if (key === 'r') startGame();
+    if (state.gameOver) return;
+    let newD = null;
+    if (key === 'arrowup' || key === 'w') newD = {x:0, y:-1};
+    if (key === 'arrowdown' || key === 's') newD = {x:0, y:1};
+    if (key === 'arrowleft' || key === 'a') newD = {x:-1, y:0};
+    if (key === 'arrowright' || key === 'd') newD = {x:1, y:0};
+    if (newD && (newD.x !== -state.dir.x || newD.y !== -state.dir.y)) state.nextDir = newD;
+};
+
 function startGame() {
-    state.snake = [{x:5, y:10}, {x:4, y:10}, {x:3, y:10}];
+    state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0};
-    state.nextDir = [];
+    state.nextDir = null;
     state.score = 0;
+    state.particles = [];
     scoreEl.textContent = '0';
     state.gameOver = false;
     spawnFood();
@@ -155,33 +213,37 @@ function startGame() {
 }
 
 function spawnFood() {
-    state.food = {
-        x: Math.floor(Math.random() * CONFIG.cols),
-        y: Math.floor(Math.random() * CONFIG.rows)
-    };
+    state.food = { x: Math.floor(Math.random()*CONFIG.cols), y: Math.floor(Math.random()*CONFIG.rows) };
 }
 
-window.onkeydown = e => {
-    const k = e.key.toLowerCase();
-    if (k === 'r') startGame();
-    let d = null;
-    if (k === 'arrowup' || k === 'w') d = {x:0, y:-1};
-    if (k === 'arrowdown' || k === 's') d = {x:0, y:1};
-    if (k === 'arrowleft' || k === 'a') d = {x:-1, y:0};
-    if (k === 'arrowright' || k === 'd') d = {x:1, y:0};
-    if (d && (d.x !== -state.dir.x || d.y !== -state.dir.y)) state.nextDir = d;
-};
+function createExplosion(x, y, color) {
+    for (let i=0; i<12; i++) {
+        state.particles.push({
+            x: x * CONFIG.cellSize + CONFIG.cellSize/2,
+            y: y * CONFIG.cellSize + CONFIG.cellSize/2,
+            vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8,
+            life: 1.0, color: color
+        });
+    }
+}
+
+function drawRoundedRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, r);
+    ctx.fill();
+}
 
 function update() {
     if (state.nextDir) { state.dir = state.nextDir; state.nextDir = null; }
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
-    
-    if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || 
+
+    if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows ||
         state.snake.some(s => s.x === head.x && s.y === head.y)) {
         state.gameOver = true;
+        state.shake = 15;
         if (state.score > state.highScore) {
             state.highScore = state.score;
-            localStorage.setItem('snake_hi', state.highScore);
+            localStorage.setItem('neon_snake_high', state.highScore);
             highEl.textContent = state.highScore;
         }
         document.getElementById('ui-layer').classList.remove('hidden');
@@ -193,38 +255,69 @@ function update() {
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++;
         scoreEl.textContent = state.score;
+        createExplosion(head.x, head.y, CONFIG.colors.food);
         spawnFood();
     } else {
         state.snake.pop();
     }
 }
 
-function loop(t) {
-    if (state.gameOver) return;
-    const dt = t - state.lastTime;
-    state.lastTime = t;
+function loop(now) {
+    if (state.gameOver && state.shake <= 0 && state.particles.length === 0) return;
+    const dt = now - state.lastTime;
+    state.lastTime = now;
     state.accumTime += dt;
 
     const p = CONFIG.speeds[CONFIG.currentMode];
     const step = 1000 / Math.min(p.max, p.base + (state.score * p.boost));
 
     while (state.accumTime >= step) {
-        update();
+        if (!state.gameOver) update();
         state.accumTime -= step;
     }
 
-    ctx.fillStyle = '#0a0a0a';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    
-    // Draw Food
-    ctx.fillStyle = '#ff00ff';
-    ctx.fillRect(state.food.x * CONFIG.cellSize, state.food.y * CONFIG.cellSize, CONFIG.cellSize-1, CONFIG.cellSize-1);
+    ctx.setTransform(1,0,0,1,0,0);
+    if (state.shake > 0) {
+        ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake);
+        state.shake *= 0.9;
+    }
 
-    // Draw Snake
+    ctx.fillStyle = CONFIG.colors.bg;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    ctx.strokeStyle = CONFIG.colors.grid;
+    ctx.beginPath();
+    for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
+    for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
+    ctx.stroke();
+
+    // Food
+    const pulse = 1 + Math.sin(now/200)*0.1;
+    ctx.fillStyle = CONFIG.colors.food;
+    ctx.shadowBlur = 15; ctx.shadowColor = CONFIG.colors.food;
+    ctx.beginPath();
+    ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.5)*pulse, 0, Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Snake
     state.snake.forEach((s, i) => {
-        ctx.fillStyle = i === 0 ? '#00ffcc' : '#00bfa5';
-        ctx.fillRect(s.x * CONFIG.cellSize, s.y * CONFIG.cellSize, CONFIG.cellSize-1, CONFIG.cellSize-1);
+        ctx.fillStyle = i === 0 ? CONFIG.colors.snakeHead : CONFIG.colors.snakeBody;
+        if(i === 0) { ctx.shadowBlur = 10; ctx.shadowColor = CONFIG.colors.snakeHead; }
+        drawRoundedRect(ctx, s.x*CONFIG.cellSize+1, s.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4);
+        ctx.shadowBlur = 0;
     });
+
+    // Particles
+    state.particles.forEach((p, i) => {
+        p.x += p.vx; p.y += p.vy; p.life -= 0.05;
+        if (p.life > 0) {
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill();
+        } else state.particles.splice(i, 1);
+    });
+    ctx.globalAlpha = 1.0;
 
     requestAnimationFrame(loop);
 }
