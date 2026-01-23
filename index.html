@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - Focused Edition</title>
+    <title>Neon Snake - Skins Are Back</title>
     
     <style>
         :root {
@@ -61,25 +61,38 @@
         .menu-box {
             text-align: center; background: var(--ui-bg); padding: 25px;
             border: 1px solid #444; border-radius: 12px; width: 320px;
+            max-height: 90vh; overflow-y: auto;
         }
-        .menu-title { font-size: 28px; margin-bottom: 15px; color: var(--primary); font-weight: 800; }
+        .menu-title { font-size: 28px; margin-bottom: 5px; color: var(--primary); font-weight: 800; }
         
-        .user-input-container { margin: 15px 0; }
+        .user-input-container { margin: 10px 0; }
         #username-in {
             background: #000; border: 1px solid #444; color: var(--primary);
-            padding: 10px; border-radius: 4px; text-align: center;
+            padding: 8px; border-radius: 4px; text-align: center;
             font-family: inherit; width: 85%; outline: none; font-weight: bold;
         }
-        #username-in:focus { border-color: var(--primary); }
+
+        /* SHOP STYLES */
+        .shop-btn { 
+            background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 10px; 
+            width: 100%; margin-top: 10px; cursor: pointer; border-radius: 6px; 
+            font-weight: bold; font-size: 12px; display: flex; justify-content: space-between; 
+        }
+        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: #000; }
+        .shop-content.open { max-height: 300px; padding: 10px 0; border: 1px solid #444; border-top: none; }
+        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 10px; }
+        .skin-card { background: #111; border: 1px solid #333; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; }
+        .skin-card.selected { border-color: var(--primary); background: #001a11; }
+        .swatch { width: 12px; height: 12px; margin: 0 auto 4px; border-radius: 2px; }
 
         .btn { background: var(--primary); color: #000; border: none; padding: 12px; font-size: 18px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; width: 100%; }
         
-        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 8px; }
+        .speed-selector { margin: 10px 0; display: flex; justify-content: center; gap: 8px; }
         .speed-btn { background: transparent; color: #888; border: 1px solid #444; padding: 5px 10px; font-size: 11px; cursor: pointer; border-radius: 4px; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
         
         footer { padding: 8px; text-align: center; font-size: 11px; color: #444; background: #080808; }
-        .hint-text { font-size: 10px; color: #555; margin-top: 10px; letter-spacing: 0.5px; }
+        .hint-text { font-size: 10px; color: #555; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -105,8 +118,13 @@
                     <button class="speed-btn active" data-speed="hard">HARD</button>
                 </div>
 
+                <button class="shop-btn" onclick="toggleShop()">SNAKE SKINS <span>▼</span></button>
+                <div id="shop-panel" class="shop-content">
+                    <div class="skin-grid" id="skin-grid"></div>
+                </div>
+
                 <button class="btn" id="start-btn">PLAY</button>
-                <div class="hint-text">R TO RESTART | Q TO QUICK EXIT</div>
+                <div class="hint-text">R TO RESTART | Q TO EXIT</div>
             </div>
         </div>
     </div>
@@ -114,11 +132,20 @@
     <footer>HAPPY BIRTHDAY SANJIT</footer>
 
 <script>
+const SNAKE_SKINS = [
+    { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
+    { id: 's2', name: 'GOLD', head: '#ff9900', body: '#cc7700', price: 15 },
+    { id: 's3', name: 'RUBY', head: '#ff0000', body: '#aa0000', price: 30 },
+    { id: 's4', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 100 }
+];
+
 const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
     score: 0,
     wallet: parseInt(localStorage.getItem('neon_wallet') || '0'),
     username: localStorage.getItem('neon_user') || 'ANON',
+    ownedSkins: JSON.parse(localStorage.getItem('neon_owned') || '["s1"]'),
+    activeSkin: JSON.parse(localStorage.getItem('neon_active_s')) || SNAKE_SKINS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null
 };
 
@@ -135,6 +162,41 @@ userIn.oninput = (e) => {
     localStorage.setItem('neon_user', state.username);
 };
 
+function toggleShop() {
+    document.getElementById('shop-panel').classList.toggle('open');
+}
+
+function renderShop() {
+    const grid = document.getElementById('skin-grid');
+    grid.innerHTML = '';
+    SNAKE_SKINS.forEach(skin => {
+        const isOwned = state.ownedSkins.includes(skin.id);
+        const isSel = state.activeSkin.id === skin.id;
+        const card = document.createElement('div');
+        card.className = `skin-card ${isSel ? 'selected' : ''}`;
+        const color = (skin.head === 'rainbow') ? 'linear-gradient(to right, red, violet)' : skin.head;
+        card.innerHTML = `<div class="swatch" style="background:${color}"></div>
+            <b>${skin.name}</b><br>${isSel ? 'ACTIVE' : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
+        card.onclick = (e) => {
+            if (isOwned) state.activeSkin = skin;
+            else if (state.wallet >= skin.price) { 
+                state.wallet -= skin.price; 
+                state.ownedSkins.push(skin.id); 
+                state.activeSkin = skin; 
+                highEl.textContent = state.wallet;
+            }
+            save(); renderShop();
+        };
+        grid.appendChild(card);
+    });
+}
+
+function save() {
+    localStorage.setItem('neon_wallet', state.wallet);
+    localStorage.setItem('neon_owned', JSON.stringify(state.ownedSkins));
+    localStorage.setItem('neon_active_s', JSON.stringify(state.activeSkin));
+}
+
 function triggerPulse(type = 'ball') {
     canvas.classList.remove('pulse', 'death-pulse');
     void canvas.offsetWidth; 
@@ -148,11 +210,7 @@ function triggerPulse(type = 'ball') {
 
 const CONFIG = {
     cols: 31, rows: 15, cellSize: 20,
-    speeds: { 
-        slow: { base: 6, boost: 0.1, max: 12 }, 
-        normal: { base: 8, boost: 0.15, max: 18 }, 
-        hard: { base: 13, boost: 0.3, max: 30 } 
-    },
+    speeds: { slow: { base: 6, boost: 0.1, max: 12 }, normal: { base: 8, boost: 0.15, max: 18 }, hard: { base: 13, boost: 0.3, max: 30 } },
     currentMode: 'hard'
 };
 
@@ -211,10 +269,11 @@ function update() {
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 15; triggerPulse('death'); 
         state.wallet += state.score;
-        localStorage.setItem('neon_wallet', state.wallet);
+        save();
         state.deathTimer = setTimeout(() => {
             document.getElementById('menu-text').textContent = "CRASHED!";
             document.getElementById('high').textContent = state.wallet;
+            renderShop();
             document.getElementById('ui-layer').classList.remove('hidden');
         }, 800);
         return;
@@ -222,8 +281,7 @@ function update() {
 
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
-        state.score++; 
-        document.getElementById('score').textContent = state.score;
+        state.score++; document.getElementById('score').textContent = state.score;
         triggerPulse('ball'); spawnFood();
     } else state.snake.pop();
 }
@@ -233,25 +291,22 @@ function render(now) {
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
     ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    // Breathing Ball
     const ballPulse = 0.95 + Math.sin(now / 150) * 0.15;
     ctx.fillStyle = '#ff00ff'; ctx.shadowBlur = 15; ctx.shadowColor = '#ff00ff';
-    ctx.beginPath(); 
-    ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.5) * ballPulse, 0, Math.PI*2); 
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.5) * ballPulse, 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Snake
+    const rainbowHue = (now / 5) % 360;
     state.snake.forEach((seg, i) => {
-        ctx.fillStyle = i === 0 ? '#00ffcc' : '#00bfa5';
-        if(i===0) { ctx.shadowBlur = 10; ctx.shadowColor = '#00ffcc'; }
+        let sHead = state.activeSkin.head === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeSkin.head;
+        let sBody = state.activeSkin.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSkin.body;
+        ctx.fillStyle = i === 0 ? sHead : sBody;
+        if(i===0) { ctx.shadowBlur = 10; ctx.shadowColor = sHead; }
         ctx.fillRect(seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2);
         ctx.shadowBlur = 0;
         
-        // Eyes
         if(i===0) {
-            ctx.fillStyle='#000';
-            const sz=CONFIG.cellSize-2; const off=sz/4;
+            ctx.fillStyle='#000'; const sz=CONFIG.cellSize-2; const off=sz/4;
             let ex1 = seg.x*CONFIG.cellSize+sz-off, ey1 = seg.y*CONFIG.cellSize+off;
             let ex2 = seg.x*CONFIG.cellSize+sz-off, ey2 = seg.y*CONFIG.cellSize+sz-off;
             if(state.dir.x===-1){ ex1-=sz/2; ex2-=sz/2; }
@@ -279,6 +334,7 @@ document.querySelectorAll('.speed-btn').forEach(btn => {
     });
 });
 document.getElementById('start-btn').onclick = startGame;
+renderShop();
 </script>
 </body>
 </html>
