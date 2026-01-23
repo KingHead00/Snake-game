@@ -160,7 +160,7 @@
                 <button class="btn" id="start-btn">PLAY</button>
                 <div class="controls-hint">
                     <span class="key">WASD</span> or <span class="key">Arrows</span> to Move<br>
-                    <span class="key">R</span> to Reset Game
+                    <span class="key">R</span> to Reset | <span class="key">Q</span> to Quick Exit
                 </div>
             </div>
         </div>
@@ -169,6 +169,7 @@
     <footer>Designed for Speed & Style</footer>
 
 <script>
+/* ================= CONFIGURATION ================= */
 const CONFIG = {
     cols: 31,
     rows: 15,          
@@ -176,7 +177,7 @@ const CONFIG = {
     speeds: {
         slow: { base: 6, boost: 0.1, max: 12 },
         normal: { base: 8, boost: 0.15, max: 18 },
-        hard: { base: 10, boost: 0.2, max: 25 } 
+        hard: { base: 10, boost: 0.2, max: 25 }
     },
     currentMode: 'hard',
     colors: {
@@ -188,6 +189,7 @@ const CONFIG = {
     }
 };
 
+/* ================= STATE ================= */
 const state = {
     snake: [],
     dir: {x:1, y:0},
@@ -202,6 +204,7 @@ const state = {
     shake: 0
 };
 
+/* ================= SETUP ================= */
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
 const uiLayer = document.getElementById('ui-layer');
@@ -226,8 +229,16 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
+/* ================= INPUT HANDLING ================= */
 window.addEventListener('keydown', e => {
     const key = e.key.toLowerCase();
+    
+    // Panic Button
+    if (key === 'q') {
+        window.location.href = "https://www.google.com";
+        return;
+    }
+    
     if (key === 'r') { startGame(); return; }
     if (state.gameOver) return;
 
@@ -257,6 +268,7 @@ speedBtns.forEach(btn => {
 
 startBtn.addEventListener('click', startGame);
 
+/* ================= GAME LOGIC ================= */
 function initGame() {
     state.snake = [{x: 8, y: 7}, {x: 7, y: 7}, {x: 6, y: 7}];
     state.dir = {x: 1, y: 0};
@@ -286,6 +298,19 @@ function spawnFood() {
         state.food.x = Math.floor(Math.random() * CONFIG.cols);
         state.food.y = Math.floor(Math.random() * CONFIG.rows);
         valid = !state.snake.some(p => p.x === state.food.x && p.y === state.food.y);
+    }
+}
+
+function createExplosion(x, y, color) {
+    for (let i = 0; i < 12; i++) {
+        state.particles.push({
+            x: x * CONFIG.cellSize + CONFIG.cellSize/2,
+            y: y * CONFIG.cellSize + CONFIG.cellSize/2,
+            vx: (Math.random() - 0.5) * 8,
+            vy: (Math.random() - 0.5) * 8,
+            life: 1.0,
+            color: color
+        });
     }
 }
 
@@ -331,19 +356,7 @@ function update() {
     }
 }
 
-function createExplosion(x, y, color) {
-    for (let i = 0; i < 12; i++) {
-        state.particles.push({
-            x: x * CONFIG.cellSize + CONFIG.cellSize/2,
-            y: y * CONFIG.cellSize + CONFIG.cellSize/2,
-            vx: (Math.random() - 0.5) * 8,
-            vy: (Math.random() - 0.5) * 8,
-            life: 1.0,
-            color: color
-        });
-    }
-}
-
+/* ================= RENDERING ================= */
 function drawRoundedRect(ctx, x, y, width, height, radius) {
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
@@ -365,8 +378,10 @@ function render() {
         ctx.translate((Math.random() - 0.5) * state.shake, (Math.random() - 0.5) * state.shake);
         state.shake *= 0.9;
     }
+
     ctx.fillStyle = CONFIG.colors.bg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     ctx.strokeStyle = CONFIG.colors.grid;
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -384,25 +399,27 @@ function render() {
     ctx.shadowBlur = 0;
 
     state.snake.forEach((seg, i) => {
+        let drawX = seg.x * CONFIG.cellSize;
+        let drawY = seg.y * CONFIG.cellSize;
         let size = CONFIG.cellSize - 2;
         if (i === 0) {
             ctx.fillStyle = CONFIG.colors.snakeHead;
             ctx.shadowBlur = 10;
             ctx.shadowColor = CONFIG.colors.snakeHead;
-            drawRoundedRect(ctx, seg.x * CONFIG.cellSize + 1, seg.y * CONFIG.cellSize + 1, size, size, 8);
+            drawRoundedRect(ctx, drawX+1, drawY+1, size, size, 8);
             ctx.shadowBlur = 0;
             ctx.fillStyle = '#000';
             const eyeOff = size/4;
-            let ex1 = seg.x * CONFIG.cellSize + size - eyeOff, ey1 = seg.y * CONFIG.cellSize + eyeOff;
-            let ex2 = seg.x * CONFIG.cellSize + size - eyeOff, ey2 = seg.y * CONFIG.cellSize + size - eyeOff;
-            if (state.dir.x === -1) { ex1 = seg.x * CONFIG.cellSize + eyeOff; ex2 = seg.x * CONFIG.cellSize + eyeOff; }
-            if (state.dir.y === -1) { ex1 = seg.x * CONFIG.cellSize + eyeOff; ey1 = seg.y * CONFIG.cellSize + eyeOff; ex2 = seg.x * CONFIG.cellSize + size - eyeOff; ey2 = seg.y * CONFIG.cellSize + eyeOff; }
-            if (state.dir.y === 1)  { ex1 = seg.x * CONFIG.cellSize + eyeOff; ey1 = seg.y * CONFIG.cellSize + size - eyeOff; ex2 = seg.x * CONFIG.cellSize + size - eyeOff; ey2 = seg.y * CONFIG.cellSize + size - eyeOff; }
+            let ex1 = drawX + size - eyeOff, ey1 = drawY + eyeOff;
+            let ex2 = drawX + size - eyeOff, ey2 = drawY + size - eyeOff;
+            if (state.dir.x === -1) { ex1 = drawX + eyeOff; ex2 = drawX + eyeOff; }
+            if (state.dir.y === -1) { ex1 = drawX + eyeOff; ey1 = drawY + eyeOff; ex2 = drawX + size - eyeOff; ey2 = drawY + eyeOff; }
+            if (state.dir.y === 1)  { ex1 = drawX + eyeOff; ey1 = drawY + size - eyeOff; ex2 = drawX + size - eyeOff; ey2 = drawY + size - eyeOff; }
             ctx.beginPath(); ctx.arc(ex1, ey1, size/8, 0, Math.PI*2); ctx.fill();
             ctx.beginPath(); ctx.arc(ex2, ey2, size/8, 0, Math.PI*2); ctx.fill();
         } else {
             ctx.fillStyle = CONFIG.colors.snakeBody;
-            drawRoundedRect(ctx, seg.x * CONFIG.cellSize + 1, seg.y * CONFIG.cellSize + 1, size, size, 4);
+            drawRoundedRect(ctx, drawX+1, drawY+1, size, size, 4);
         }
     });
 
