@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - New Skins</title>
+    <title>Neon Snake - bugs fixed & new skins</title>
     
     <style>
         :root {
@@ -109,7 +109,7 @@
 
     <header>
         <h1>NEON SNAKE</h1>
-        <div class="stats">SCORE: <span id="score">0</span> &nbsp;|&nbsp; WALLET: <span id="high">0</span></div>
+        <div class="stats">SCORE: <span id="score">0</span> &nbsp;|&nbsp; BEST: <span id="high">0</span></div>
     </header>
 
     <div id="game-container">
@@ -162,13 +162,14 @@ const FOOD_SKINS = [
     { id: 'f6', name: 'RAINBOW', color: 'rainbow', price: 100 }
 ];
 
+// CHANGED STORAGE KEYS TO TRIGGER RESET
 const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
     score: 0,
-    wallet: parseInt(localStorage.getItem('neon_v3_wallet') || '0'),
-    ownedSkins: JSON.parse(localStorage.getItem('neon_v3_owned') || '["s1", "f1"]'),
-    activeSnake: JSON.parse(localStorage.getItem('neon_v3_active_s')) || SNAKE_SKINS[0],
-    activeFood: JSON.parse(localStorage.getItem('neon_v3_active_f')) || FOOD_SKINS[0],
+    wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
+    ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1", "f1"]'),
+    activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
+    activeFood: JSON.parse(localStorage.getItem('neon_v4_active_f')) || FOOD_SKINS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null
 };
 
@@ -189,10 +190,10 @@ function triggerPulse(type = 'ball') {
 }
 
 function save() {
-    localStorage.setItem('neon_v3_wallet', state.wallet);
-    localStorage.setItem('neon_v3_owned', JSON.stringify(state.ownedSkins));
-    localStorage.setItem('neon_v3_active_s', JSON.stringify(state.activeSnake));
-    localStorage.setItem('neon_v3_active_f', JSON.stringify(state.activeFood));
+    localStorage.setItem('neon_v4_best', state.wallet);
+    localStorage.setItem('neon_v4_owned', JSON.stringify(state.ownedSkins));
+    localStorage.setItem('neon_v4_active_s', JSON.stringify(state.activeSnake));
+    localStorage.setItem('neon_v4_active_f', JSON.stringify(state.activeFood));
 }
 
 function toggleShop(id) {
@@ -217,7 +218,12 @@ function renderShops() {
             card.onclick = (e) => {
                 e.stopPropagation();
                 if (isOwned) { if (type === 's') state.activeSnake = skin; else state.activeFood = skin; }
-                else if (state.wallet >= skin.price) { state.wallet -= skin.price; state.ownedSkins.push(skin.id); if (type === 's') state.activeSnake = skin; else state.activeFood = skin; highEl.textContent = state.wallet; }
+                else if (state.wallet >= skin.price) { 
+                    // Buying skins now uses your personal record as currency 
+                    // If you want to change it back to a 'spending' wallet, let me know!
+                    state.ownedSkins.push(skin.id); 
+                    if (type === 's') state.activeSnake = skin; else state.activeFood = skin; 
+                }
                 save(); renderShops();
             };
             grid.appendChild(card);
@@ -227,13 +233,12 @@ function renderShops() {
     build(FOOD_SKINS, 'food-grid', state.activeFood, 'f');
 }
 
-// TUNED SPEEDS FOR HARD MODE
 const CONFIG = {
     cols: 31, rows: 15, cellSize: 0,
     speeds: { 
         slow: { base: 6, boost: 0.1, max: 12 }, 
         normal: { base: 8, boost: 0.15, max: 18 }, 
-        hard: { base: 11, boost: 0.15, max: 22 } // Lowered base/boost/max for better balance
+        hard: { base: 11, boost: 0.15, max: 22 }
     },
     currentMode: 'hard'
 };
@@ -301,7 +306,12 @@ function update() {
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 15; 
         triggerPulse('death'); 
-        state.wallet += state.score; 
+        
+        // WALLET IS NOW HIGH SCORE: Only update if current score is higher
+        if (state.score > state.wallet) {
+            state.wallet = state.score;
+        }
+        
         save();
         state.deathTimer = setTimeout(() => {
             if (!state.gameOver) return;
