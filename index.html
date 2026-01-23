@@ -189,10 +189,11 @@
 /* ================= SKINS DATA ================= */
 const SNAKE_SKINS = [
     { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
-    { id: 's2', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 15 },
-    { id: 's3', name: 'RUBY', head: '#ff0044', body: '#990022', price: 30 },
-    { id: 's4', name: 'AMETHYST', head: '#bf00ff', body: '#7700bb', price: 45 },
-    { id: 's5', name: 'COBALT', head: '#0066ff', body: '#0033aa', price: 75 }
+    { id: 's2', name: 'GOLD', head: '#ff9900', body: '#cc7700', price: 15 },
+    { id: 's3', name: 'RUBY', head: '#ff0000', body: '#aa0000', price: 30 },
+    { id: 's4', name: 'COBALT', head: '#0066ff', body: '#0044aa', price: 45 },
+    { id: 's5', name: 'GHOST', head: '#ffffff', body: '#cccccc', price: 75 },
+    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 100 }
 ];
 
 const FOOD_SKINS = [
@@ -209,9 +210,9 @@ const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
     particles: [], score: 0,
     highScore: parseInt(localStorage.getItem('neon_snake_high_points') || '0'),
-    ownedSkins: JSON.parse(localStorage.getItem('snake_owned') || '["s1", "f1"]'),
-    activeSnake: JSON.parse(localStorage.getItem('active_s')) || SNAKE_SKINS[0],
-    activeFood: JSON.parse(localStorage.getItem('active_f')) || FOOD_SKINS[0],
+    ownedSkins: JSON.parse(localStorage.getItem('snake_owned_v2') || '["s1", "f1"]'),
+    activeSnake: JSON.parse(localStorage.getItem('active_s_v2')) || SNAKE_SKINS[0],
+    activeFood: JSON.parse(localStorage.getItem('active_f_v2')) || FOOD_SKINS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0
 };
 
@@ -222,9 +223,9 @@ highEl.textContent = state.highScore;
 
 function save() {
     localStorage.setItem('neon_snake_high_points', state.highScore);
-    localStorage.setItem('snake_owned', JSON.stringify(state.ownedSkins));
-    localStorage.setItem('active_s', JSON.stringify(state.activeSnake));
-    localStorage.setItem('active_f', JSON.stringify(state.activeFood));
+    localStorage.setItem('snake_owned_v2', JSON.stringify(state.ownedSkins));
+    localStorage.setItem('active_s_v2', JSON.stringify(state.activeSnake));
+    localStorage.setItem('active_f_v2', JSON.stringify(state.activeFood));
 }
 
 function toggleShop(id) {
@@ -243,7 +244,7 @@ function renderShops() {
             const isSel = activeObj.id === skin.id;
             const card = document.createElement('div');
             card.className = `skin-card ${isSel ? 'selected' : ''}`;
-            const swatchColor = skin.color === 'rainbow' ? 'linear-gradient(to right, red, orange, yellow, green, blue, violet)' : (skin.head || skin.color);
+            const swatchColor = (skin.color === 'rainbow' || skin.head === 'rainbow') ? 'linear-gradient(to right, red, orange, yellow, green, blue, violet)' : (skin.head || skin.color);
             card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
                 <b>${skin.name}</b><br>${isSel ? 'ACTIVE' : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
             card.onclick = (e) => {
@@ -362,19 +363,28 @@ function render() {
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
 
-    // Food (Ball)
+    const rainbowHue = (performance.now() / 5) % 360;
+
+    // Ball
     let fColor = state.activeFood.color;
-    if (fColor === 'rainbow') fColor = `hsl(${performance.now()/5 % 360}, 100%, 50%)`;
-    ctx.fillStyle = fColor;
-    ctx.shadowBlur = 15; ctx.shadowColor = fColor;
+    if (fColor === 'rainbow') fColor = `hsl(${rainbowHue}, 100%, 50%)`;
+    ctx.fillStyle = fColor; ctx.shadowBlur = 15; ctx.shadowColor = fColor;
     ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.5)*(1+Math.sin(performance.now()/200)*0.1), 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
 
     // Snake
     state.snake.forEach((seg, i) => {
         let drawX = seg.x * CONFIG.cellSize, drawY = seg.y * CONFIG.cellSize, size = CONFIG.cellSize - 2;
+        let sHead = state.activeSnake.head;
+        let sBody = state.activeSnake.body;
+
+        if (sHead === 'rainbow') {
+            sHead = `hsl(${rainbowHue}, 100%, 50%)`;
+            sBody = `hsl(${(rainbowHue - (i * 10)) % 360}, 100%, 40%)`;
+        }
+
         if (i === 0) {
-            ctx.fillStyle = state.activeSnake.head; ctx.shadowBlur = 10; ctx.shadowColor = state.activeSnake.head;
+            ctx.fillStyle = sHead; ctx.shadowBlur = 10; ctx.shadowColor = sHead;
             drawRoundedRect(ctx, drawX+1, drawY+1, size, size, 8); ctx.shadowBlur = 0;
             ctx.fillStyle = '#000'; const eyeOff = size/4;
             let ex1 = drawX+size-eyeOff, ey1 = drawY+eyeOff, ex2 = drawX+size-eyeOff, ey2 = drawY+size-eyeOff;
@@ -384,7 +394,7 @@ function render() {
             ctx.beginPath(); ctx.arc(ex1, ey1, size/8, 0, Math.PI*2); ctx.fill();
             ctx.beginPath(); ctx.arc(ex2, ey2, size/8, 0, Math.PI*2); ctx.fill();
         } else {
-            ctx.fillStyle = state.activeSnake.body; drawRoundedRect(ctx, drawX+1, drawY+1, size, size, 4);
+            ctx.fillStyle = sBody; drawRoundedRect(ctx, drawX+1, drawY+1, size, size, 4);
         }
     });
 
