@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - Logo Integrated</title>
+    <title>Neon Snake - Reset & Fixed</title>
     
     <style>
         :root {
@@ -25,7 +25,6 @@
             user-select: none;
         }
 
-        /* LOGO SECTION */
         header {
             padding: 15px 20px;
             display: flex;
@@ -36,26 +35,26 @@
             z-index: 10;
         }
 
-        .logo-wrap { display: flex; align-items: center; gap: 15px; }
-
-        .neon-icon {
-            width: 30px;
-            height: 30px;
+        /* --- LOGO STYLES --- */
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .logo-box {
+            width: 24px; height: 24px;
             border: 2px solid var(--primary);
-            border-radius: 6px;
+            border-radius: 4px;
             position: relative;
-            box-shadow: 0 0 10px var(--primary);
-            animation: pulseLogo 2s infinite ease-in-out;
+            box-shadow: 0 0 8px var(--primary);
+            animation: logoPulse 2s infinite ease-in-out;
         }
-        .neon-icon::before {
-            content: ''; position: absolute; width: 12px; height: 12px;
-            background: var(--primary); top: 4px; left: 4px; border-radius: 2px;
+        .logo-box::after {
+            content: ''; position: absolute; width: 10px; height: 4px;
+            background: var(--primary); top: 6px; left: 6px; border-radius: 1px;
+            box-shadow: 0 6px 0 var(--primary);
         }
-
-        @keyframes pulseLogo {
+        @keyframes logoPulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.7; transform: scale(1.05); }
         }
+        /* ------------------- */
 
         h1 { font-size: 20px; margin: 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
         .stats { font-family: monospace; font-size: 16px; color: #ccc; }
@@ -78,8 +77,14 @@
             transition: transform 0.1s ease-out;
         }
 
-        canvas.pulse { transform: scale(1.025); box-shadow: 0 0 50px #fff, inset 0 0 25px #fff; }
-        canvas.death-pulse { animation: deathGlowRed 1.2s ease-out forwards; }
+        canvas.pulse {
+            transform: scale(1.025);
+            box-shadow: 0 0 50px #fff, inset 0 0 25px #fff;
+        }
+
+        canvas.death-pulse {
+            animation: deathGlowRed 1.2s ease-out forwards;
+        }
 
         @keyframes deathGlowRed {
             0% { box-shadow: 0 0 80px var(--danger), inset 0 0 40px var(--danger); border-color: var(--danger); transform: scale(1.04); }
@@ -125,8 +130,8 @@
 <body>
 
     <header>
-        <div class="logo-wrap">
-            <div class="neon-icon"></div>
+        <div class="header-left">
+            <div class="logo-box"></div>
             <h1>NEON SNAKE</h1>
         </div>
         <div class="stats">SCORE: <span id="score">0</span> &nbsp;|&nbsp; BEST: <span id="high">0</span></div>
@@ -185,10 +190,10 @@ const FOOD_SKINS = [
 const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
     score: 0,
-    wallet: parseInt(localStorage.getItem('neon_v6_best') || '0'),
-    ownedSkins: JSON.parse(localStorage.getItem('neon_v6_owned') || '["s1", "f1"]'),
-    activeSnake: JSON.parse(localStorage.getItem('neon_v6_active_s')) || SNAKE_SKINS[0],
-    activeFood: JSON.parse(localStorage.getItem('neon_v6_active_f')) || FOOD_SKINS[0],
+    wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
+    ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1", "f1"]'),
+    activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
+    activeFood: JSON.parse(localStorage.getItem('neon_v4_active_f')) || FOOD_SKINS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null
 };
 
@@ -209,10 +214,10 @@ function triggerPulse(type = 'ball') {
 }
 
 function save() {
-    localStorage.setItem('neon_v6_best', state.wallet);
-    localStorage.setItem('neon_v6_owned', JSON.stringify(state.ownedSkins));
-    localStorage.setItem('neon_v6_active_s', JSON.stringify(state.activeSnake));
-    localStorage.setItem('neon_v6_active_f', JSON.stringify(state.activeFood));
+    localStorage.setItem('neon_v4_best', state.wallet);
+    localStorage.setItem('neon_v4_owned', JSON.stringify(state.ownedSkins));
+    localStorage.setItem('neon_v4_active_s', JSON.stringify(state.activeSnake));
+    localStorage.setItem('neon_v4_active_f', JSON.stringify(state.activeFood));
 }
 
 function toggleShop(id) {
@@ -319,11 +324,10 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 function update() {
     if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
-    
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 15; 
         triggerPulse('death'); 
-        if (state.score > state.wallet) state.wallet = state.score;
+        if (state.score > state.wallet) { state.wallet = state.score; }
         save();
         state.deathTimer = setTimeout(() => {
             if (!state.gameOver) return;
@@ -334,7 +338,6 @@ function update() {
         }, 800);
         return;
     }
-
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; 
@@ -348,12 +351,10 @@ function render(now) {
     ctx.setTransform(1,0,0,1,0,0);
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
     ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    
     ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
-
     const rainbowHue = (now / 5) % 360;
     const ballPulse = 0.95 + Math.sin(now / 150) * 0.15;
     let fColor = state.activeFood.color === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeFood.color;
@@ -362,7 +363,6 @@ function render(now) {
     ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.5) * ballPulse, 0, Math.PI*2); 
     ctx.fill();
     ctx.shadowBlur = 0;
-
     state.snake.forEach((seg, i) => {
         let sHead = state.activeSnake.head === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeSnake.head;
         let sBody = state.activeSnake.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
@@ -370,6 +370,17 @@ function render(now) {
         if(i===0) { ctx.shadowBlur = 10; ctx.shadowColor = sHead; }
         drawRoundedRect(ctx, seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4);
         ctx.shadowBlur = 0;
+        if(i===0) {
+            ctx.fillStyle='#000'; 
+            const sz=CONFIG.cellSize-2; const off=sz/4;
+            let ex1 = seg.x*CONFIG.cellSize+sz-off, ey1 = seg.y*CONFIG.cellSize+off;
+            let ex2 = seg.x*CONFIG.cellSize+sz-off, ey2 = seg.y*CONFIG.cellSize+sz-off;
+            if(state.dir.x===-1){ ex1-=sz/2; ex2-=sz/2; }
+            if(state.dir.y===-1){ ey1=seg.y*CONFIG.cellSize+off; ey2=ey1; ex1=seg.x*CONFIG.cellSize+off; ex2=seg.x*CONFIG.cellSize+sz-off; }
+            if(state.dir.y===1){ ey1=seg.y*CONFIG.cellSize+sz-off; ey2=ey1; ex1=seg.x*CONFIG.cellSize+off; ex2=seg.x*CONFIG.cellSize+sz-off; }
+            ctx.beginPath(); ctx.arc(ex1,ey1,sz/8,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(ex2,ey2,sz/8,0,Math.PI*2); ctx.fill();
+        }
     });
 }
 
