@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - Username Edition</title>
+    <title>Neon Snake - Focused Edition</title>
     
     <style>
         :root {
@@ -27,42 +27,23 @@
 
         header {
             padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #111;
-            border-bottom: 1px solid #333;
-            z-index: 10;
+            display: flex; justify-content: space-between; align-items: center;
+            background: #111; border-bottom: 1px solid #333; z-index: 10;
         }
         h1 { font-size: 20px; margin: 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
         .stats { font-family: monospace; font-size: 16px; color: #ccc; }
 
         #game-container {
-            flex: 1;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
+            flex: 1; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden;
         }
 
         canvas {
-            background: #000;
-            display: block;
-            border: 3px solid #fff;
-            border-radius: 4px;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
-            transition: transform 0.1s ease-out;
+            background: #000; display: block; border: 3px solid #fff; border-radius: 4px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); transition: transform 0.1s ease-out;
         }
 
-        canvas.pulse {
-            transform: scale(1.025);
-            box-shadow: 0 0 50px #fff, inset 0 0 25px #fff;
-        }
-
-        canvas.death-pulse {
-            animation: deathGlowRed 1.2s ease-out forwards;
-        }
+        canvas.pulse { transform: scale(1.025); box-shadow: 0 0 50px #fff, inset 0 0 25px #fff; }
+        canvas.death-pulse { animation: deathGlowRed 1.2s ease-out forwards; }
 
         @keyframes deathGlowRed {
             0% { box-shadow: 0 0 80px var(--danger), inset 0 0 40px var(--danger); border-color: var(--danger); transform: scale(1.04); }
@@ -70,8 +51,7 @@
         }
 
         #ui-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
             transition: opacity 0.3s; z-index: 20;
@@ -81,46 +61,25 @@
         .menu-box {
             text-align: center; background: var(--ui-bg); padding: 25px;
             border: 1px solid #444; border-radius: 12px; width: 320px;
-            max-height: 90vh; overflow-y: auto;
         }
-        .menu-title { font-size: 28px; margin-bottom: 5px; color: var(--primary); font-weight: 800; }
+        .menu-title { font-size: 28px; margin-bottom: 15px; color: var(--primary); font-weight: 800; }
         
-        /* USERNAME INPUT */
-        .user-input-container { margin: 10px 0; }
+        .user-input-container { margin: 15px 0; }
         #username-in {
             background: #000; border: 1px solid #444; color: var(--primary);
-            padding: 8px; border-radius: 4px; text-align: center;
-            font-family: inherit; width: 80%; outline: none;
+            padding: 10px; border-radius: 4px; text-align: center;
+            font-family: inherit; width: 85%; outline: none; font-weight: bold;
         }
         #username-in:focus { border-color: var(--primary); }
 
-        .leaderboard {
-            background: #111; border: 1px solid #333; border-radius: 6px;
-            margin: 15px 0; padding: 10px; font-family: monospace;
-        }
-        .leaderboard-title { color: #888; font-size: 12px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-        .lb-entry { display: flex; justify-content: space-between; padding: 3px 0; font-size: 12px; border-bottom: 1px solid #222; }
-        .lb-entry:last-child { border: none; }
-        .lb-entry.new-record { color: var(--primary); font-weight: bold; }
-
         .btn { background: var(--primary); color: #000; border: none; padding: 12px; font-size: 18px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; width: 100%; }
         
-        .shop-btn { background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 10px; width: 100%; margin-top: 10px; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 12px; display: flex; justify-content: space-between; }
-        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: #000; }
-        .shop-content.open { max-height: 350px; padding: 10px 0; border: 1px solid #444; border-top: none; }
-        
-        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 10px; }
-        .skin-card { background: #111; border: 1px solid #333; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; }
-        .skin-card.selected { border-color: var(--primary); background: #001a11; }
-        .swatch { width: 12px; height: 12px; margin: 0 auto 4px; border-radius: 2px; }
-
-        .speed-selector { margin: 10px 0; display: flex; justify-content: center; gap: 5px; }
-        .speed-btn { background: transparent; color: #888; border: 1px solid #444; padding: 4px 8px; font-size: 11px; cursor: pointer; border-radius: 4px; }
+        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 8px; }
+        .speed-btn { background: transparent; color: #888; border: 1px solid #444; padding: 5px 10px; font-size: 11px; cursor: pointer; border-radius: 4px; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
         
-        .controls-hint { font-size: 11px; color: #aaa; margin-top: 12px; font-weight: bold; }
-        .exit-hint { font-size: 9px; color: #555; margin-top: 5px; }
         footer { padding: 8px; text-align: center; font-size: 11px; color: #444; background: #080808; }
+        .hint-text { font-size: 10px; color: #555; margin-top: 10px; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
@@ -140,25 +99,14 @@
                     <input type="text" id="username-in" placeholder="YOUR NAME" maxlength="12">
                 </div>
 
-                <div class="leaderboard">
-                    <div class="leaderboard-title">Hall of Fame</div>
-                    <div id="lb-list"></div>
-                </div>
-
                 <div class="speed-selector">
                     <button class="speed-btn" data-speed="slow">SLOW</button>
                     <button class="speed-btn" data-speed="normal">NORMAL</button>
                     <button class="speed-btn active" data-speed="hard">HARD</button>
                 </div>
 
-                <button class="shop-btn" onclick="toggleShop('snake-shop')">SNAKE SKINS <span>▼</span></button>
-                <div id="snake-shop" class="shop-content">
-                    <div class="skin-grid" id="snake-grid"></div>
-                </div>
-
                 <button class="btn" id="start-btn">PLAY</button>
-                <div class="controls-hint">R OR SPACE TO RESTART</div>
-                <div class="exit-hint">Press 'Q' to Quick Exit</div>
+                <div class="hint-text">R TO RESTART | Q TO QUICK EXIT</div>
             </div>
         </div>
     </div>
@@ -166,22 +114,12 @@
     <footer>HAPPY BIRTHDAY SANJIT</footer>
 
 <script>
-const SNAKE_SKINS = [
-    { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
-    { id: 's2', name: 'GOLD', head: '#ff9900', body: '#cc7700', price: 15 },
-    { id: 's3', name: 'RUBY', head: '#ff0000', body: '#aa0000', price: 30 },
-    { id: 's4', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 100 }
-];
-
 const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
     score: 0,
-    wallet: parseInt(localStorage.getItem('neon_v3_wallet') || '0'),
-    leaderboard: JSON.parse(localStorage.getItem('neon_v3_lb_names') || '[]'),
-    username: localStorage.getItem('neon_v3_user') || 'ANON',
-    ownedSkins: JSON.parse(localStorage.getItem('neon_v3_owned') || '["s1"]'),
-    activeSnake: JSON.parse(localStorage.getItem('neon_v3_active_s')) || SNAKE_SKINS[0],
-    lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null, lastEntryId: -1
+    wallet: parseInt(localStorage.getItem('neon_wallet') || '0'),
+    username: localStorage.getItem('neon_user') || 'ANON',
+    lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null
 };
 
 const canvas = document.getElementById('c');
@@ -192,10 +130,10 @@ const userIn = document.getElementById('username-in');
 highEl.textContent = state.wallet;
 userIn.value = state.username;
 
-userIn.addEventListener('input', (e) => {
+userIn.oninput = (e) => {
     state.username = e.target.value.toUpperCase() || 'ANON';
-    localStorage.setItem('neon_v3_user', state.username);
-});
+    localStorage.setItem('neon_user', state.username);
+};
 
 function triggerPulse(type = 'ball') {
     canvas.classList.remove('pulse', 'death-pulse');
@@ -208,67 +146,13 @@ function triggerPulse(type = 'ball') {
     }
 }
 
-function updateLeaderboard(score) {
-    if (score <= 0) return;
-    const entry = { name: state.username, score: score, id: Date.now() };
-    state.leaderboard.push(entry);
-    state.leaderboard.sort((a, b) => b.score - a.score);
-    state.leaderboard = state.leaderboard.slice(0, 5);
-    state.lastEntryId = entry.id;
-    localStorage.setItem('neon_v3_lb_names', JSON.stringify(state.leaderboard));
-}
-
-function renderLeaderboard() {
-    const list = document.getElementById('lb-list');
-    list.innerHTML = '';
-    if (state.leaderboard.length === 0) {
-        list.innerHTML = '<div style="color:#444; font-size:12px;">No scores yet</div>';
-        return;
-    }
-    state.leaderboard.forEach((entry, i) => {
-        const row = document.createElement('div');
-        row.className = `lb-entry ${entry.id === state.lastEntryId ? 'new-record' : ''}`;
-        row.innerHTML = `<span>${entry.name}</span> <span>${entry.score} pts</span>`;
-        list.appendChild(row);
-    });
-}
-
-function save() {
-    localStorage.setItem('neon_v3_wallet', state.wallet);
-    localStorage.setItem('neon_v3_owned', JSON.stringify(state.ownedSkins));
-    localStorage.setItem('neon_v3_active_s', JSON.stringify(state.activeSnake));
-}
-
-function toggleShop(id) {
-    const el = document.getElementById(id);
-    const isOpen = el.classList.contains('open');
-    document.querySelectorAll('.shop-content').forEach(s => s.classList.remove('open'));
-    if (!isOpen) el.classList.add('open');
-}
-
-function renderShops() {
-    const grid = document.getElementById('snake-grid');
-    grid.innerHTML = '';
-    SNAKE_SKINS.forEach(skin => {
-        const isOwned = state.ownedSkins.includes(skin.id);
-        const isSel = state.activeSnake.id === skin.id;
-        const card = document.createElement('div');
-        card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        const color = (skin.head === 'rainbow') ? 'linear-gradient(to right, red, violet)' : skin.head;
-        card.innerHTML = `<div class="swatch" style="background:${color}"></div>
-            <b>${skin.name}</b><br>${isSel ? 'ACTIVE' : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
-        card.onclick = (e) => {
-            if (isOwned) state.activeSnake = skin;
-            else if (state.wallet >= skin.price) { state.wallet -= skin.price; state.ownedSkins.push(skin.id); state.activeSnake = skin; highEl.textContent = state.wallet; }
-            save(); renderShops();
-        };
-        grid.appendChild(card);
-    });
-}
-
 const CONFIG = {
-    cols: 31, rows: 15, cellSize: 0,
-    speeds: { slow: { base: 6, boost: 0.1, max: 12 }, normal: { base: 8, boost: 0.15, max: 18 }, hard: { base: 13, boost: 0.3, max: 30 } },
+    cols: 31, rows: 15, cellSize: 20,
+    speeds: { 
+        slow: { base: 6, boost: 0.1, max: 12 }, 
+        normal: { base: 8, boost: 0.15, max: 18 }, 
+        hard: { base: 13, boost: 0.3, max: 30 } 
+    },
     currentMode: 'hard'
 };
 
@@ -288,11 +172,11 @@ function spawnFood() {
 }
 
 function startGame() {
-    userIn.blur(); // Close keyboard on mobile/take focus off input
+    userIn.blur();
     clearTimeout(state.deathTimer);
     canvas.classList.remove('pulse', 'death-pulse');
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
-    state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0; state.lastEntryId = -1;
+    state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0;
     document.getElementById('score').textContent = '0';
     spawnFood();
     state.gameOver = false;
@@ -303,54 +187,43 @@ function startGame() {
 
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
-    if (document.activeElement === userIn) return; // Don't trigger game while typing
+    if (document.activeElement === userIn) return;
     if (k === 'q') { window.location.href = "https://www.google.com"; return; }
     if (k === 'r' || (k === ' ' && state.gameOver)) { startGame(); return; }
     if (state.gameOver) return;
+    
     let nD = null;
     if (k === 'w' || k === 'arrowup') nD = {x:0, y:-1};
     if (k === 's' || k === 'arrowdown') nD = {x:0, y:1};
     if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0};
     if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
+    
     if (nD && state.nextDir.length < 2) {
         const last = state.nextDir.length > 0 ? state.nextDir[state.nextDir.length-1] : state.dir;
         if (nD.x !== -last.x || nD.y !== -last.y) state.nextDir.push(nD);
     }
 });
 
-function drawRoundedRect(ctx, x, y, width, height, radius) {
-    ctx.beginPath();
-    ctx.moveTo(x+radius, y); ctx.lineTo(x+width-radius, y);
-    ctx.quadraticCurveTo(x+width, y, x+width, y+radius);
-    ctx.lineTo(x+width, y+height-radius);
-    ctx.quadraticCurveTo(x+width, y+height, x+width-radius, y+height);
-    ctx.lineTo(x+radius, y+height);
-    ctx.quadraticCurveTo(x, y+height, x, y+height-radius);
-    ctx.lineTo(x, y+radius); ctx.quadraticCurveTo(x, y, x+radius, y);
-    ctx.closePath(); ctx.fill();
-}
-
 function update() {
     if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
+    
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 15; triggerPulse('death'); 
-        state.wallet += state.score; 
-        updateLeaderboard(state.score);
-        save();
+        state.wallet += state.score;
+        localStorage.setItem('neon_wallet', state.wallet);
         state.deathTimer = setTimeout(() => {
-            if (!state.gameOver) return;
             document.getElementById('menu-text').textContent = "CRASHED!";
             document.getElementById('high').textContent = state.wallet;
-            renderLeaderboard();
-            renderShops();
             document.getElementById('ui-layer').classList.remove('hidden');
         }, 800);
         return;
     }
+
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
-        state.score++; document.getElementById('score').textContent = state.score;
+        state.score++; 
+        document.getElementById('score').textContent = state.score;
         triggerPulse('ball'); spawnFood();
     } else state.snake.pop();
 }
@@ -359,26 +232,26 @@ function render(now) {
     ctx.setTransform(1,0,0,1,0,0);
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
     ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath();
-    for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
-    for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
-    ctx.stroke();
-
-    const rainbowHue = (now / 5) % 360;
+    
+    // Breathing Ball
     const ballPulse = 0.95 + Math.sin(now / 150) * 0.15;
     ctx.fillStyle = '#ff00ff'; ctx.shadowBlur = 15; ctx.shadowColor = '#ff00ff';
-    ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.5) * ballPulse, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); 
+    ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.5) * ballPulse, 0, Math.PI*2); 
+    ctx.fill();
     ctx.shadowBlur = 0;
 
+    // Snake
     state.snake.forEach((seg, i) => {
-        let sHead = state.activeSnake.head === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeSnake.head;
-        let sBody = state.activeSnake.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
-        ctx.fillStyle = (i === 0) ? sHead : sBody;
-        if(i===0) { ctx.shadowBlur = 10; ctx.shadowColor = sHead; }
-        drawRoundedRect(ctx, seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4);
+        ctx.fillStyle = i === 0 ? '#00ffcc' : '#00bfa5';
+        if(i===0) { ctx.shadowBlur = 10; ctx.shadowColor = '#00ffcc'; }
+        ctx.fillRect(seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2);
         ctx.shadowBlur = 0;
+        
+        // Eyes
         if(i===0) {
-            ctx.fillStyle='#000'; const sz=CONFIG.cellSize-2; const off=sz/4;
+            ctx.fillStyle='#000';
+            const sz=CONFIG.cellSize-2; const off=sz/4;
             let ex1 = seg.x*CONFIG.cellSize+sz-off, ey1 = seg.y*CONFIG.cellSize+off;
             let ex2 = seg.x*CONFIG.cellSize+sz-off, ey2 = seg.y*CONFIG.cellSize+sz-off;
             if(state.dir.x===-1){ ex1-=sz/2; ex2-=sz/2; }
@@ -406,8 +279,6 @@ document.querySelectorAll('.speed-btn').forEach(btn => {
     });
 });
 document.getElementById('start-btn').onclick = startGame;
-renderLeaderboard();
-renderShops();
 </script>
 </body>
 </html>
