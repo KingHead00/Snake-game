@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - Fixed Edition</title>
+    <title>Neon Snake - Pulse & Death</title>
     
     <style>
         :root {
@@ -50,14 +50,24 @@
             display: block;
             border: 3px solid #fff;
             border-radius: 4px;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-            transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            transition: transform 0.1s ease-out;
         }
 
-        /* Toned down pulse */
+        /* BRIGHT BALL PULSE */
         canvas.pulse {
-            transform: scale(1.01);
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
+            transform: scale(1.025);
+            box-shadow: 0 0 45px #fff, inset 0 0 20px #fff;
+        }
+
+        /* LONGER DEATH PULSE */
+        canvas.death-pulse {
+            animation: deathGlow 1.5s ease-out forwards;
+        }
+
+        @keyframes deathGlow {
+            0% { box-shadow: 0 0 60px #ff0055, inset 0 0 30px #ff0055; border-color: #ff0055; transform: scale(1.04); }
+            100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); border-color: #ffffff; transform: scale(1); }
         }
 
         #ui-layer {
@@ -74,12 +84,9 @@
             border: 1px solid #444; border-radius: 12px; width: 300px;
         }
         .menu-title { font-size: 32px; margin-bottom: 10px; color: var(--primary); font-weight: 800; }
+        .btn { background: var(--primary); color: #000; border: none; padding: 12px; font-size: 18px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; width: 100%; }
         
-        .shop-btn {
-            background: #1a1a1a; color: #fff; border: 1px solid #444;
-            padding: 10px; width: 100%; margin-top: 10px; cursor: pointer;
-            border-radius: 6px; font-weight: bold; display: flex; justify-content: space-between;
-        }
+        .shop-btn { background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 10px; width: 100%; margin-top: 10px; cursor: pointer; border-radius: 6px; font-weight: bold; display: flex; justify-content: space-between; }
         .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: #000; }
         .shop-content.open { max-height: 350px; padding: 10px 0; border: 1px solid #444; border-top: none; }
         .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 10px; }
@@ -90,8 +97,6 @@
         .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 8px; }
         .speed-btn { background: transparent; color: #888; border: 1px solid #444; padding: 5px 10px; font-size: 12px; cursor: pointer; border-radius: 4px; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
-
-        .btn { background: var(--primary); color: #000; border: none; padding: 12px; font-size: 18px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; width: 100%; }
         footer { padding: 10px; text-align: center; font-size: 12px; color: #555; background: #080808; }
     </style>
 </head>
@@ -167,11 +172,15 @@ const ctx = canvas.getContext('2d', { alpha: false });
 const highEl = document.getElementById('high');
 highEl.textContent = state.wallet;
 
-function triggerPulse() {
-    canvas.classList.remove('pulse');
+function triggerPulse(type = 'ball') {
+    canvas.classList.remove('pulse', 'death-pulse');
     void canvas.offsetWidth; 
-    canvas.classList.add('pulse');
-    setTimeout(() => canvas.classList.remove('pulse'), 150);
+    if (type === 'ball') {
+        canvas.classList.add('pulse');
+        setTimeout(() => canvas.classList.remove('pulse'), 150);
+    } else {
+        canvas.classList.add('death-pulse');
+    }
 }
 
 function save() {
@@ -213,7 +222,6 @@ function renderShops() {
     build(FOOD_SKINS, 'food-grid', state.activeFood, 'f');
 }
 
-/* ================= GAME CORE ================= */
 const CONFIG = {
     cols: 31, rows: 15, cellSize: 0,
     speeds: { 
@@ -241,7 +249,7 @@ function spawnFood() {
 
 function startGame() {
     clearTimeout(state.deathTimer);
-    canvas.classList.remove('pulse');
+    canvas.classList.remove('pulse', 'death-pulse');
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0;
     document.getElementById('score').textContent = '0';
@@ -284,7 +292,8 @@ function update() {
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
     
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
-        state.gameOver = true; state.shake = 10; 
+        state.gameOver = true; state.shake = 15; 
+        triggerPulse('death'); 
         if (CONFIG.currentMode === 'hard' && state.score > state.wallet) { state.wallet = state.score; }
         save();
         state.deathTimer = setTimeout(() => {
@@ -295,7 +304,7 @@ function update() {
             document.getElementById('high').textContent = state.wallet;
             renderShops();
             document.getElementById('ui-layer').classList.remove('hidden');
-        }, 500);
+        }, 800);
         return;
     }
 
@@ -303,7 +312,7 @@ function update() {
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; 
         document.getElementById('score').textContent = state.score;
-        triggerPulse(); 
+        triggerPulse('ball'); 
         spawnFood();
     } else state.snake.pop();
 }
@@ -335,18 +344,14 @@ function render() {
         drawRoundedRect(ctx, seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4);
         ctx.shadowBlur = 0;
 
-        // EYES LOGIC
         if(i===0) {
             ctx.fillStyle='#000'; 
-            const sz=CONFIG.cellSize-2; 
-            const off=sz/4;
+            const sz=CONFIG.cellSize-2; const off=sz/4;
             let ex1 = seg.x*CONFIG.cellSize+sz-off, ey1 = seg.y*CONFIG.cellSize+off;
             let ex2 = seg.x*CONFIG.cellSize+sz-off, ey2 = seg.y*CONFIG.cellSize+sz-off;
-            
             if(state.dir.x===-1){ ex1-=sz/2; ex2-=sz/2; }
             if(state.dir.y===-1){ ey1=seg.y*CONFIG.cellSize+off; ey2=ey1; ex1=seg.x*CONFIG.cellSize+off; ex2=seg.x*CONFIG.cellSize+sz-off; }
             if(state.dir.y===1){ ey1=seg.y*CONFIG.cellSize+sz-off; ey2=ey1; ex1=seg.x*CONFIG.cellSize+off; ex2=seg.x*CONFIG.cellSize+sz-off; }
-            
             ctx.beginPath(); ctx.arc(ex1,ey1,sz/8,0,Math.PI*2); ctx.fill();
             ctx.beginPath(); ctx.arc(ex2,ey2,sz/8,0,Math.PI*2); ctx.fill();
         }
