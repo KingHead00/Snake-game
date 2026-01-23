@@ -4,6 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     <title>Neon Snake</title>
+    
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <meta property="og:image" content="logo.png">
+    <meta name="twitter:image" content="logo.png">
+
     <style>
         :root {
             --bg: #050505;
@@ -76,7 +82,6 @@
         }
         .menu-title { font-size: 32px; margin-bottom: 10px; font-weight: 800; color: var(--primary); }
         
-        /* Speed Selector Styling */
         .speed-selector {
             margin: 15px 0;
             display: flex;
@@ -165,16 +170,14 @@
     <footer>Designed for Speed & Style</footer>
 
 <script>
-/* ================= CONFIGURATION ================= */
 const CONFIG = {
     cols: 31,
     rows: 15,          
     cellSize: 0,        
-    // Base Speed Settings
     speeds: {
         slow: { base: 6, boost: 0.1, max: 12 },
         normal: { base: 8, boost: 0.15, max: 18 },
-        hard: { base: 10, boost: 0.2, max: 25 } // This is your original code's speed
+        hard: { base: 10, boost: 0.2, max: 25 } 
     },
     currentMode: 'hard',
     colors: {
@@ -186,7 +189,6 @@ const CONFIG = {
     }
 };
 
-/* ================= STATE ================= */
 const state = {
     snake: [],
     dir: {x:1, y:0},
@@ -201,7 +203,6 @@ const state = {
     shake: 0
 };
 
-/* ================= SETUP ================= */
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
 const uiLayer = document.getElementById('ui-layer');
@@ -218,17 +219,14 @@ function resize() {
     const container = document.getElementById('game-container');
     const availW = container.clientWidth - 40;
     const availH = container.clientHeight - 40;
-    
     const rawSize = Math.min(availW / CONFIG.cols, availH / CONFIG.rows);
     CONFIG.cellSize = Math.floor(rawSize);
-
     canvas.width = CONFIG.cols * CONFIG.cellSize;
     canvas.height = CONFIG.rows * CONFIG.cellSize;
 }
 window.addEventListener('resize', resize);
 resize();
 
-/* ================= INPUT HANDLING ================= */
 window.addEventListener('keydown', e => {
     const key = e.key.toLowerCase();
     if (key === 'r') { startGame(); return; }
@@ -260,7 +258,6 @@ speedBtns.forEach(btn => {
 
 startBtn.addEventListener('click', startGame);
 
-/* ================= GAME LOGIC ================= */
 function initGame() {
     state.snake = [{x: 8, y: 7}, {x: 7, y: 7}, {x: 6, y: 7}];
     state.dir = {x: 1, y: 0};
@@ -276,7 +273,6 @@ function startGame() {
     menuText.textContent = "READY?";
     finalScoreEl.style.display = 'none';
     startBtn.textContent = "PLAY";
-    
     initGame();
     state.gameOver = false;
     state.lastTime = performance.now();
@@ -291,19 +287,6 @@ function spawnFood() {
         state.food.x = Math.floor(Math.random() * CONFIG.cols);
         state.food.y = Math.floor(Math.random() * CONFIG.rows);
         valid = !state.snake.some(p => p.x === state.food.x && p.y === state.food.y);
-    }
-}
-
-function createExplosion(x, y, color) {
-    for (let i = 0; i < 12; i++) {
-        state.particles.push({
-            x: x * CONFIG.cellSize + CONFIG.cellSize/2,
-            y: y * CONFIG.cellSize + CONFIG.cellSize/2,
-            vx: (Math.random() - 0.5) * 8,
-            vy: (Math.random() - 0.5) * 8,
-            life: 1.0,
-            color: color
-        });
     }
 }
 
@@ -349,7 +332,19 @@ function update() {
     }
 }
 
-/* ================= RENDERING ================= */
+function createExplosion(x, y, color) {
+    for (let i = 0; i < 12; i++) {
+        state.particles.push({
+            x: x * CONFIG.cellSize + CONFIG.cellSize/2,
+            y: y * CONFIG.cellSize + CONFIG.cellSize/2,
+            vx: (Math.random() - 0.5) * 8,
+            vy: (Math.random() - 0.5) * 8,
+            life: 1.0,
+            color: color
+        });
+    }
+}
+
 function drawRoundedRect(ctx, x, y, width, height, radius) {
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
@@ -371,10 +366,8 @@ function render() {
         ctx.translate((Math.random() - 0.5) * state.shake, (Math.random() - 0.5) * state.shake);
         state.shake *= 0.9;
     }
-
     ctx.fillStyle = CONFIG.colors.bg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     ctx.strokeStyle = CONFIG.colors.grid;
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -392,27 +385,25 @@ function render() {
     ctx.shadowBlur = 0;
 
     state.snake.forEach((seg, i) => {
-        let drawX = seg.x * CONFIG.cellSize;
-        let drawY = seg.y * CONFIG.cellSize;
         let size = CONFIG.cellSize - 2;
         if (i === 0) {
             ctx.fillStyle = CONFIG.colors.snakeHead;
             ctx.shadowBlur = 10;
             ctx.shadowColor = CONFIG.colors.snakeHead;
-            drawRoundedRect(ctx, drawX+1, drawY+1, size, size, 8);
+            drawRoundedRect(ctx, seg.x * CONFIG.cellSize + 1, seg.y * CONFIG.cellSize + 1, size, size, 8);
             ctx.shadowBlur = 0;
             ctx.fillStyle = '#000';
             const eyeOff = size/4;
-            let ex1 = drawX + size - eyeOff, ey1 = drawY + eyeOff;
-            let ex2 = drawX + size - eyeOff, ey2 = drawY + size - eyeOff;
-            if (state.dir.x === -1) { ex1 = drawX + eyeOff; ex2 = drawX + eyeOff; }
-            if (state.dir.y === -1) { ex1 = drawX + eyeOff; ey1 = drawY + eyeOff; ex2 = drawX + size - eyeOff; ey2 = drawY + eyeOff; }
-            if (state.dir.y === 1)  { ex1 = drawX + eyeOff; ey1 = drawY + size - eyeOff; ex2 = drawX + size - eyeOff; ey2 = drawY + size - eyeOff; }
+            let ex1 = seg.x * CONFIG.cellSize + size - eyeOff, ey1 = seg.y * CONFIG.cellSize + eyeOff;
+            let ex2 = seg.x * CONFIG.cellSize + size - eyeOff, ey2 = seg.y * CONFIG.cellSize + size - eyeOff;
+            if (state.dir.x === -1) { ex1 = seg.x * CONFIG.cellSize + eyeOff; ex2 = seg.x * CONFIG.cellSize + eyeOff; }
+            if (state.dir.y === -1) { ex1 = seg.x * CONFIG.cellSize + eyeOff; ey1 = seg.y * CONFIG.cellSize + eyeOff; ex2 = seg.x * CONFIG.cellSize + size - eyeOff; ey2 = seg.y * CONFIG.cellSize + eyeOff; }
+            if (state.dir.y === 1)  { ex1 = seg.x * CONFIG.cellSize + eyeOff; ey1 = seg.y * CONFIG.cellSize + size - eyeOff; ex2 = seg.x * CONFIG.cellSize + size - eyeOff; ey2 = seg.y * CONFIG.cellSize + size - eyeOff; }
             ctx.beginPath(); ctx.arc(ex1, ey1, size/8, 0, Math.PI*2); ctx.fill();
             ctx.beginPath(); ctx.arc(ex2, ey2, size/8, 0, Math.PI*2); ctx.fill();
         } else {
             ctx.fillStyle = CONFIG.colors.snakeBody;
-            drawRoundedRect(ctx, drawX+1, drawY+1, size, size, 4);
+            drawRoundedRect(ctx, seg.x * CONFIG.cellSize + 1, seg.y * CONFIG.cellSize + 1, size, size, 4);
         }
     });
 
@@ -431,11 +422,8 @@ function loop(now) {
     const dt = now - state.lastTime;
     state.lastTime = now;
     state.accumTime += dt;
-    
-    // Use the selected speed profile
     const profile = CONFIG.speeds[CONFIG.currentMode];
     const stepTime = 1000 / Math.min(profile.max, profile.base + (state.score * profile.boost));
-    
     while (state.accumTime >= stepTime) {
         if (!state.gameOver) update();
         state.accumTime -= stepTime;
