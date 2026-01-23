@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - Breathing Ball Edition</title>
+    <title>Neon Snake - Leaderboard Edition</title>
     
     <style>
         :root {
@@ -11,7 +11,7 @@
             --grid: #333333;
             --primary: #00ffcc;
             --text: #ffffff;
-            --ui-bg: rgba(0, 0, 0, 0.9);
+            --ui-bg: rgba(0, 0, 0, 0.95);
             --danger: #ff0044;
         }
 
@@ -52,18 +52,13 @@
             border: 3px solid #fff;
             border-radius: 4px;
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            transition: transform 0.1s ease-out;
         }
 
-        /* COLLECTION DOUBLE PULSE */
+        /* SINGLE CLEAN PULSE */
         canvas.pulse {
-            animation: beepBeep 0.3s ease-out forwards;
-        }
-
-        @keyframes beepBeep {
-            0% { transform: scale(1.03); box-shadow: 0 0 40px #fff, inset 0 0 20px #fff; }
-            40% { transform: scale(1); }
-            60% { transform: scale(1.02); box-shadow: 0 0 35px #fff, inset 0 0 15px #fff; }
-            100% { transform: scale(1); }
+            transform: scale(1.025);
+            box-shadow: 0 0 50px #fff, inset 0 0 25px #fff;
         }
 
         /* RED DEATH PULSE */
@@ -72,7 +67,7 @@
         }
 
         @keyframes deathGlowRed {
-            0% { box-shadow: 0 0 70px var(--danger), inset 0 0 35px var(--danger); border-color: var(--danger); transform: scale(1.04); }
+            0% { box-shadow: 0 0 80px var(--danger), inset 0 0 40px var(--danger); border-color: var(--danger); transform: scale(1.04); }
             100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); border-color: #ffffff; transform: scale(1); }
         }
 
@@ -80,33 +75,46 @@
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
             transition: opacity 0.3s; z-index: 20;
         }
         #ui-layer.hidden { opacity: 0; pointer-events: none; }
         
         .menu-box {
             text-align: center; background: var(--ui-bg); padding: 25px;
-            border: 1px solid #444; border-radius: 12px; width: 300px;
+            border: 1px solid #444; border-radius: 12px; width: 320px;
+            max-height: 90vh; overflow-y: auto;
         }
-        .menu-title { font-size: 32px; margin-bottom: 10px; color: var(--primary); font-weight: 800; }
+        .menu-title { font-size: 28px; margin-bottom: 5px; color: var(--primary); font-weight: 800; }
+        
+        /* LEADERBOARD STYLE */
+        .leaderboard {
+            background: #111; border: 1px solid #333; border-radius: 6px;
+            margin: 15px 0; padding: 10px; font-family: monospace;
+        }
+        .leaderboard-title { color: #888; font-size: 12px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .lb-entry { display: flex; justify-content: space-between; padding: 3px 0; font-size: 14px; border-bottom: 1px solid #222; }
+        .lb-entry:last-child { border: none; }
+        .lb-entry.new-record { color: var(--primary); font-weight: bold; }
+
         .btn { background: var(--primary); color: #000; border: none; padding: 12px; font-size: 18px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; width: 100%; }
         
-        .shop-btn { background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 10px; width: 100%; margin-top: 10px; cursor: pointer; border-radius: 6px; font-weight: bold; display: flex; justify-content: space-between; }
+        .shop-btn { background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 10px; width: 100%; margin-top: 10px; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 12px; display: flex; justify-content: space-between; }
         .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: #000; }
         .shop-content.open { max-height: 350px; padding: 10px 0; border: 1px solid #444; border-top: none; }
-        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 10px; }
-        .skin-card { background: #111; border: 1px solid #333; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        
+        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 10px; }
+        .skin-card { background: #111; border: 1px solid #333; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; }
         .skin-card.selected { border-color: var(--primary); background: #001a11; }
-        .swatch { width: 14px; height: 14px; margin: 0 auto 4px; border-radius: 2px; }
+        .swatch { width: 12px; height: 12px; margin: 0 auto 4px; border-radius: 2px; }
 
-        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 8px; }
-        .speed-btn { background: transparent; color: #888; border: 1px solid #444; padding: 5px 10px; font-size: 12px; cursor: pointer; border-radius: 4px; }
+        .speed-selector { margin: 10px 0; display: flex; justify-content: center; gap: 5px; }
+        .speed-btn { background: transparent; color: #888; border: 1px solid #444; padding: 4px 8px; font-size: 11px; cursor: pointer; border-radius: 4px; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
         
-        .controls-hint { font-size: 12px; color: #aaa; margin-top: 15px; font-weight: bold; }
-        .exit-hint { font-size: 10px; color: #555; margin-top: 8px; }
-        footer { padding: 10px; text-align: center; font-size: 12px; color: #555; background: #080808; }
+        .controls-hint { font-size: 11px; color: #aaa; margin-top: 12px; font-weight: bold; }
+        .exit-hint { font-size: 9px; color: #555; margin-top: 5px; }
+        footer { padding: 8px; text-align: center; font-size: 11px; color: #444; background: #080808; }
     </style>
 </head>
 <body>
@@ -121,8 +129,13 @@
         <div id="ui-layer">
             <div class="menu-box">
                 <div class="menu-title" id="menu-text">READY?</div>
-                <div id="final-score" style="display:none; margin-bottom:10px; color:#ccc; font-weight: bold;"></div>
                 
+                <div class="leaderboard">
+                    <div class="leaderboard-title">Leaderboard (Local)</div>
+                    <div id="lb-list">
+                        </div>
+                </div>
+
                 <div class="speed-selector">
                     <button class="speed-btn" data-speed="slow">SLOW</button>
                     <button class="speed-btn" data-speed="normal">NORMAL</button>
@@ -140,7 +153,7 @@
                 </div>
 
                 <button class="btn" id="start-btn">PLAY</button>
-                <div class="controls-hint">PRESS R OR SPACE TO START</div>
+                <div class="controls-hint">R OR SPACE TO RESTART</div>
                 <div class="exit-hint">Press 'Q' to Quick Exit</div>
             </div>
         </div>
@@ -171,10 +184,11 @@ const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
     score: 0,
     wallet: parseInt(localStorage.getItem('neon_v3_wallet') || '0'),
+    leaderboard: JSON.parse(localStorage.getItem('neon_v3_lb') || '[]'),
     ownedSkins: JSON.parse(localStorage.getItem('neon_v3_owned') || '["s1", "f1"]'),
     activeSnake: JSON.parse(localStorage.getItem('neon_v3_active_s')) || SNAKE_SKINS[0],
     activeFood: JSON.parse(localStorage.getItem('neon_v3_active_f')) || FOOD_SKINS[0],
-    lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null
+    lastTime: 0, accumTime: 0, gameOver: true, shake: 0, deathTimer: null, lastScoreIndex: -1
 };
 
 const canvas = document.getElementById('c');
@@ -185,8 +199,36 @@ highEl.textContent = state.wallet;
 function triggerPulse(type = 'ball') {
     canvas.classList.remove('pulse', 'death-pulse');
     void canvas.offsetWidth; 
-    if (type === 'ball') canvas.classList.add('pulse');
-    else canvas.classList.add('death-pulse');
+    if (type === 'ball') {
+        canvas.classList.add('pulse');
+        setTimeout(() => canvas.classList.remove('pulse'), 150); // Single flash
+    } else {
+        canvas.classList.add('death-pulse');
+    }
+}
+
+function updateLeaderboard(score) {
+    if (score <= 0) return;
+    state.leaderboard.push(score);
+    state.leaderboard.sort((a, b) => b - a);
+    state.leaderboard = state.leaderboard.slice(0, 5); // Top 5
+    state.lastScoreIndex = state.leaderboard.indexOf(score);
+    localStorage.setItem('neon_v3_lb', JSON.stringify(state.leaderboard));
+}
+
+function renderLeaderboard() {
+    const list = document.getElementById('lb-list');
+    list.innerHTML = '';
+    if (state.leaderboard.length === 0) {
+        list.innerHTML = '<div style="color:#444; font-size:12px;">No scores yet</div>';
+        return;
+    }
+    state.leaderboard.forEach((s, i) => {
+        const row = document.createElement('div');
+        row.className = `lb-entry ${i === state.lastScoreIndex ? 'new-record' : ''}`;
+        row.innerHTML = `<span>#${i+1}</span> <span>${s} pts</span>`;
+        list.appendChild(row);
+    });
 }
 
 function save() {
@@ -257,7 +299,7 @@ function startGame() {
     clearTimeout(state.deathTimer);
     canvas.classList.remove('pulse', 'death-pulse');
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
-    state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0;
+    state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0; state.lastScoreIndex = -1;
     document.getElementById('score').textContent = '0';
     spawnFood();
     state.gameOver = false;
@@ -271,13 +313,11 @@ window.addEventListener('keydown', e => {
     if (k === 'q') { window.location.href = "https://www.google.com"; return; }
     if (k === 'r' || (k === ' ' && state.gameOver)) { startGame(); return; }
     if (state.gameOver) return;
-    
     let nD = null;
     if (k === 'w' || k === 'arrowup') nD = {x:0, y:-1};
     if (k === 's' || k === 'arrowdown') nD = {x:0, y:1};
     if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0};
     if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
-    
     if (nD && state.nextDir.length < 2) {
         const last = state.nextDir.length > 0 ? state.nextDir[state.nextDir.length-1] : state.dir;
         if (nD.x !== -last.x || nD.y !== -last.y) state.nextDir.push(nD);
@@ -303,14 +343,14 @@ function update() {
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 15; 
         triggerPulse('death'); 
-        if (CONFIG.currentMode === 'hard' && state.score > state.wallet) { state.wallet = state.score; }
+        state.wallet += state.score; 
+        updateLeaderboard(state.score);
         save();
         state.deathTimer = setTimeout(() => {
             if (!state.gameOver) return;
-            document.getElementById('menu-text').textContent = "GAME OVER";
-            document.getElementById('final-score').textContent = "Score: " + state.score;
-            document.getElementById('final-score').style.display = 'block';
+            document.getElementById('menu-text').textContent = "CRASHED!";
             document.getElementById('high').textContent = state.wallet;
+            renderLeaderboard();
             renderShops();
             document.getElementById('ui-layer').classList.remove('hidden');
         }, 800);
@@ -338,21 +378,16 @@ function render(now) {
 
     const rainbowHue = (now / 5) % 360;
 
-    // BREATHING BALL LOGIC
-    // Uses sine wave to calculate a scale between 0.8 and 1.1
+    // BREATHING BALL
     const ballPulse = 0.95 + Math.sin(now / 150) * 0.15;
     let fColor = state.activeFood.color === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeFood.color;
     ctx.fillStyle = fColor; ctx.shadowBlur = 15; ctx.shadowColor = fColor;
     ctx.beginPath(); 
-    ctx.arc(
-        state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, 
-        state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, 
-        (CONFIG.cellSize/2.5) * ballPulse, 
-        0, Math.PI*2
-    ); 
+    ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.5) * ballPulse, 0, Math.PI*2); 
     ctx.fill();
     ctx.shadowBlur = 0;
 
+    // SNAKE
     state.snake.forEach((seg, i) => {
         let sHead = state.activeSnake.head === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeSnake.head;
         let sBody = state.activeSnake.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
@@ -391,6 +426,7 @@ document.querySelectorAll('.speed-btn').forEach(btn => {
     });
 });
 document.getElementById('start-btn').onclick = startGame;
+renderLeaderboard();
 renderShops();
 </script>
 </body>
