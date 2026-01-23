@@ -83,7 +83,6 @@
         }
         .menu-title { font-size: 32px; margin-bottom: 5px; font-weight: 800; color: var(--primary); }
         
-        /* Shop UI */
         .shop-btn {
             background: #1a1a1a;
             color: #fff;
@@ -102,10 +101,9 @@
             overflow: hidden;
             transition: max-height 0.3s ease;
             background: #000;
-            border-radius: 0 0 6px 6px;
         }
         .shop-content.open {
-            max-height: 300px;
+            max-height: 350px;
             padding: 10px 0;
             border: 1px solid #444;
             border-top: none;
@@ -139,10 +137,9 @@
             padding: 12px 24px; font-size: 18px; font-weight: bold; border-radius: 4px;
             cursor: pointer; margin-top: 15px; width: 100%; text-transform: uppercase;
         }
-        .btn:hover { transform: scale(1.02); box-shadow: 0 0 15px var(--primary); }
         
-        .controls-hint { margin-top: 15px; font-size: 11px; color: #666; }
-        .key { background: #333; padding: 1px 4px; border-radius: 3px; color: #fff; }
+        .controls-hint { margin-top: 15px; font-size: 11px; color: #888; line-height: 1.6;}
+        .key { background: #333; padding: 1px 4px; border-radius: 3px; color: #fff; border-bottom: 2px solid #111;}
 
         footer { padding: 10px; text-align: center; font-size: 12px; color: #555; background: #080808; }
     </style>
@@ -167,19 +164,20 @@
                     <button class="speed-btn active" data-speed="hard">HARD</button>
                 </div>
 
-                <button class="shop-btn" onclick="toggleShop('snake-shop')">SNAKE SKINS <span>+</span></button>
+                <button class="shop-btn" onclick="toggleShop('snake-shop')">SNAKE SKINS <span>▼</span></button>
                 <div id="snake-shop" class="shop-content">
                     <div class="skin-grid" id="snake-grid"></div>
                 </div>
 
-                <button class="shop-btn" onclick="toggleShop('ball-shop')">BALL SKINS <span>+</span></button>
+                <button class="shop-btn" onclick="toggleShop('ball-shop')">BALL SKINS <span>▼</span></button>
                 <div id="ball-shop" class="shop-content">
                     <div class="skin-grid" id="food-grid"></div>
                 </div>
 
                 <button class="btn" id="start-btn">PLAY</button>
                 <div class="controls-hint">
-                    <span class="key">WASD</span> to Move | <span class="key">Q</span> Exit
+                    <span class="key">WASD</span> or <span class="key">Arrows</span> to Move<br>
+                    <span class="key">R</span> to Reset | <span class="key">Q</span> to Quick Exit
                 </div>
             </div>
         </div>
@@ -199,10 +197,11 @@ const SNAKE_SKINS = [
 
 const FOOD_SKINS = [
     { id: 'f1', name: 'PURPLE', color: '#ff00ff', price: 0 },
-    { id: 'f2', name: 'LIME', color: '#ccff00', price: 15 },
-    { id: 'f3', name: 'CYAN', color: '#00ffff', price: 30 },
-    { id: 'f4', name: 'ORANGE', color: '#ff9900', price: 45 },
-    { id: 'f5', name: 'WHITE', color: '#ffffff', price: 75 }
+    { id: 'f2', name: 'ORANGE', color: '#ff9900', price: 15 },
+    { id: 'f3', name: 'RED', color: '#ff0000', price: 30 },
+    { id: 'f4', name: 'BLUE', color: '#0066ff', price: 45 },
+    { id: 'f5', name: 'WHITE', color: '#ffffff', price: 75 },
+    { id: 'f6', name: 'RAINBOW', color: 'rainbow', price: 100 }
 ];
 
 /* ================= STATE ================= */
@@ -244,7 +243,8 @@ function renderShops() {
             const isSel = activeObj.id === skin.id;
             const card = document.createElement('div');
             card.className = `skin-card ${isSel ? 'selected' : ''}`;
-            card.innerHTML = `<div class="swatch" style="background:${skin.head || skin.color}"></div>
+            const swatchColor = skin.color === 'rainbow' ? 'linear-gradient(to right, red, orange, yellow, green, blue, violet)' : (skin.head || skin.color);
+            card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
                 <b>${skin.name}</b><br>${isSel ? 'ACTIVE' : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
             card.onclick = (e) => {
                 e.stopPropagation();
@@ -336,7 +336,7 @@ function update() {
         save();
         setTimeout(() => {
             document.getElementById('menu-text').textContent = "GAME OVER";
-            document.getElementById('final-score').textContent = "Score: " + state.score;
+            document.getElementById('final-score').textContent = "Collected: " + state.score + " pts";
             document.getElementById('final-score').style.display = 'block';
             document.getElementById('high').textContent = state.highScore;
             renderShops();
@@ -347,7 +347,8 @@ function update() {
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; document.getElementById('score').textContent = state.score;
-        for (let i=0; i<12; i++) state.particles.push({x: head.x*CONFIG.cellSize+CONFIG.cellSize/2, y: head.y*CONFIG.cellSize+CONFIG.cellSize/2, vx:(Math.random()-0.5)*8, vy:(Math.random()-0.5)*8, life:1, color: state.activeFood.color});
+        const pColor = state.activeFood.color === 'rainbow' ? `hsl(${performance.now()/5 % 360}, 100%, 50%)` : state.activeFood.color;
+        for (let i=0; i<12; i++) state.particles.push({x: head.x*CONFIG.cellSize+CONFIG.cellSize/2, y: head.y*CONFIG.cellSize+CONFIG.cellSize/2, vx:(Math.random()-0.5)*8, vy:(Math.random()-0.5)*8, life:1, color: pColor});
         spawnFood();
     } else state.snake.pop();
 }
@@ -362,8 +363,10 @@ function render() {
     ctx.stroke();
 
     // Food (Ball)
-    ctx.fillStyle = state.activeFood.color;
-    ctx.shadowBlur = 15; ctx.shadowColor = state.activeFood.color;
+    let fColor = state.activeFood.color;
+    if (fColor === 'rainbow') fColor = `hsl(${performance.now()/5 % 360}, 100%, 50%)`;
+    ctx.fillStyle = fColor;
+    ctx.shadowBlur = 15; ctx.shadowColor = fColor;
     ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.5)*(1+Math.sin(performance.now()/200)*0.1), 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
 
@@ -373,7 +376,6 @@ function render() {
         if (i === 0) {
             ctx.fillStyle = state.activeSnake.head; ctx.shadowBlur = 10; ctx.shadowColor = state.activeSnake.head;
             drawRoundedRect(ctx, drawX+1, drawY+1, size, size, 8); ctx.shadowBlur = 0;
-            // BLACK EYES
             ctx.fillStyle = '#000'; const eyeOff = size/4;
             let ex1 = drawX+size-eyeOff, ey1 = drawY+eyeOff, ex2 = drawX+size-eyeOff, ey2 = drawY+size-eyeOff;
             if (state.dir.x===-1){ ex1=drawX+eyeOff; ex2=drawX+eyeOff; }
