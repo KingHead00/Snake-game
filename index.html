@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>Neon Snake - Boss Key Edition</title>
+    <title>Neon Snake - Red Death Edition</title>
     
     <style>
         :root {
@@ -12,6 +12,7 @@
             --primary: #00ffcc;
             --text: #ffffff;
             --ui-bg: rgba(0, 0, 0, 0.9);
+            --danger: #ff0044;
         }
 
         html, body { height: 100%; margin: 0; overflow: hidden; }
@@ -54,19 +55,19 @@
             transition: transform 0.1s ease-out;
         }
 
-        /* BRIGHT BALL PULSE */
+        /* BRIGHT BALL PULSE (WHITE) */
         canvas.pulse {
             transform: scale(1.025);
             box-shadow: 0 0 45px #fff, inset 0 0 20px #fff;
         }
 
-        /* LONGER WHITE DEATH PULSE */
+        /* LONGER RED DEATH PULSE */
         canvas.death-pulse {
-            animation: deathGlow 1.2s ease-out forwards;
+            animation: deathGlowRed 1.2s ease-out forwards;
         }
 
-        @keyframes deathGlow {
-            0% { box-shadow: 0 0 70px #fff, inset 0 0 35px #fff; border-color: #fff; transform: scale(1.04); }
+        @keyframes deathGlowRed {
+            0% { box-shadow: 0 0 70px var(--danger), inset 0 0 35px var(--danger); border-color: var(--danger); transform: scale(1.04); }
             100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); border-color: #ffffff; transform: scale(1); }
         }
 
@@ -98,7 +99,8 @@
         .speed-btn { background: transparent; color: #888; border: 1px solid #444; padding: 5px 10px; font-size: 12px; cursor: pointer; border-radius: 4px; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
         
-        .hint { font-size: 10px; color: #555; margin-top: 15px; }
+        .controls-hint { font-size: 12px; color: #aaa; margin-top: 15px; font-weight: bold; }
+        .exit-hint { font-size: 10px; color: #555; margin-top: 8px; }
         footer { padding: 10px; text-align: center; font-size: 12px; color: #555; background: #080808; }
     </style>
 </head>
@@ -133,7 +135,8 @@
                 </div>
 
                 <button class="btn" id="start-btn">PLAY</button>
-                <div class="hint">Press 'Q' to Quick Exit</div>
+                <div class="controls-hint">PRESS R OR SPACE TO START</div>
+                <div class="exit-hint">Press 'Q' to Quick Exit</div>
             </div>
         </div>
     </div>
@@ -266,7 +269,6 @@ function startGame() {
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
     
-    // THE QUICK EXIT (BOSS KEY)
     if (k === 'q') {
         window.location.href = "https://www.google.com";
         return;
