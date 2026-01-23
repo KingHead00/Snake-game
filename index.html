@@ -7,47 +7,25 @@
     
     <style>
         :root {
-            --bg: #030303;
-            --grid: #151515;
+            --bg: #050505;
             --primary: #00ffcc;
+            --secondary: #ff00ff;
             --text: #ffffff;
-            --ui-bg: rgba(5, 5, 5, 0.9);
-            --danger: #ff0044;
-            --trial: #bd00ff;
         }
 
-        html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); }
-        body {
-            color: var(--text);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            user-select: none;
-        }
+        html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Courier New', Courier, monospace; }
+        body { display: flex; flex-direction: column; user-select: none; }
 
         header {
-            padding: 12px 20px;
+            padding: 15px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #080808;
-            border-bottom: 1px solid #1a1a1a;
-            z-index: 10;
+            border-bottom: 2px solid #222;
         }
 
-        .header-left { display: flex; align-items: center; gap: 15px; }
-
-        .logo-box {
-            width: 24px; height: 24px;
-            border: 2px solid var(--primary);
-            border-radius: 6px;
-            position: relative;
-            box-shadow: 0 0 8px var(--primary);
-        }
-        
-        h1 { font-size: 18px; margin: 0; color: var(--primary); text-shadow: 0 0 8px var(--primary); letter-spacing: 1px; }
-        .stats { font-family: 'Courier New', monospace; font-size: 14px; color: #666; font-weight: bold; }
-        #score, #high { color: #fff; }
+        h1 { margin: 0; font-size: 24px; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        .stats { font-size: 18px; font-weight: bold; }
 
         #game-container {
             flex: 1;
@@ -55,91 +33,64 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
-            padding: 10px;
+            padding: 20px;
         }
 
         canvas {
             background: #000;
-            display: block;
-            border: 1px solid #222;
-            border-radius: 4px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            border: 3px solid #333;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
         #ui-layer {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
-            transition: opacity 0.3s; z-index: 20;
+            background: rgba(0,0,0,0.8);
+            z-index: 20;
         }
-        #ui-layer.hidden { opacity: 0; pointer-events: none; }
+        #ui-layer.hidden { display: none; }
         
         .menu-box {
-            text-align: center; background: var(--ui-bg); padding: 30px;
-            border: 1px solid #222; border-radius: 15px; width: 300px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.9);
+            text-align: center; background: #000; padding: 40px;
+            border: 2px solid var(--primary); border-radius: 10px; width: 320px;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.2);
         }
-        .menu-title { font-size: 28px; margin-bottom: 20px; color: var(--primary); font-weight: 800; }
 
         .btn { 
-            background: #00ffcc; color: #000; border: none; padding: 14px; 
-            font-size: 18px; font-weight: 800; border-radius: 8px; cursor: pointer; 
-            margin-top: 15px; width: 100%; transition: 0.2s;
+            background: var(--primary); color: #000; border: none; padding: 15px; 
+            font-size: 20px; font-weight: bold; cursor: pointer; 
+            margin-top: 20px; width: 100%; border-radius: 5px;
         }
-        .btn:hover { background: #00e6b8; transform: scale(1.02); }
         
-        .trial-btn { 
-            background: transparent; color: var(--trial); border: 1px solid var(--trial);
-            padding: 10px; margin-top: 10px; width: 100%; border-radius: 8px; 
-            font-weight: bold; cursor: pointer; transition: 0.2s;
-        }
-        .trial-btn:hover { background: rgba(189, 0, 255, 0.1); }
-
-        .shop-btn { background: #111; color: #aaa; border: 1px solid #222; padding: 12px; width: 100%; margin-top: 10px; cursor: pointer; border-radius: 8px; display: flex; justify-content: space-between; }
+        .shop-btn { background: #111; color: #fff; border: 1px solid #444; padding: 10px; width: 100%; margin-top: 10px; cursor: pointer; }
+        .shop-content { display: none; margin-top: 10px; }
+        .shop-content.open { display: block; }
         
-        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: #050505; }
-        .shop-content.open { max-height: 300px; padding: 10px 0; border: 1px solid #222; border-top: none; }
+        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .skin-card { border: 1px solid #333; padding: 10px; cursor: pointer; font-size: 12px; }
+        .skin-card.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
         
-        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 10px; }
-        .skin-card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 10px; }
-        .skin-card.selected { border-color: var(--primary); }
-        .swatch { width: 14px; height: 14px; margin: 0 auto 5px; border-radius: 3px; }
-
-        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 8px; }
-        .speed-btn { background: #111; color: #555; border: 1px solid #222; padding: 6px 12px; font-size: 11px; cursor: pointer; border-radius: 6px; }
-        .speed-btn.active { color: var(--primary); border-color: var(--primary); }
-        
-        footer { padding: 10px; text-align: center; font-size: 11px; color: #222; background: #030303; }
+        footer { padding: 10px; text-align: center; color: #444; letter-spacing: 2px; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="header-left">
-            <div class="logo-box"></div>
-            <h1>NEON SNAKE</h1>
-        </div>
-        <div class="stats">PTS: <span id="score">0</span> | BEST: <span id="high">0</span></div>
+        <h1>NEON SNAKE</h1>
+        <div class="stats">SCORE: <span id="score">0</span> | BEST: <span id="high">0</span></div>
     </header>
 
     <div id="game-container">
         <canvas id="c"></canvas>
         <div id="ui-layer">
             <div class="menu-box">
-                <div class="menu-title" id="menu-text">READY?</div>
-                <div class="speed-selector">
-                    <button class="speed-btn" data-speed="slow">SLOW</button>
-                    <button class="speed-btn" data-speed="normal">NORMAL</button>
-                    <button class="speed-btn active" data-speed="hard">HARD</button>
-                </div>
-                <button class="shop-btn" onclick="toggleShop('snake-shop')">SNAKE SKINS <span>▼</span></button>
+                <h2 id="menu-text" style="color: var(--primary)">READY?</h2>
+                <button class="shop-btn" onclick="document.getElementById('snake-shop').classList.toggle('open')">Skins ▼</button>
                 <div id="snake-shop" class="shop-content">
                     <div class="skin-grid" id="snake-grid"></div>
                 </div>
-                <button class="trial-btn" onclick="startTrial()">FREE RAINBOW TRIAL</button>
-                <button class="btn" id="start-btn">START</button>
+                <button class="btn" id="start-btn">START GAME</button>
             </div>
         </div>
     </div>
@@ -148,75 +99,25 @@
 
 <script>
 const SNAKE_SKINS = [
-    { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
-    { id: 's2', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 15 },
-    { id: 's3', name: 'RUBY', head: '#ff0044', body: '#990022', price: 30 },
-    { id: 's4', name: 'COBALT', head: '#0088ff', body: '#0044aa', price: 45 },
-    { id: 's5', name: 'GHOST', head: '#ffffff', body: '#888888', price: 75 },
-    { id: 's6', name: 'PRISM', head: 'rainbow', body: 'rainbow', price: 100 }
+    { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5' },
+    { id: 's2', name: 'GOLD', head: '#ffcc00', body: '#aa8800' },
+    { id: 's3', name: 'RUBY', head: '#ff0044', body: '#990022' },
+    { id: 's4', name: 'PRISM', head: 'rainbow', body: 'rainbow' }
 ];
 
 const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
-    score: 0,
-    wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
-    ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
-    activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
-    isTrial: false,
-    lastTime: 0, accumTime: 0, gameOver: true, shake: 0
+    score: 0, wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'),
+    activeSkin: SNAKE_SKINS[0], gameOver: true, lastTime: 0, accumTime: 0
 };
 
 const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d', { alpha: false });
-document.getElementById('high').textContent = state.wallet;
-
-function startTrial() { state.activeSnake = SNAKE_SKINS[5]; state.isTrial = true; renderShops(); }
-
-function toggleShop(id) {
-    const el = document.getElementById(id);
-    el.classList.toggle('open');
-}
-
-function renderShops() {
-    const grid = document.getElementById('snake-grid');
-    grid.innerHTML = '';
-    SNAKE_SKINS.forEach(skin => {
-        const isOwned = state.ownedSkins.includes(skin.id);
-        const isSel = state.activeSnake.id === skin.id;
-        const card = document.createElement('div');
-        card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        const swatchColor = skin.head === 'rainbow' ? 'linear-gradient(45deg, red, blue, green)' : skin.head;
-        card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
-            <b>${skin.name}</b><br>${isSel ? (state.isTrial && skin.id==='s6' ? 'TRIAL' : 'ACTIVE') : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
-        card.onclick = () => {
-            if (isOwned) { state.activeSnake = skin; state.isTrial = false; }
-            else if (state.wallet >= skin.price) { 
-                state.ownedSkins.push(skin.id); 
-                state.activeSnake = skin; 
-                state.isTrial = false;
-                save();
-            }
-            renderShops();
-        };
-        grid.appendChild(card);
-    });
-}
-
-function save() {
-    localStorage.setItem('neon_v4_best', state.wallet);
-    localStorage.setItem('neon_v4_owned', JSON.stringify(state.ownedSkins));
-    if (!state.isTrial) localStorage.setItem('neon_v4_active_s', JSON.stringify(state.activeSnake));
-}
-
-const CONFIG = {
-    cols: 25, rows: 15, cellSize: 0,
-    speeds: { slow: 120, normal: 90, hard: 65 },
-    currentMode: 'hard'
-};
+const ctx = canvas.getContext('2d');
+const CONFIG = { cols: 24, rows: 14, cellSize: 30 };
 
 function resize() {
     const container = document.getElementById('game-container');
-    const rawSize = Math.min((container.clientWidth-20)/CONFIG.cols, (container.clientHeight-20)/CONFIG.rows);
+    const rawSize = Math.min((container.clientWidth-40)/CONFIG.cols, (container.clientHeight-40)/CONFIG.rows);
     CONFIG.cellSize = Math.floor(rawSize);
     canvas.width = CONFIG.cols * CONFIG.cellSize;
     canvas.height = CONFIG.rows * CONFIG.cellSize;
@@ -242,37 +143,45 @@ function startGame() {
 
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
-    if (k === 'r' || (k === ' ' && state.gameOver)) { startGame(); return; }
+    if (k === ' ' && state.gameOver) startGame();
     if (state.gameOver) return;
     let nD = null;
-    if (k === 'w' || k === 'arrowup') nD = {x:0, y:-1};
-    if (k === 's' || k === 'arrowdown') nD = {x:0, y:1};
-    if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0};
-    if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
+    if (k === 'arrowup' || k === 'w') nD = {x:0, y:-1};
+    if (k === 'arrowdown' || k === 's') nD = {x:0, y:1};
+    if (k === 'arrowleft' || k === 'a') nD = {x:-1, y:0};
+    if (k === 'arrowright' || k === 'd') nD = {x:1, y:0};
     if (nD) {
         const last = state.nextDir.length > 0 ? state.nextDir[state.nextDir.length-1] : state.dir;
         if (nD.x !== -last.x || nD.y !== -last.y) state.nextDir.push(nD);
     }
 });
 
+function drawRoundedRect(ctx, x, y, sz, r) {
+    ctx.beginPath();
+    ctx.roundRect(x, y, sz, sz, r);
+    ctx.fill();
+}
+
 function update() {
     if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
+    
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true;
-        if (state.score > state.wallet) state.wallet = state.score;
-        save();
-        setTimeout(() => {
-            document.getElementById('menu-text').textContent = "BOOM!";
+        if (state.score > state.wallet) {
+            state.wallet = state.score;
+            localStorage.setItem('neon_v4_best', state.wallet);
             document.getElementById('high').textContent = state.wallet;
-            renderShops();
-            document.getElementById('ui-layer').classList.remove('hidden');
-        }, 500);
+        }
+        document.getElementById('menu-text').textContent = "GAME OVER";
+        document.getElementById('ui-layer').classList.remove('hidden');
         return;
     }
+
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
-        state.score++; document.getElementById('score').textContent = state.score;
+        state.score++;
+        document.getElementById('score').textContent = state.score;
         spawnFood();
     } else state.snake.pop();
 }
@@ -280,18 +189,18 @@ function update() {
 function render(now) {
     ctx.fillStyle = '#050505'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    // Clean Grid
-    ctx.strokeStyle = '#151515'; ctx.lineWidth = 1; ctx.beginPath();
+    // Bright Persistent Grid
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 1;
+    ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
 
-    const rainbowHue = (now / 5) % 360;
+    const rainbow = `hsl(${now/5 % 360}, 100%, 50%)`;
 
-    // Vibrant Food (Vibrant Magenta)
-    let ballColor = state.isTrial ? `hsl(${rainbowHue}, 100%, 60%)` : '#ff00ff';
-    ctx.fillStyle = ballColor;
-    ctx.shadowBlur = 12; ctx.shadowColor = ballColor;
+    // Food
+    ctx.fillStyle = var(--secondary);
+    ctx.shadowBlur = 15; ctx.shadowColor = '#ff00ff';
     ctx.beginPath();
     ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, CONFIG.cellSize/3, 0, Math.PI*2);
     ctx.fill();
@@ -299,12 +208,20 @@ function render(now) {
 
     // Snake
     state.snake.forEach((seg, i) => {
-        let sHead = state.activeSnake.head === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeSnake.head;
-        let sBody = state.activeSnake.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
-        ctx.fillStyle = (i === 0) ? sHead : sBody;
-        if(i === 0) { ctx.shadowBlur = 10; ctx.shadowColor = sHead; }
-        ctx.fillRect(seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2);
+        let color = (i === 0) ? state.activeSkin.head : state.activeSkin.body;
+        if (color === 'rainbow') color = rainbow;
+        ctx.fillStyle = color;
+        if (i === 0) { ctx.shadowBlur = 10; ctx.shadowColor = color; }
+        drawRoundedRect(ctx, seg.x*CONFIG.cellSize+2, seg.y*CONFIG.cellSize+2, CONFIG.cellSize-4, 8);
         ctx.shadowBlur = 0;
+        
+        // Eyes
+        if (i === 0) {
+            ctx.fillStyle = '#000';
+            const eyeSize = CONFIG.cellSize/8;
+            ctx.beginPath(); ctx.arc(seg.x*CONFIG.cellSize+CONFIG.cellSize*0.7, seg.y*CONFIG.cellSize+CONFIG.cellSize*0.3, eyeSize, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(seg.x*CONFIG.cellSize+CONFIG.cellSize*0.7, seg.y*CONFIG.cellSize+CONFIG.cellSize*0.7, eyeSize, 0, Math.PI*2); ctx.fill();
+        }
     });
 }
 
@@ -312,20 +229,16 @@ function loop(now) {
     const dt = now - state.lastTime;
     state.lastTime = now;
     state.accumTime += dt;
-    const step = CONFIG.speeds[CONFIG.currentMode];
-    while (state.accumTime >= step) { if (!state.gameOver) update(); state.accumTime -= step; }
+    if (state.accumTime >= 100) {
+        if (!state.gameOver) update();
+        state.accumTime = 0;
+    }
     render(now);
     requestAnimationFrame(loop);
 }
 
-document.querySelectorAll('.speed-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active'); CONFIG.currentMode = btn.dataset.speed;
-    });
-});
 document.getElementById('start-btn').onclick = startGame;
-renderShops();
+document.getElementById('high').textContent = state.wallet;
 </script>
 </body>
 </html>
