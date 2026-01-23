@@ -140,6 +140,7 @@
         
         .controls-hint { margin-top: 15px; font-size: 11px; color: #888; line-height: 1.6;}
         .key { background: #333; padding: 1px 4px; border-radius: 3px; color: #fff; border-bottom: 2px solid #111;}
+        .mode-warning { font-size: 10px; color: #ff00ff; margin-top: 5px; font-weight: bold; }
 
         footer { padding: 10px; text-align: center; font-size: 12px; color: #555; background: #080808; }
     </style>
@@ -148,7 +149,7 @@
 
     <header>
         <h1>NEON SNAKE</h1>
-        <div class="stats">SCORE: <span id="score">0</span> &nbsp;|&nbsp; HIGH SCORE: <span id="high">0</span></div>
+        <div class="stats">SCORE: <span id="score">0</span> &nbsp;|&nbsp; WALLET: <span id="high">0</span></div>
     </header>
 
     <div id="game-container">
@@ -163,6 +164,7 @@
                     <button class="speed-btn" data-speed="normal">NORMAL</button>
                     <button class="speed-btn active" data-speed="hard">HARD</button>
                 </div>
+                <div class="mode-warning">ONLY HARD MODE SAVES TO WALLET</div>
 
                 <button class="shop-btn" onclick="toggleShop('snake-shop')">SNAKE SKINS <span>▼</span></button>
                 <div id="snake-shop" class="shop-content">
@@ -205,27 +207,27 @@ const FOOD_SKINS = [
     { id: 'f6', name: 'RAINBOW', color: 'rainbow', price: 100 }
 ];
 
-/* ================= STATE ================= */
+/* ================= STATE (v3 Reset) ================= */
 const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
     particles: [], score: 0,
-    highScore: parseInt(localStorage.getItem('neon_snake_high_points') || '0'),
-    ownedSkins: JSON.parse(localStorage.getItem('snake_owned_v2') || '["s1", "f1"]'),
-    activeSnake: JSON.parse(localStorage.getItem('active_s_v2')) || SNAKE_SKINS[0],
-    activeFood: JSON.parse(localStorage.getItem('active_f_v2')) || FOOD_SKINS[0],
+    wallet: parseInt(localStorage.getItem('neon_v3_wallet') || '0'),
+    ownedSkins: JSON.parse(localStorage.getItem('neon_v3_owned') || '["s1", "f1"]'),
+    activeSnake: JSON.parse(localStorage.getItem('neon_v3_active_s')) || SNAKE_SKINS[0],
+    activeFood: JSON.parse(localStorage.getItem('neon_v3_active_f')) || FOOD_SKINS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0
 };
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
 const highEl = document.getElementById('high');
-highEl.textContent = state.highScore;
+highEl.textContent = state.wallet;
 
 function save() {
-    localStorage.setItem('neon_snake_high_points', state.highScore);
-    localStorage.setItem('snake_owned_v2', JSON.stringify(state.ownedSkins));
-    localStorage.setItem('active_s_v2', JSON.stringify(state.activeSnake));
-    localStorage.setItem('active_f_v2', JSON.stringify(state.activeFood));
+    localStorage.setItem('neon_v3_wallet', state.wallet);
+    localStorage.setItem('neon_v3_owned', JSON.stringify(state.ownedSkins));
+    localStorage.setItem('neon_v3_active_s', JSON.stringify(state.activeSnake));
+    localStorage.setItem('neon_v3_active_f', JSON.stringify(state.activeFood));
 }
 
 function toggleShop(id) {
@@ -251,10 +253,10 @@ function renderShops() {
                 e.stopPropagation();
                 if (isOwned) {
                     if (type === 's') state.activeSnake = skin; else state.activeFood = skin;
-                } else if (state.highScore >= skin.price) {
-                    state.highScore -= skin.price; state.ownedSkins.push(skin.id);
+                } else if (state.wallet >= skin.price) {
+                    state.wallet -= skin.price; state.ownedSkins.push(skin.id);
                     if (type === 's') state.activeSnake = skin; else state.activeFood = skin;
-                    highEl.textContent = state.highScore;
+                    highEl.textContent = state.wallet;
                 }
                 save(); renderShops();
             };
@@ -332,14 +334,25 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 function update() {
     if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
+    
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
-        state.gameOver = true; state.shake = 15; state.highScore += state.score;
+        state.gameOver = true; state.shake = 15; 
+        
+        let msg = "Score: " + state.score;
+        // HARD MODE RECORD ONLY
+        if (CONFIG.currentMode === 'hard' && state.score > state.wallet) {
+            state.wallet = state.score;
+            msg = "NEW RECORD! Wallet Updated: " + state.wallet;
+        } else if (CONFIG.currentMode !== 'hard') {
+            msg += " (Hard mode needed for Wallet)";
+        }
+        
         save();
         setTimeout(() => {
             document.getElementById('menu-text').textContent = "GAME OVER";
-            document.getElementById('final-score').textContent = "Collected: " + state.score + " pts";
+            document.getElementById('final-score').textContent = msg;
             document.getElementById('final-score').style.display = 'block';
-            document.getElementById('high').textContent = state.highScore;
+            document.getElementById('high').textContent = state.wallet;
             renderShops();
             document.getElementById('ui-layer').classList.remove('hidden');
         }, 500);
