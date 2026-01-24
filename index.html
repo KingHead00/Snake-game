@@ -244,13 +244,18 @@ function applyCheats() {
     renderShops();
 }
 
+// EXPLODE EFFECT (Now from Ball position)
 function explode(x, y, color) {
-    for(let i=0; i<15; i++) {
+    const count = 20; 
+    for(let i=0; i<count; i++) {
         state.particles.push({
             x: x * CONFIG.cellSize + CONFIG.cellSize/2,
             y: y * CONFIG.cellSize + CONFIG.cellSize/2,
-            vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
-            life: 1.0, color: color
+            vx: (Math.random() - 0.5) * 10, 
+            vy: (Math.random() - 0.5) * 10,
+            life: 1.5, // LAST LONGER
+            color: color,
+            size: Math.random() * 3 + 2
         });
     }
 }
@@ -346,8 +351,12 @@ function update() {
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; document.getElementById('score').textContent = state.score;
         AudioFX.playEat(); canvas.classList.add('pulse'); setTimeout(()=>canvas.classList.remove('pulse'), 400);
+        
+        // JOICE EFFECT from Ball pos
         const pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
-        explode(state.food.x, state.food.y, pCol); spawnFood();
+        explode(state.food.x, state.food.y, pCol); 
+        
+        spawnFood();
     } else state.snake.pop();
 }
 
@@ -362,11 +371,14 @@ function render(now) {
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
 
-    // Particles
+    // Particles (Updated Fade for longevity)
     state.particles.forEach((p, i) => {
-        p.x += p.vx; p.y += p.vy; p.life -= 0.02;
+        p.x += p.vx; p.y += p.vy; 
+        p.vx *= 0.98; p.vy *= 0.98; // Friction for smooth float
+        p.life -= 0.01; // Slowed down decay
         if(p.life <= 0) { state.particles.splice(i,1); return; }
-        ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3);
+        ctx.globalAlpha = p.life; ctx.fillStyle = p.color; 
+        ctx.fillRect(p.x, p.y, p.size, p.size);
     });
     ctx.globalAlpha = 1.0;
 
@@ -384,29 +396,22 @@ function render(now) {
         ctx.fillStyle = (i === 0) ? sH : sB;
         if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sH; }
         
-        // Body Segment
         const r = i === 0 ? 8 : 4;
         const x = seg.x*CONFIG.cellSize+1; const y = seg.y*CONFIG.cellSize+1;
         const w = CONFIG.cellSize-2; const h = CONFIG.cellSize-2;
         ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fill();
         ctx.shadowBlur = 0;
 
-        // --- RESTORED EYES ---
+        // Eyes
         if(i === 0) {
             ctx.fillStyle = '#000';
             const eyeSize = CONFIG.cellSize / 8;
             const offset = CONFIG.cellSize / 4;
             let e1x, e1y, e2x, e2y;
-
-            if (state.lastD.x === 1) { // Right
-                e1x = e2x = x + w - offset; e1y = y + offset; e2y = y + h - offset;
-            } else if (state.lastD.x === -1) { // Left
-                e1x = e2x = x + offset; e1y = y + offset; e2y = y + h - offset;
-            } else if (state.lastD.y === -1) { // Up
-                e1y = e2y = y + offset; e1x = x + offset; e2x = x + w - offset;
-            } else { // Down
-                e1y = e2y = y + h - offset; e1x = x + offset; e2x = x + w - offset;
-            }
+            if (state.lastD.x === 1) { e1x = e2x = x + w - offset; e1y = y + offset; e2y = y + h - offset; }
+            else if (state.lastD.x === -1) { e1x = e2x = x + offset; e1y = y + offset; e2y = y + h - offset; }
+            else if (state.lastD.y === -1) { e1y = e2y = y + offset; e1x = x + offset; e2x = x + w - offset; }
+            else { e1y = e2y = y + h - offset; e1x = x + offset; e2x = x + w - offset; }
             ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill();
             ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill();
         }
