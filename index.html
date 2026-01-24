@@ -105,7 +105,7 @@
 
         .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
         
-        /* RAINBOW CHEAT BUTTON (MENU VERSION) */
+        /* RAINBOW CHEAT BUTTON */
         .cheat-btn {
             background: linear-gradient(45deg, #ff0000, #ff8800, #ffff00, #00ff00, #0000ff, #8b00ff);
             background-size: 400% 400%;
@@ -124,6 +124,7 @@
             transition: 0.2s;
         }
         .cheat-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
+        .cheat-btn.active { filter: brightness(0.7); pointer-events: none; transform: scale(0.95); opacity: 0.8; }
         @keyframes rainbowShift {
             0% { background-position: 0% 50%; }
             100% { background-position: 100% 50%; }
@@ -176,7 +177,7 @@
             <div class="menu-box">
                 <div class="menu-title" id="menu-text">READY?</div>
                 
-                <button class="cheat-btn" onclick="applyCheats()">Cheats Mode</button>
+                <button class="cheat-btn" id="cheat-btn" onclick="applyCheats()">Cheats Mode</button>
 
                 <div class="speed-selector">
                     <button class="speed-btn" data-speed="slow">SLOW</button>
@@ -228,7 +229,8 @@ const state = {
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
     activeBall: JSON.parse(localStorage.getItem('neon_v4_active_b')) || BALL_COLORS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0,
-    menuTimeout: null
+    menuTimeout: null,
+    cheatsActive: false // NEW FLAG
 };
 
 const canvas = document.getElementById('c');
@@ -236,6 +238,9 @@ const ctx = canvas.getContext('2d', { alpha: false });
 document.getElementById('high').textContent = state.wallet;
 
 function save() {
+    // If cheats are active, we BLOCK saving entirely.
+    if (state.cheatsActive) return; 
+
     localStorage.setItem('neon_v4_best', state.wallet);
     localStorage.setItem('neon_v4_owned', JSON.stringify(state.ownedSkins));
     localStorage.setItem('neon_v4_balls', JSON.stringify(state.ownedBalls));
@@ -244,8 +249,11 @@ function save() {
 }
 
 function applyCheats() {
+    state.cheatsActive = true;
     state.ownedSkins = SNAKE_SKINS.map(s => s.id);
     state.ownedBalls = BALL_COLORS.map(b => b.id);
+    document.getElementById('cheat-btn').classList.add('active');
+    document.getElementById('cheat-btn').innerText = "CHEATS ON (NO SAVING)";
     renderShops();
 }
 
@@ -276,7 +284,8 @@ function renderShops() {
             <b>${skin.name}</b><br>${isSel ? 'ACTIVE' : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
         card.onclick = () => {
             if (isOwned) { state.activeSnake = skin; } 
-            else if (state.wallet >= skin.price) { state.wallet -= skin.price; state.ownedSkins.push(skin.id); state.activeSnake = skin; save(); }
+            else if (state.wallet >= skin.price) { state.wallet -= skin.price; state.ownedSkins.push(skin.id); state.activeSnake = skin; }
+            save(); // Save only if cheatsActive is false
             renderShops();
         };
         sGrid.appendChild(card);
@@ -294,7 +303,8 @@ function renderShops() {
             <b>${ball.name}</b><br>${isSel ? 'ACTIVE' : (isOwned ? 'OWNED' : ball.price + ' pts')}`;
         card.onclick = () => {
             if (isOwned) { state.activeBall = ball; } 
-            else if (state.wallet >= ball.price) { state.wallet -= ball.price; state.ownedBalls.push(ball.id); state.activeBall = ball; save(); }
+            else if (state.wallet >= ball.price) { state.wallet -= ball.price; state.ownedBalls.push(ball.id); state.activeBall = ball; }
+            save(); // Save only if cheatsActive is false
             renderShops();
         };
         bGrid.appendChild(card);
