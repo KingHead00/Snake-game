@@ -8,7 +8,7 @@
     <style>
         :root {
             --bg: #050505;
-            --grid: #151515;
+            --grid: #333333; /* Brightened Grid Variable */
             --primary: #00ffcc;
             --text: #ffffff;
             --ui-bg: rgba(0, 0, 0, 0.95);
@@ -245,15 +245,12 @@ function applyCheats() {
 }
 
 function explode(x, y, color) {
-    const count = 15; 
-    for(let i=0; i<count; i++) {
+    for(let i=0; i<15; i++) {
         state.particles.push({
             x: x * CONFIG.cellSize + CONFIG.cellSize/2,
             y: y * CONFIG.cellSize + CONFIG.cellSize/2,
-            vx: (Math.random() - 0.5) * 8, 
-            vy: (Math.random() - 0.5) * 8,
-            life: 1.0, // Back to normal length
-            color: color
+            vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
+            life: 1.0, color: color
         });
     }
 }
@@ -350,8 +347,7 @@ function update() {
         state.score++; document.getElementById('score').textContent = state.score;
         AudioFX.playEat(); canvas.classList.add('pulse'); setTimeout(()=>canvas.classList.remove('pulse'), 400);
         const pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
-        explode(state.food.x, state.food.y, pCol); 
-        spawnFood();
+        explode(state.food.x, state.food.y, pCol); spawnFood();
     } else state.snake.pop();
 }
 
@@ -360,19 +356,18 @@ function render(now) {
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; }
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    // Grid
-    ctx.strokeStyle = '#151515'; ctx.lineWidth = 1; ctx.beginPath();
+    // --- BRIGHTER GRID ---
+    ctx.strokeStyle = '#333333'; 
+    ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
 
     // Particles
     state.particles.forEach((p, i) => {
-        p.x += p.vx; p.y += p.vy; 
-        p.life -= 0.02;
+        p.x += p.vx; p.y += p.vy; p.life -= 0.02;
         if(p.life <= 0) { state.particles.splice(i,1); return; }
-        ctx.globalAlpha = p.life; ctx.fillStyle = p.color; 
-        ctx.fillRect(p.x, p.y, 3, 3);
+        ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3);
     });
     ctx.globalAlpha = 1.0;
 
