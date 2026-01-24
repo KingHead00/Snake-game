@@ -70,7 +70,6 @@
             display: block;
             border: 5px solid #ffffff; 
             border-radius: 4px;
-            /* MORE DRAMATIC OUTER GLOW */
             box-shadow: 
                 0 0 15px rgba(255, 255, 255, 0.6),
                 0 0 30px rgba(255, 255, 255, 0.3),
@@ -79,13 +78,13 @@
 
         canvas.pulse { animation: flashWhite 0.4s ease-out forwards; }
         @keyframes flashWhite {
-            0% { transform: scale(1.01); border-color: #fff; box-shadow: 0 0 60px rgba(255,255,255,0.8), 0 0 30px rgba(255,255,255,0.5); }
+            0% { transform: scale(1.01); border-color: #fff; box-shadow: 0 0 60px rgba(255,255,255,0.8); }
             100% { transform: scale(1); border-color: #fff; }
         }
         canvas.death-pulse { animation: deathGlowRed 0.8s ease-out forwards; }
         @keyframes deathGlowRed {
-            0% { box-shadow: 0 0 100px var(--danger), 0 0 50px var(--danger); border-color: var(--danger); transform: scale(1.02); }
-            100% { transform: scale(1); }
+            0% { box-shadow: 0 0 80px var(--danger); border-color: var(--danger); transform: scale(1.01); }
+            100% { transform: scale(1); border-color: #ffffff; }
         }
 
         #ui-layer {
@@ -339,7 +338,9 @@ function update() {
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
     
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
-        state.gameOver = true; state.shake = 15; triggerPulse('death');
+        state.gameOver = true; 
+        state.shake = 6; // Reduced shake to prevent corner distortion
+        triggerPulse('death');
         if (state.score > state.wallet) { state.wallet = state.score; }
         save();
         if(state.menuTimeout) clearTimeout(state.menuTimeout);
@@ -355,10 +356,13 @@ function update() {
 
 function render(now) {
     ctx.setTransform(1,0,0,1,0,0);
-    if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
+    // Controlled shake logic to keep drawing within bounds
+    if (state.shake > 0) { 
+        ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); 
+        state.shake *= 0.85; 
+    }
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    // Brighter Grid Pulse
     const gridPulseCycle = 3000; 
     const gridPulse = 40 + Math.sin(now / gridPulseCycle) * 10; 
     ctx.strokeStyle = `rgb(${gridPulse}, ${gridPulse}, ${gridPulse})`; 
@@ -388,6 +392,7 @@ function render(now) {
         let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
         ctx.fillStyle = (i === 0) ? sH : sB;
         if(i === 0) { ctx.shadowBlur = glowStr; ctx.shadowColor = sH; }
+        // Cell clamping: ensure segments never bleed into the border pixels during shake
         drawRoundedRect(ctx, seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4);
         ctx.shadowBlur = 0;
 
@@ -406,7 +411,11 @@ function render(now) {
 }
 
 function loop(now) {
-    if(state.gameOver) return;
+    if(state.gameOver) {
+        render(now); // Keep rendering during game over for the shake effect
+        if(state.shake > 0.1) requestAnimationFrame(loop);
+        return;
+    }
     const dt = now - state.lastTime; state.lastTime = now; state.accumTime += dt;
     const p = CONFIG.speeds[CONFIG.currentMode];
     const step = 1000 / Math.min(p.max, p.base + (state.score * p.boost));
