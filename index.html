@@ -288,7 +288,7 @@ function spawnFood() {
 function startGame() {
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
-    state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0;
+    state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0; state.shake = 0; // Fix: Reset shake on start
     document.getElementById('score').textContent = '0';
     spawnFood(); state.gameOver = false; state.lastTime = performance.now();
     document.getElementById('ui-layer').classList.add('hidden');
@@ -356,7 +356,6 @@ function render(now) {
     
     ctx.translate(CONFIG.padding, CONFIG.padding);
 
-    // Grid Pulse Cycle slowed down significantly (approx 6 seconds per loop)
     const gridPulseCycle = 3000; 
     const gridPulse = 28 + Math.sin(now / gridPulseCycle) * 8; 
     ctx.strokeStyle = `rgb(${gridPulse}, ${gridPulse}, ${gridPulse})`; 
@@ -370,7 +369,6 @@ function render(now) {
     const rainbowHue = (now / 5) % 360;
     const glowStr = 10 + Math.min(state.score, 40);
 
-    // Food pulse logic
     const pulseFactor = Math.sin(now / 200) * 0.15;
     const foodRadius = (CONFIG.cellSize / 2.8) * (1 + pulseFactor);
     const pulseGlow = 15 + (Math.sin(now / 200) * 10);
