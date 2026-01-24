@@ -355,7 +355,12 @@ function render(now) {
     ctx.fillStyle = '#050505'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
     ctx.translate(CONFIG.padding, CONFIG.padding);
-    ctx.strokeStyle = '#151515'; ctx.lineWidth = 1; ctx.beginPath();
+
+    // GRID PULSING: Fades between 21 and 35 brightness
+    const gridPulse = 28 + Math.sin(now / 1500) * 7; 
+    ctx.strokeStyle = `rgb(${gridPulse}, ${gridPulse}, ${gridPulse})`; 
+    ctx.lineWidth = 1; 
+    ctx.beginPath();
     const gW = CONFIG.cols * CONFIG.cellSize; const gH = CONFIG.rows * CONFIG.cellSize;
     for(let x=0; x<=gW; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, gH); }
     for(let y=0; y<=gH; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(gW, y); }
@@ -365,7 +370,7 @@ function render(now) {
     const glowStr = 10 + Math.min(state.score, 40);
 
     // Food pulsing logic
-    const pulseFactor = Math.sin(now / 200) * 0.15; // Grows/shrinks by 15%
+    const pulseFactor = Math.sin(now / 200) * 0.15;
     const foodRadius = (CONFIG.cellSize / 2.8) * (1 + pulseFactor);
     const pulseGlow = 15 + (Math.sin(now / 200) * 10);
 
