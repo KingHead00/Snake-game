@@ -266,15 +266,22 @@ function renderShops() {
 const CONFIG = { 
     cols: 31, rows: 15, cellSize: 0, 
     speeds: { slow: { base: 6, boost: 0.1, max: 12 }, normal: { base: 8, boost: 0.15, max: 18 }, hard: { base: 11, boost: 0.15, max: 22 } }, 
-    currentMode: 'hard' 
+    currentMode: 'hard',
+    padding: 12 // Internal padding so snake doesn't touch border
 };
 
 function resize() {
     const container = document.getElementById('game-container');
-    const rawSize = Math.min((container.clientWidth-40)/CONFIG.cols, (container.clientHeight-40)/CONFIG.rows);
+    // Subtract padding*2 from available space calculation
+    const rawSize = Math.min(
+        (container.clientWidth - 40 - (CONFIG.padding*2)) / CONFIG.cols, 
+        (container.clientHeight - 40 - (CONFIG.padding*2)) / CONFIG.rows
+    );
     CONFIG.cellSize = Math.floor(rawSize);
-    canvas.width = CONFIG.cols * CONFIG.cellSize;
-    canvas.height = CONFIG.rows * CONFIG.cellSize;
+    
+    // Total canvas size = grid size + padding on both sides
+    canvas.width = (CONFIG.cols * CONFIG.cellSize) + (CONFIG.padding * 2);
+    canvas.height = (CONFIG.rows * CONFIG.cellSize) + (CONFIG.padding * 2);
 }
 window.addEventListener('resize', resize);
 resize();
@@ -362,13 +369,31 @@ function update() {
 }
 
 function render(now) {
+    // Reset transform to clear the WHOLE canvas including padding
     ctx.setTransform(1,0,0,1,0,0);
-    if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
-    ctx.fillStyle = '#050505'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
+    // Shake effect (applied to everything)
+    if (state.shake > 0) { 
+        const sx = (Math.random()-0.5)*state.shake;
+        const sy = (Math.random()-0.5)*state.shake;
+        ctx.translate(sx, sy);
+        state.shake *= 0.9; 
+    }
+    
+    // Fill background
+    ctx.fillStyle = '#050505'; 
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    
+    // Push the grid inwards by the padding amount
+    ctx.translate(CONFIG.padding, CONFIG.padding);
+
+    // Draw grid
     ctx.strokeStyle = '#151515'; ctx.lineWidth = 1; ctx.beginPath();
-    for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
-    for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
+    const gridW = CONFIG.cols * CONFIG.cellSize;
+    const gridH = CONFIG.rows * CONFIG.cellSize;
+    
+    for(let x=0; x<=gridW; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, gridH); }
+    for(let y=0; y<=gridH; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(gridW, y); }
     ctx.stroke();
 
     const rainbowHue = (now / 5) % 360;
