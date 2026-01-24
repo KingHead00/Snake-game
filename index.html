@@ -356,8 +356,9 @@ function render(now) {
     
     ctx.translate(CONFIG.padding, CONFIG.padding);
 
-    // GRID PULSING: Fades between 21 and 35 brightness
-    const gridPulse = 28 + Math.sin(now / 1500) * 7; 
+    // Grid Pulse Cycle slowed down significantly (approx 6 seconds per loop)
+    const gridPulseCycle = 3000; 
+    const gridPulse = 28 + Math.sin(now / gridPulseCycle) * 8; 
     ctx.strokeStyle = `rgb(${gridPulse}, ${gridPulse}, ${gridPulse})`; 
     ctx.lineWidth = 1; 
     ctx.beginPath();
@@ -369,7 +370,7 @@ function render(now) {
     const rainbowHue = (now / 5) % 360;
     const glowStr = 10 + Math.min(state.score, 40);
 
-    // Food pulsing logic
+    // Food pulse logic
     const pulseFactor = Math.sin(now / 200) * 0.15;
     const foodRadius = (CONFIG.cellSize / 2.8) * (1 + pulseFactor);
     const pulseGlow = 15 + (Math.sin(now / 200) * 10);
