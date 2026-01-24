@@ -339,7 +339,7 @@ function update() {
     
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; 
-        state.shake = 6; // Reduced shake to prevent corner distortion
+        state.shake = 6; 
         triggerPulse('death');
         if (state.score > state.wallet) { state.wallet = state.score; }
         save();
@@ -356,15 +356,20 @@ function update() {
 
 function render(now) {
     ctx.setTransform(1,0,0,1,0,0);
-    // Controlled shake logic to keep drawing within bounds
+    // CRITICAL FIX: Clear any lingering neon shadows before drawing the grid
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
+
     if (state.shake > 0) { 
         ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); 
         state.shake *= 0.85; 
     }
+    
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
+    // Stabilized Grid Brightness (Fixed range to prevent "dimming")
     const gridPulseCycle = 3000; 
-    const gridPulse = 40 + Math.sin(now / gridPulseCycle) * 10; 
+    const gridPulse = 55 + Math.sin(now / gridPulseCycle) * 8; 
     ctx.strokeStyle = `rgb(${gridPulse}, ${gridPulse}, ${gridPulse})`; 
     ctx.lineWidth = 1; 
     ctx.beginPath();
@@ -392,7 +397,6 @@ function render(now) {
         let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
         ctx.fillStyle = (i === 0) ? sH : sB;
         if(i === 0) { ctx.shadowBlur = glowStr; ctx.shadowColor = sH; }
-        // Cell clamping: ensure segments never bleed into the border pixels during shake
         drawRoundedRect(ctx, seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4);
         ctx.shadowBlur = 0;
 
@@ -412,7 +416,7 @@ function render(now) {
 
 function loop(now) {
     if(state.gameOver) {
-        render(now); // Keep rendering during game over for the shake effect
+        render(now);
         if(state.shake > 0.1) requestAnimationFrame(loop);
         return;
     }
