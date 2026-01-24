@@ -62,25 +62,25 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            padding: 20px;
+            padding: 10px;
         }
 
         canvas {
             background: #000;
             display: block;
-            border: 4px solid #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+            border: 5px solid #ffffff; 
+            border-radius: 4px;
+            box-shadow: 0 0 25px rgba(255,255,255,0.15);
         }
 
         canvas.pulse { animation: flashWhite 0.4s ease-out forwards; }
         @keyframes flashWhite {
-            0% { transform: scale(1.02); border-color: #fff; box-shadow: 0 0 50px #fff; }
+            0% { transform: scale(1.01); border-color: #fff; box-shadow: 0 0 50px #fff; }
             100% { transform: scale(1); border-color: #fff; }
         }
         canvas.death-pulse { animation: deathGlowRed 0.8s ease-out forwards; }
         @keyframes deathGlowRed {
-            0% { box-shadow: 0 0 100px var(--danger); border-color: var(--danger); transform: scale(1.03); }
+            0% { box-shadow: 0 0 100px var(--danger); border-color: var(--danger); transform: scale(1.02); }
             100% { box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-color: #fff; transform: scale(1); }
         }
 
@@ -267,15 +267,15 @@ const CONFIG = {
     cols: 31, rows: 15, cellSize: 0, 
     speeds: { slow: { base: 6, boost: 0.1, max: 12 }, normal: { base: 8, boost: 0.15, max: 18 }, hard: { base: 11, boost: 0.15, max: 22 } }, 
     currentMode: 'hard',
-    padding: 12
+    padding: 0 
 };
 
 function resize() {
     const container = document.getElementById('game-container');
-    const rawSize = Math.min((container.clientWidth-40-(CONFIG.padding*2))/CONFIG.cols, (container.clientHeight-40-(CONFIG.padding*2))/CONFIG.rows);
+    const rawSize = Math.min((container.clientWidth-20)/CONFIG.cols, (container.clientHeight-20)/CONFIG.rows);
     CONFIG.cellSize = Math.floor(rawSize);
-    canvas.width = (CONFIG.cols * CONFIG.cellSize) + (CONFIG.padding * 2);
-    canvas.height = (CONFIG.rows * CONFIG.cellSize) + (CONFIG.padding * 2);
+    canvas.width = (CONFIG.cols * CONFIG.cellSize);
+    canvas.height = (CONFIG.rows * CONFIG.cellSize);
 }
 window.addEventListener('resize', resize);
 resize();
@@ -334,9 +334,7 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 function update() {
     if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
-    
-    // Adjusted collision bounds: Dying only happens when outside 0 to CONFIG-1
-    if (head.x < 0 || head.x > CONFIG.cols - 1 || head.y < 0 || head.y > CONFIG.rows - 1 || state.snake.some(p => p.x === head.x && p.y === head.y)) {
+    if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 15; triggerPulse('death');
         if (state.score > state.wallet) { state.wallet = state.score; }
         save();
@@ -354,12 +352,11 @@ function update() {
 function render(now) {
     ctx.setTransform(1,0,0,1,0,0);
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
-    ctx.fillStyle = '#050505'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    ctx.translate(CONFIG.padding, CONFIG.padding);
-
+    // Brighter Grid Pulse (Increased base from 28 to 40)
     const gridPulseCycle = 3000; 
-    const gridPulse = 28 + Math.sin(now / gridPulseCycle) * 8; 
+    const gridPulse = 40 + Math.sin(now / gridPulseCycle) * 10; 
     ctx.strokeStyle = `rgb(${gridPulse}, ${gridPulse}, ${gridPulse})`; 
     ctx.lineWidth = 1; 
     ctx.beginPath();
