@@ -45,11 +45,6 @@
             box-shadow: 0 0 10px var(--primary);
             animation: logoPulse 2s infinite ease-in-out;
         }
-        .logo-box::after {
-            content: ''; position: absolute; width: 10px; height: 4px;
-            background: var(--primary); top: 7px; left: 7px; border-radius: 1px;
-            box-shadow: 0 7px 0 var(--primary);
-        }
         
         @keyframes logoPulse {
             0%, 100% { opacity: 1; transform: scale(1); filter: brightness(1); }
@@ -64,6 +59,7 @@
             flex: 1;
             position: relative;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             overflow: hidden;
@@ -73,20 +69,30 @@
         canvas {
             background: #000;
             display: block;
-            border: 2px solid #333;
+            /* THICKER WHITE BORDER */
+            border: 4px solid #ffffff;
             border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
         }
+
+        .controls-hint {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .controls-hint b { color: var(--primary); }
 
         canvas.pulse { animation: flashWhite 0.4s ease-out forwards; }
         @keyframes flashWhite {
-            0% { transform: scale(1.03); border-color: #fff; box-shadow: 0 0 50px #fff; }
-            100% { transform: scale(1); border-color: #333; }
+            0% { transform: scale(1.02); border-color: #fff; box-shadow: 0 0 50px #fff; }
+            100% { transform: scale(1); border-color: #fff; }
         }
         canvas.death-pulse { animation: deathGlowRed 0.8s ease-out forwards; }
         @keyframes deathGlowRed {
-            0% { box-shadow: 0 0 100px var(--danger); border-color: var(--danger); transform: scale(1.05); }
-            100% { box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-color: #333; transform: scale(1); }
+            0% { box-shadow: 0 0 100px var(--danger); border-color: var(--danger); transform: scale(1.03); }
+            100% { box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-color: #fff; transform: scale(1); }
         }
 
         #ui-layer {
@@ -94,7 +100,7 @@
             top: 0; left: 0; width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
             background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
-            transition: opacity 0.4s; z-index: 20;
+            transition: opacity 0.3s; z-index: 20;
         }
         #ui-layer.hidden { opacity: 0; pointer-events: none; }
         
@@ -104,19 +110,12 @@
             max-height: 85vh; overflow-y: auto;
             scrollbar-width: none;
         }
-        .menu-box::-webkit-scrollbar { display: none; }
 
         .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
-
         .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; transition: 0.2s; }
         .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--primary); }
 
-        .trial-btn { 
-            background: linear-gradient(45deg, var(--trial), #0088ff); 
-            color: #fff; border: none; padding: 12px; margin-top: 10px; 
-            width: 100%; border-radius: 10px; font-weight: 900; cursor: pointer;
-            transition: 0.2s;
-        }
+        .trial-btn { background: linear-gradient(45deg, var(--trial), #0088ff); color: #fff; border: none; padding: 12px; margin-top: 10px; width: 100%; border-radius: 10px; font-weight: 900; cursor: pointer; transition: 0.2s; }
 
         .shop-btn { background: #111; color: #fff; border: 1px solid #333; padding: 14px; width: 100%; margin-top: 12px; cursor: pointer; border-radius: 10px; font-weight: bold; display: flex; justify-content: space-between; }
         .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #000; }
@@ -146,6 +145,9 @@
 
     <div id="game-container">
         <canvas id="c"></canvas>
+        <div class="controls-hint">
+            [<b>WASD</b>] Move | [<b>R/Space</b>] Restart | [<b>Q</b>] Exit to Menu
+        </div>
         <div id="ui-layer">
             <div class="menu-box">
                 <div class="menu-title" id="menu-text">READY?</div>
@@ -193,7 +195,8 @@ const state = {
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
     activeBall: JSON.parse(localStorage.getItem('neon_v4_active_b')) || BALL_COLORS[0],
     isTrial: false,
-    lastTime: 0, accumTime: 0, gameOver: true, shake: 0
+    lastTime: 0, accumTime: 0, gameOver: true, shake: 0,
+    menuTimeout: null
 };
 
 const canvas = document.getElementById('c');
@@ -232,7 +235,6 @@ function toggleShop(id) {
 
 function renderShops() {
     document.getElementById('high').textContent = state.wallet;
-    
     const sGrid = document.getElementById('snake-grid');
     sGrid.innerHTML = '';
     SNAKE_SKINS.forEach(skin => {
@@ -244,15 +246,8 @@ function renderShops() {
         card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
             <b>${skin.name}</b><br>${isSel ? (state.isTrial && skin.id==='s6' ? 'TRIAL' : 'ACTIVE') : (isOwned ? 'OWNED' : skin.price + ' pts')}`;
         card.onclick = () => {
-            if (isOwned) { 
-                state.activeSnake = skin; 
-                state.isTrial = false; 
-            } else if (state.wallet >= skin.price) { 
-                state.wallet -= skin.price; // ACTUALLY MINUS MONEY
-                state.ownedSkins.push(skin.id); 
-                state.activeSnake = skin; 
-                state.isTrial = false; 
-            }
+            if (isOwned) { state.activeSnake = skin; state.isTrial = false; } 
+            else if (state.wallet >= skin.price) { state.wallet -= skin.price; state.ownedSkins.push(skin.id); state.activeSnake = skin; state.isTrial = false; }
             save(); renderShops();
         };
         sGrid.appendChild(card);
@@ -269,15 +264,8 @@ function renderShops() {
         card.innerHTML = `<div class="swatch" style="background:${swatchColor}"></div>
             <b>${ball.name}</b><br>${isSel ? (state.isTrial && ball.id==='b5' ? 'TRIAL' : 'ACTIVE') : (isOwned ? 'OWNED' : ball.price + ' pts')}`;
         card.onclick = () => {
-            if (isOwned) { 
-                state.activeBall = ball; 
-                state.isTrial = false; 
-            } else if (state.wallet >= ball.price) { 
-                state.wallet -= ball.price; // ACTUALLY MINUS MONEY
-                state.ownedBalls.push(ball.id); 
-                state.activeBall = ball; 
-                state.isTrial = false; 
-            }
+            if (isOwned) { state.activeBall = ball; state.isTrial = false; } 
+            else if (state.wallet >= ball.price) { state.wallet -= ball.price; state.ownedBalls.push(ball.id); state.activeBall = ball; state.isTrial = false; }
             save(); renderShops();
         };
         bGrid.appendChild(card);
@@ -292,7 +280,7 @@ const CONFIG = {
 
 function resize() {
     const container = document.getElementById('game-container');
-    const rawSize = Math.min((container.clientWidth-40)/CONFIG.cols, (container.clientHeight-40)/CONFIG.rows);
+    const rawSize = Math.min((container.clientWidth-40)/CONFIG.cols, (container.clientHeight-100)/CONFIG.rows);
     CONFIG.cellSize = Math.floor(rawSize);
     canvas.width = CONFIG.cols * CONFIG.cellSize;
     canvas.height = CONFIG.rows * CONFIG.cellSize;
@@ -306,6 +294,7 @@ function spawnFood() {
 }
 
 function startGame() {
+    if(state.menuTimeout) clearTimeout(state.menuTimeout);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0;
     document.getElementById('score').textContent = '0';
@@ -314,9 +303,29 @@ function startGame() {
     requestAnimationFrame(loop);
 }
 
+function showMenu(text = "CRASHED!") {
+    document.getElementById('menu-text').textContent = text;
+    document.getElementById('high').textContent = state.wallet;
+    document.getElementById('ui-layer').classList.remove('hidden'); 
+    renderShops(); 
+}
+
 window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
-    if (k === 'r' || (k === ' ' && state.gameOver)) startGame();
+    
+    // QUICK RESET
+    if (k === 'r' || k === ' ') {
+        startGame();
+        return;
+    }
+
+    // QUICK EXIT
+    if (k === 'q') {
+        state.gameOver = true;
+        showMenu("EXITED");
+        return;
+    }
+
     if (state.gameOver) return;
     let nD = null;
     if (k === 'w' || k === 'arrowup') nD = {x:0, y:-1};
@@ -348,11 +357,10 @@ function update() {
         state.gameOver = true; state.shake = 15; triggerPulse('death');
         if (state.score > state.wallet) { state.wallet = state.score; }
         save();
-        setTimeout(() => { 
-            document.getElementById('menu-text').textContent = "CRASHED!";
-            document.getElementById('high').textContent = state.wallet;
-            document.getElementById('ui-layer').classList.remove('hidden'); 
-            renderShops(); 
+        // Clear old timeout if it exists
+        if(state.menuTimeout) clearTimeout(state.menuTimeout);
+        state.menuTimeout = setTimeout(() => { 
+            if(state.gameOver) showMenu(); 
         }, 800);
         return;
     }
@@ -406,12 +414,13 @@ function render(now) {
 }
 
 function loop(now) {
+    if(state.gameOver) return;
     const dt = now - state.lastTime; state.lastTime = now; state.accumTime += dt;
     const p = CONFIG.speeds[CONFIG.currentMode];
     const step = 1000 / Math.min(p.max, p.base + (state.score * p.boost));
     while (state.accumTime >= step) { if (!state.gameOver) update(); state.accumTime -= step; }
     render(now);
-    if (!state.gameOver) requestAnimationFrame(loop);
+    requestAnimationFrame(loop);
 }
 
 document.querySelectorAll('.speed-btn').forEach(btn => {
