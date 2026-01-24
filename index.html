@@ -364,10 +364,15 @@ function render(now) {
     const rainbowHue = (now / 5) % 360;
     const glowStr = 10 + Math.min(state.score, 40);
 
+    // Food pulsing logic
+    const pulseFactor = Math.sin(now / 200) * 0.15; // Grows/shrinks by 15%
+    const foodRadius = (CONFIG.cellSize / 2.8) * (1 + pulseFactor);
+    const pulseGlow = 15 + (Math.sin(now / 200) * 10);
+
     let ballColor = state.activeBall.color === 'rainbow' ? `hsl(${rainbowHue}, 100%, 60%)` : state.activeBall.color;
-    ctx.fillStyle = ballColor; ctx.shadowBlur = 15; ctx.shadowColor = ballColor;
+    ctx.fillStyle = ballColor; ctx.shadowBlur = pulseGlow; ctx.shadowColor = ballColor;
     ctx.beginPath(); 
-    ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, CONFIG.cellSize/2.8, 0, Math.PI*2); 
+    ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, foodRadius, 0, Math.PI*2); 
     ctx.fill();
     ctx.shadowBlur = 0;
 
