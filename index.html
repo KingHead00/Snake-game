@@ -70,18 +70,22 @@
             display: block;
             border: 5px solid #ffffff; 
             border-radius: 4px;
-            box-shadow: 0 0 25px rgba(255,255,255,0.15);
+            /* MORE DRAMATIC OUTER GLOW */
+            box-shadow: 
+                0 0 15px rgba(255, 255, 255, 0.6),
+                0 0 30px rgba(255, 255, 255, 0.3),
+                0 0 60px rgba(255, 255, 255, 0.1);
         }
 
         canvas.pulse { animation: flashWhite 0.4s ease-out forwards; }
         @keyframes flashWhite {
-            0% { transform: scale(1.01); border-color: #fff; box-shadow: 0 0 50px #fff; }
+            0% { transform: scale(1.01); border-color: #fff; box-shadow: 0 0 60px rgba(255,255,255,0.8), 0 0 30px rgba(255,255,255,0.5); }
             100% { transform: scale(1); border-color: #fff; }
         }
         canvas.death-pulse { animation: deathGlowRed 0.8s ease-out forwards; }
         @keyframes deathGlowRed {
-            0% { box-shadow: 0 0 100px var(--danger); border-color: var(--danger); transform: scale(1.02); }
-            100% { box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-color: #fff; transform: scale(1); }
+            0% { box-shadow: 0 0 100px var(--danger), 0 0 50px var(--danger); border-color: var(--danger); transform: scale(1.02); }
+            100% { transform: scale(1); }
         }
 
         #ui-layer {
@@ -266,8 +270,7 @@ function renderShops() {
 const CONFIG = { 
     cols: 31, rows: 15, cellSize: 0, 
     speeds: { slow: { base: 6, boost: 0.1, max: 12 }, normal: { base: 8, boost: 0.15, max: 18 }, hard: { base: 11, boost: 0.15, max: 22 } }, 
-    currentMode: 'hard',
-    padding: 0 
+    currentMode: 'hard'
 };
 
 function resize() {
@@ -334,6 +337,7 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 function update() {
     if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
+    
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 15; triggerPulse('death');
         if (state.score > state.wallet) { state.wallet = state.score; }
@@ -354,7 +358,7 @@ function render(now) {
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.9; }
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    // Brighter Grid Pulse (Increased base from 28 to 40)
+    // Brighter Grid Pulse
     const gridPulseCycle = 3000; 
     const gridPulse = 40 + Math.sin(now / gridPulseCycle) * 10; 
     ctx.strokeStyle = `rgb(${gridPulse}, ${gridPulse}, ${gridPulse})`; 
