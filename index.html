@@ -105,7 +105,6 @@
 
         .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
         
-        /* RAINBOW CHEAT BUTTON */
         .cheat-btn {
             background: linear-gradient(45deg, #ff0000, #ff8800, #ffff00, #00ff00, #0000ff, #8b00ff);
             background-size: 400% 400%;
@@ -223,6 +222,7 @@ const BALL_COLORS = [
 const state = {
     snake: [], dir: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
     score: 0,
+    particles: [], // FOR PARTICLE JUICE
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
     ownedBalls: JSON.parse(localStorage.getItem('neon_v4_balls') || '["b1"]'),
@@ -230,7 +230,7 @@ const state = {
     activeBall: JSON.parse(localStorage.getItem('neon_v4_active_b')) || BALL_COLORS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0,
     menuTimeout: null,
-    cheatsActive: false // NEW FLAG
+    cheatsActive: false
 };
 
 const canvas = document.getElementById('c');
@@ -238,9 +238,7 @@ const ctx = canvas.getContext('2d', { alpha: false });
 document.getElementById('high').textContent = state.wallet;
 
 function save() {
-    // If cheats are active, we BLOCK saving entirely.
     if (state.cheatsActive) return; 
-
     localStorage.setItem('neon_v4_best', state.wallet);
     localStorage.setItem('neon_v4_owned', JSON.stringify(state.ownedSkins));
     localStorage.setItem('neon_v4_balls', JSON.stringify(state.ownedBalls));
@@ -255,6 +253,21 @@ function applyCheats() {
     document.getElementById('cheat-btn').classList.add('active');
     document.getElementById('cheat-btn').innerText = "CHEATS ON (NO SAVING)";
     renderShops();
+}
+
+// CREATE PARTICLES
+function explode(x, y, color) {
+    const count = 15;
+    for(let i=0; i<count; i++) {
+        state.particles.push({
+            x: x * CONFIG.cellSize + CONFIG.cellSize/2,
+            y: y * CONFIG.cellSize + CONFIG.cellSize/2,
+            vx: (Math.random() - 0.5) * 8,
+            vy: (Math.random() - 0.5) * 8,
+            life: 1.0,
+            color: color
+        });
+    }
 }
 
 function triggerPulse(type = 'ball') {
@@ -285,7 +298,7 @@ function renderShops() {
         card.onclick = () => {
             if (isOwned) { state.activeSnake = skin; } 
             else if (state.wallet >= skin.price) { state.wallet -= skin.price; state.ownedSkins.push(skin.id); state.activeSnake = skin; }
-            save(); // Save only if cheatsActive is false
+            save();
             renderShops();
         };
         sGrid.appendChild(card);
@@ -304,7 +317,7 @@ function renderShops() {
         card.onclick = () => {
             if (isOwned) { state.activeBall = ball; } 
             else if (state.wallet >= ball.price) { state.wallet -= ball.price; state.ownedBalls.push(ball.id); state.activeBall = ball; }
-            save(); // Save only if cheatsActive is false
+            save();
             renderShops();
         };
         bGrid.appendChild(card);
@@ -335,7 +348,7 @@ function spawnFood() {
 function startGame() {
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
-    state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0; state.shake = 0;
+    state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0; state.shake = 0; state.particles = [];
     document.getElementById('score').textContent = '0';
     spawnFood(); state.gameOver = false; state.lastTime = performance.now();
     document.getElementById('ui-layer').classList.add('hidden');
@@ -353,7 +366,6 @@ window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
     if (k === 'r' || k === ' ') { startGame(); return; }
     if (k === 'q') { window.location.href = "https://www.google.com"; return; }
-
     if (state.gameOver) return;
     let nD = null;
     if (k === 'w' || k === 'arrowup') nD = {x:0, y:-1};
@@ -384,7 +396,7 @@ function update() {
     
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; 
-        state.shake = 6; 
+        state.shake = 8; 
         triggerPulse('death');
         if (state.score > state.wallet) { state.wallet = state.score; }
         save();
@@ -394,16 +406,20 @@ function update() {
     }
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
-        state.score++; document.getElementById('score').textContent = state.score;
-        triggerPulse('ball'); spawnFood();
+        state.score++; 
+        document.getElementById('score').textContent = state.score;
+        triggerPulse('ball'); 
+        
+        // TRIGGER EXPLOSION JUICE
+        const pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
+        explode(state.food.x, state.food.y, pCol);
+        
+        spawnFood();
     } else state.snake.pop();
 }
 
 function render(now) {
     ctx.setTransform(1,0,0,1,0,0);
-    ctx.shadowBlur = 0;
-    ctx.shadowColor = 'transparent';
-
     if (state.shake > 0) { 
         ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); 
         state.shake *= 0.85; 
@@ -411,6 +427,7 @@ function render(now) {
     
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
+    // GRID
     const gridPulseCycle = 3000; 
     const gridPulse = 55 + Math.sin(now / gridPulseCycle) * 8; 
     ctx.strokeStyle = `rgb(${gridPulse}, ${gridPulse}, ${gridPulse})`; 
@@ -422,24 +439,33 @@ function render(now) {
     ctx.stroke();
 
     const rainbowHue = (now / 5) % 360;
-    const glowStr = 10 + Math.min(state.score, 40);
 
+    // PARTICLES UPDATE & DRAW
+    state.particles.forEach((p, i) => {
+        p.x += p.vx; p.y += p.vy; p.life -= 0.02;
+        if(p.life <= 0) { state.particles.splice(i, 1); return; }
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 3, 3);
+    });
+    ctx.globalAlpha = 1.0;
+
+    // FOOD
     const pulseFactor = Math.sin(now / 200) * 0.15;
     const foodRadius = (CONFIG.cellSize / 2.8) * (1 + pulseFactor);
-    const pulseGlow = 15 + (Math.sin(now / 200) * 10);
-
     let ballColor = state.activeBall.color === 'rainbow' ? `hsl(${rainbowHue}, 100%, 60%)` : state.activeBall.color;
-    ctx.fillStyle = ballColor; ctx.shadowBlur = pulseGlow; ctx.shadowColor = ballColor;
+    ctx.fillStyle = ballColor; ctx.shadowBlur = 15 + (Math.sin(now / 200) * 10); ctx.shadowColor = ballColor;
     ctx.beginPath(); 
     ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, foodRadius, 0, Math.PI*2); 
     ctx.fill();
     ctx.shadowBlur = 0;
 
+    // SNAKE
     state.snake.forEach((seg, i) => {
         let sH = state.activeSnake.head === 'rainbow' ? `hsl(${rainbowHue}, 100%, 50%)` : state.activeSnake.head;
         let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rainbowHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
         ctx.fillStyle = (i === 0) ? sH : sB;
-        if(i === 0) { ctx.shadowBlur = glowStr; ctx.shadowColor = sH; }
+        if(i === 0) { ctx.shadowBlur = 20; ctx.shadowColor = sH; }
         drawRoundedRect(ctx, seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4);
         ctx.shadowBlur = 0;
 
@@ -460,7 +486,7 @@ function render(now) {
 function loop(now) {
     if(state.gameOver) {
         render(now);
-        if(state.shake > 0.1) requestAnimationFrame(loop);
+        if(state.shake > 0.1 || state.particles.length > 0) requestAnimationFrame(loop);
         return;
     }
     const dt = now - state.lastTime; state.lastTime = now; state.accumTime += dt;
