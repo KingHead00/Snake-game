@@ -288,7 +288,7 @@ function spawnFood() {
 function startGame() {
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
-    state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0; state.shake = 0; // Fix: Reset shake on start
+    state.dir = {x:1, y:0}; state.nextDir = []; state.score = 0; state.shake = 0;
     document.getElementById('score').textContent = '0';
     spawnFood(); state.gameOver = false; state.lastTime = performance.now();
     document.getElementById('ui-layer').classList.add('hidden');
@@ -334,7 +334,9 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 function update() {
     if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
-    if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
+    
+    // Adjusted collision bounds: Dying only happens when outside 0 to CONFIG-1
+    if (head.x < 0 || head.x > CONFIG.cols - 1 || head.y < 0 || head.y > CONFIG.rows - 1 || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 15; triggerPulse('death');
         if (state.score > state.wallet) { state.wallet = state.score; }
         save();
