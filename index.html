@@ -194,13 +194,15 @@
 <script>
 // --- SUPABASE SETUP ---
 const SB_URL = 'https://koekifrfjhgmttafkynn.supabase.co';
-const SB_KEY = 'sb_publishable_bdcWSNSQne3MR6v79L2tRQ_NRsjdoJg';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvZWtpZnJmamhnbXR0YWZreW5uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyOTkyMDUsImV4cCI6MjA4NDg3NTIwNX0.hg6RjJjg7PTQQ1OmHlQhhGo_f_ijWxDvguL0dmg0h5E';
 let supabase = null;
+
+// Initialize Supabase safely
 try {
-    if (SB_URL !== 'PASTE_YOUR_URL_HERE') {
+    if (SB_URL.includes('supabase.co')) {
         supabase = window.supabase.createClient(SB_URL, SB_KEY);
     }
-} catch(e) { console.error("SB Init Error"); }
+} catch(e) { console.warn("Leaderboard disabled."); }
 
 const AudioFX = {
     ctx: null,
@@ -259,20 +261,21 @@ const state = {
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
 
-async function loadLeaderboard() {
+function loadLeaderboard() {
     const box = document.getElementById('lb-content');
     if(!supabase) { box.innerHTML = "Offline Mode"; return; }
-    try {
-        const { data, error } = await supabase.from('Leaderboard').select('username, score').order('score', { ascending: false }).limit(5);
+    
+    supabase.from('Leaderboard').select('username, score').order('score', { ascending: false }).limit(5)
+    .then(({ data, error }) => {
         if(error || !data || data.length === 0) { box.innerHTML = "No scores yet!"; return; }
         box.innerHTML = data.map(r => `<div class="lb-row"><span class="lb-name">${r.username}</span><span>${r.score}</span></div>`).join('');
-    } catch(e) { box.innerHTML = "Offline Mode"; }
+    }).catch(() => { box.innerHTML = "Offline Mode"; });
 }
 
-async function submitScore() {
+function submitScore() {
     if(!supabase || state.score === 0 || state.cheatsActive) return;
     const user = document.getElementById('username').value || 'Anonymous';
-    try { await supabase.from('Leaderboard').insert([{ username: user, score: state.score }]); loadLeaderboard(); } catch(e){}
+    supabase.from('Leaderboard').insert([{ username: user, score: state.score }]).then(() => loadLeaderboard());
 }
 
 function save() {
@@ -307,9 +310,10 @@ function explode(x, y, color) {
 
 function toggleShop(id) {
     AudioFX.playClick();
-    const isOpen = document.getElementById(id).classList.contains('open');
+    const target = document.getElementById(id);
+    const isOpen = target.classList.contains('open');
     document.querySelectorAll('.shop-content').forEach(s => s.classList.remove('open'));
-    if (!isOpen) document.getElementById(id).classList.add('open');
+    if (!isOpen) target.classList.add('open');
 }
 
 function renderShops() {
@@ -442,6 +446,7 @@ function loop(now) {
 document.querySelectorAll('.speed-btn').forEach(btn => btn.onclick = () => { AudioFX.playClick(); document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); CONFIG.currentMode=btn.dataset.speed; });
 document.getElementById('start-btn').onclick = startGame;
 
+// Launch
 renderShops();
 loadLeaderboard();
 </script>
