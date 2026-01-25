@@ -65,31 +65,32 @@
             padding: 10px;
         }
 
-        /* --- DRAMATIC BORDER STYLES --- */
+        /* --- UPDATED BRIGHTER DRAMATIC BORDER --- */
         canvas {
             background: #000;
             display: block;
-            border: 5px solid #222; 
+            border: 5px solid #ffffff; /* Permanent Bright White */
             border-radius: 4px;
-            transition: border-color 0.2s;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); /* Permanent subtle glow */
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        /* Flash white when eating */
+        /* Intense White Surge when eating */
         canvas.pulse { 
             animation: flashWhite 0.4s ease-out; 
         }
         @keyframes flashWhite {
-            0% { border-color: #fff; box-shadow: 0 0 40px #fff; transform: scale(1.02); }
-            100% { border-color: #222; box-shadow: 0 0 0px transparent; transform: scale(1); }
+            0% { border-color: #fff; box-shadow: 0 0 50px #fff; transform: scale(1.02); }
+            100% { border-color: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.3); transform: scale(1); }
         }
 
-        /* Pulsing red on death */
+        /* Violent Red Pulse on death */
         canvas.death-pulse { 
-            animation: deathGlowRed 1.5s infinite alternate; 
+            animation: deathGlowRed 1s infinite alternate; 
         }
         @keyframes deathGlowRed {
-            0% { border-color: var(--danger); box-shadow: 0 0 20px var(--danger); }
-            100% { border-color: #500; box-shadow: 0 0 60px var(--danger); transform: scale(1.01); }
+            0% { border-color: var(--danger); box-shadow: 0 0 30px var(--danger); }
+            100% { border-color: #ff88aa; box-shadow: 0 0 80px var(--danger); transform: scale(1.01); }
         }
 
         #ui-layer {
