@@ -65,23 +65,31 @@
             padding: 10px;
         }
 
+        /* --- DRAMATIC BORDER STYLES --- */
         canvas {
             background: #000;
             display: block;
-            border: 5px solid #ffffff; 
+            border: 5px solid #222; 
             border-radius: 4px;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            transition: border-color 0.2s;
         }
 
-        canvas.pulse { animation: flashWhite 0.4s ease-out forwards; }
-        @keyframes flashWhite {
-            0% { transform: scale(1.01); border-color: #fff; box-shadow: 0 0 40px rgba(255,255,255,0.6); }
-            100% { transform: scale(1); border-color: #fff; }
+        /* Flash white when eating */
+        canvas.pulse { 
+            animation: flashWhite 0.4s ease-out; 
         }
-        canvas.death-pulse { animation: deathGlowRed 0.8s ease-out forwards; }
+        @keyframes flashWhite {
+            0% { border-color: #fff; box-shadow: 0 0 40px #fff; transform: scale(1.02); }
+            100% { border-color: #222; box-shadow: 0 0 0px transparent; transform: scale(1); }
+        }
+
+        /* Pulsing red on death */
+        canvas.death-pulse { 
+            animation: deathGlowRed 1.5s infinite alternate; 
+        }
         @keyframes deathGlowRed {
-            0% { box-shadow: 0 0 60px var(--danger); border-color: var(--danger); transform: scale(1.01); }
-            100% { transform: scale(1); border-color: #ffffff; }
+            0% { border-color: var(--danger); box-shadow: 0 0 20px var(--danger); }
+            100% { border-color: #500; box-shadow: 0 0 60px var(--danger); transform: scale(1.01); }
         }
 
         #ui-layer {
@@ -310,6 +318,7 @@ function startGame() {
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.nextDir = []; state.score = 0; state.shake = 0; state.particles = [];
     document.getElementById('score').textContent = '0';
+    canvas.className = ""; // Reset border dramatic effects
     spawnFood(); state.gameOver = false; state.lastTime = performance.now();
     document.getElementById('ui-layer').classList.add('hidden');
     requestAnimationFrame(loop);
@@ -337,7 +346,7 @@ function update() {
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 10; AudioFX.playDeath();
-        canvas.classList.add('death-pulse'); setTimeout(()=>canvas.classList.remove('death-pulse'), 800);
+        canvas.classList.add('death-pulse'); 
         if (state.score > state.wallet) state.wallet = state.score;
         save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 800);
         return;
@@ -345,7 +354,9 @@ function update() {
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; document.getElementById('score').textContent = state.score;
-        AudioFX.playEat(); canvas.classList.add('pulse'); setTimeout(()=>canvas.classList.remove('pulse'), 400);
+        AudioFX.playEat(); 
+        canvas.classList.remove('pulse'); void canvas.offsetWidth; // Reset animation
+        canvas.classList.add('pulse'); 
         const pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
         explode(state.food.x, state.food.y, pCol); spawnFood();
     } else state.snake.pop();
