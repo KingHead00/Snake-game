@@ -135,7 +135,6 @@
         .skin-card.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
         .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; }
 
-        /* LEADERBOARD DESIGN */
         #global-leaderboard { margin-top: 20px; background: #0a0a0a; border-radius: 10px; padding: 10px; border: 1px solid #222; }
         .lb-title { font-size: 10px; color: #666; letter-spacing: 2px; margin-bottom: 8px; }
         .lb-row { display: flex; justify-content: space-between; font-size: 13px; font-family: 'Courier New'; padding: 4px 0; border-bottom: 1px solid #111; }
@@ -170,7 +169,7 @@
                 
                 <div id="global-leaderboard">
                     <div class="lb-title">GLOBAL TOP 5</div>
-                    <div id="lb-content">Loading...</div>
+                    <div id="lb-content">Connecting...</div>
                 </div>
 
                 <button class="cheat-btn" id="cheat-btn" onclick="applyCheats()">Cheats Mode</button>
@@ -196,30 +195,35 @@
 // --- SUPABASE SETUP ---
 const SB_URL = 'https://koekifrfjhgmttafkynn.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvZWtpZnJmamhnbXR0YWZreW5uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyOTkyMDUsImV4cCI6MjA4NDg3NTIwNX0.hg6RjJjg7PTQQ1OmHlQhhGo_f_ijWxDvguL0dmg0h5E';
-const supabase = window.supabase ? window.supabase.createClient(SB_URL, SB_KEY) : null;
+let supabase = null;
+try {
+    if (SB_URL !== 'PASTE_YOUR_URL_HERE') {
+        supabase = window.supabase.createClient(SB_URL, SB_KEY);
+    }
+} catch(e) { console.error("SB Init Error"); }
 
 const AudioFX = {
     ctx: null,
     init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
     playEat() {
-        this.init(); const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+        this.init(); try { const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
         osc.type = 'triangle'; osc.frequency.setValueAtTime(440, this.ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.1);
         gain.gain.setValueAtTime(0.1, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
-        osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.1);
+        osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.1); } catch(e){}
     },
     playDeath() {
-        this.init(); const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+        this.init(); try { const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
         osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, this.ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.4);
         gain.gain.setValueAtTime(0.2, this.ctx.currentTime); gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.4);
-        osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.4);
+        osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.4); } catch(e){}
     },
     playClick() {
-        this.init(); const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+        this.init(); try { const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
         osc.type = 'sine'; osc.frequency.setValueAtTime(600, this.ctx.currentTime);
         gain.gain.setValueAtTime(0.05, this.ctx.currentTime); gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.05);
-        osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.05);
+        osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.05); } catch(e){}
     }
 };
 
@@ -255,24 +259,20 @@ const state = {
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
 
-// DATABASE FUNCTIONS
 async function loadLeaderboard() {
-    if(!supabase) return;
-    const { data, error } = await supabase.from('Leaderboard').select('username, score').order('score', { ascending: false }).limit(5);
     const box = document.getElementById('lb-content');
-    if(error) { box.innerHTML = "Offline"; return; }
-    if(!data || data.length === 0) {
-        box.innerHTML = `<div style="color:#555; font-size:11px; padding:10px;">BE THE FIRST TO SCORE!</div>`;
-        return;
-    }
-    box.innerHTML = data.map(r => `<div class="lb-row"><span class="lb-name">${r.username}</span><span>${r.score}</span></div>`).join('');
+    if(!supabase) { box.innerHTML = "Offline Mode"; return; }
+    try {
+        const { data, error } = await supabase.from('Leaderboard').select('username, score').order('score', { ascending: false }).limit(5);
+        if(error || !data || data.length === 0) { box.innerHTML = "No scores yet!"; return; }
+        box.innerHTML = data.map(r => `<div class="lb-row"><span class="lb-name">${r.username}</span><span>${r.score}</span></div>`).join('');
+    } catch(e) { box.innerHTML = "Offline Mode"; }
 }
 
 async function submitScore() {
     if(!supabase || state.score === 0 || state.cheatsActive) return;
     const user = document.getElementById('username').value || 'Anonymous';
-    await supabase.from('Leaderboard').insert([{ username: user, score: state.score }]);
-    loadLeaderboard();
+    try { await supabase.from('Leaderboard').insert([{ username: user, score: state.score }]); loadLeaderboard(); } catch(e){}
 }
 
 function save() {
@@ -307,10 +307,9 @@ function explode(x, y, color) {
 
 function toggleShop(id) {
     AudioFX.playClick();
-    const el = document.getElementById(id);
-    const isOpen = el.classList.contains('open');
+    const isOpen = document.getElementById(id).classList.contains('open');
     document.querySelectorAll('.shop-content').forEach(s => s.classList.remove('open'));
-    if (!isOpen) el.classList.add('open');
+    if (!isOpen) document.getElementById(id).classList.add('open');
 }
 
 function renderShops() {
@@ -321,8 +320,7 @@ function renderShops() {
         const isSel = state.activeSnake.id === skin.id;
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        card.innerHTML = `<div class="swatch" style="background:${skin.head==='rainbow'?'linear-gradient(45deg,red,blue)':skin.head}"></div>
-            <b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
+        card.innerHTML = `<div class="swatch" style="background:${skin.head==='rainbow'?'linear-gradient(45deg,red,blue)':skin.head}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
         card.onclick = () => { AudioFX.playClick(); if(isOwned) state.activeSnake=skin; else if(state.wallet>=skin.price){state.wallet-=skin.price;state.ownedSkins.push(skin.id);state.activeSnake=skin;} save(); renderShops(); };
         sGrid.appendChild(card);
     });
@@ -332,8 +330,7 @@ function renderShops() {
         const isSel = state.activeBall.id === ball.id;
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        card.innerHTML = `<div class="swatch" style="background:${ball.color==='rainbow'?'linear-gradient(45deg,red,blue)':ball.color}"></div>
-            <b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
+        card.innerHTML = `<div class="swatch" style="background:${ball.color==='rainbow'?'linear-gradient(45deg,red,blue)':ball.color}"></div><b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
         card.onclick = () => { AudioFX.playClick(); if(isOwned) state.activeBall=ball; else if(state.wallet>=ball.price){state.wallet-=ball.price;state.ownedBalls.push(ball.id);state.activeBall=ball;} save(); renderShops(); };
         bGrid.appendChild(card);
     });
@@ -360,8 +357,7 @@ function startGame() {
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.nextDir = []; state.score = 0; state.shake = 0; state.particles = [];
     document.getElementById('score').textContent = '0';
-    canvas.className = ""; 
-    spawnFood(); state.gameOver = false; state.lastTime = performance.now();
+    canvas.className = ""; spawnFood(); state.gameOver = false; state.lastTime = performance.now();
     document.getElementById('ui-layer').classList.add('hidden');
     requestAnimationFrame(loop);
 }
@@ -377,10 +373,7 @@ window.addEventListener('keydown', e => {
     if (k === 's' || k === 'arrowdown') nD = {x:0, y:1};
     if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0};
     if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
-    if (nD) {
-        const last = state.nextDir.length > 0 ? state.nextDir[state.nextDir.length-1] : state.dir;
-        if (nD.x !== -last.x || nD.y !== -last.y) state.nextDir.push(nD);
-    }
+    if (nD) { const last = state.nextDir.length > 0 ? state.nextDir[state.nextDir.length-1] : state.dir; if (nD.x !== -last.x || nD.y !== -last.y) state.nextDir.push(nD); }
 });
 
 function update() {
@@ -390,81 +383,49 @@ function update() {
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 10; AudioFX.playDeath();
         canvas.classList.add('death-pulse'); 
-        
-        if (state.score > state.wallet) {
-            state.wallet = state.score;
-            submitScore();
-        }
-        
-        save(); 
-        state.menuTimeout = setTimeout(() => { 
-            if(state.gameOver) { 
-                document.getElementById('menu-text').textContent="CRASHED!"; 
-                document.getElementById('ui-layer').classList.remove('hidden'); 
-                renderShops(); 
-                loadLeaderboard(); 
-            } 
-        }, 800);
+        if (state.score > state.wallet) { state.wallet = state.score; submitScore(); }
+        save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); loadLeaderboard(); } }, 800);
         return;
     }
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; document.getElementById('score').textContent = state.score;
-        AudioFX.playEat(); 
-        canvas.classList.remove('pulse'); void canvas.offsetWidth; 
-        canvas.classList.add('pulse'); 
+        AudioFX.playEat(); canvas.classList.remove('pulse'); void canvas.offsetWidth; canvas.classList.add('pulse'); 
         const pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
         explode(state.food.x, state.food.y, pCol); spawnFood();
     } else state.snake.pop();
 }
 
 function render(now) {
-    ctx.setTransform(1,0,0,1,0,0);
-    if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; }
+    ctx.setTransform(1,0,0,1,0,0); if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; }
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    
-    ctx.strokeStyle = '#333333'; 
-    ctx.lineWidth = 1; ctx.beginPath();
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
-
-    state.particles.forEach((p, i) => {
-        p.x += p.vx; p.y += p.vy; p.life -= 0.02;
-        if(p.life <= 0) { state.particles.splice(i,1); return; }
-        ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3);
-    });
+    state.particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life -= 0.02; if(p.life <= 0) { state.particles.splice(i,1); return; } ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3); });
     ctx.globalAlpha = 1.0;
-
     const rHue = (now / 5) % 360;
     let bCol = state.activeBall.color === 'rainbow' ? `hsl(${rHue}, 100%, 60%)` : state.activeBall.color;
     ctx.fillStyle = bCol; ctx.shadowBlur = 15; ctx.shadowColor = bCol;
     ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*(1+Math.sin(now/200)*0.1), 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
-
     state.snake.forEach((seg, i) => {
         let sH = state.activeSnake.head === 'rainbow' ? `hsl(${rHue}, 100%, 50%)` : state.activeSnake.head;
         let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
         ctx.fillStyle = (i === 0) ? sH : sB;
         if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sH; }
-        
-        const r = i === 0 ? 8 : 4;
-        const x = seg.x*CONFIG.cellSize+1; const y = seg.y*CONFIG.cellSize+1;
+        const r = i === 0 ? 8 : 4; const x = seg.x*CONFIG.cellSize+1; const y = seg.y*CONFIG.cellSize+1;
         const w = CONFIG.cellSize-2; const h = CONFIG.cellSize-2;
-        ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fill();
-        ctx.shadowBlur = 0;
-
+        ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.shadowBlur = 0;
         if(i === 0) {
-            ctx.fillStyle = '#000';
-            const eyeSize = CONFIG.cellSize / 8;
-            const offset = CONFIG.cellSize / 4;
+            ctx.fillStyle = '#000'; const eyeSize = CONFIG.cellSize / 8; const offset = CONFIG.cellSize / 4;
             let e1x, e1y, e2x, e2y;
             if (state.lastD.x === 1) { e1x = e2x = x + w - offset; e1y = y + offset; e2y = y + h - offset; }
             else if (state.lastD.x === -1) { e1x = e2x = x + offset; e1y = y + offset; e2y = y + h - offset; }
             else if (state.lastD.y === -1) { e1y = e2y = y + offset; e1x = x + offset; e2x = x + w - offset; }
             else { e1y = e2y = y + h - offset; e1x = x + offset; e2x = x + w - offset; }
-            ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill();
         }
     });
 }
