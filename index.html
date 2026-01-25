@@ -103,7 +103,6 @@
 
         .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
         
-        /* --- IMPROVED USERNAME BOX --- */
         .user-input {
             width: 100%; padding: 12px; margin-bottom: 20px;
             background: #111; border: 1px solid #333; border-radius: 10px;
@@ -160,9 +159,7 @@
         <div id="ui-layer">
             <div class="menu-box">
                 <div class="menu-title" id="menu-text">READY?</div>
-                
                 <input type="text" id="username" class="user-input" placeholder="YOUR USERNAME..." maxlength="15">
-
                 <button class="cheat-btn" id="cheat-btn" onclick="applyCheats()">Cheats Mode</button>
                 <div class="speed-selector">
                     <button class="speed-btn" data-speed="slow">SLOW</button>
@@ -173,7 +170,6 @@
                 <div id="snake-shop" class="shop-content"><div class="skin-grid" id="snake-grid"></div></div>
                 <button class="shop-btn" onclick="toggleShop('ball-shop')">BALL COLORS <span>▼</span></button>
                 <div id="ball-shop" class="shop-content"><div class="skin-grid" id="ball-grid"></div></div>
-                
                 <button class="btn" id="start-btn">START GAME</button>
                 <div class="menu-controls-hint">[<b>WASD</b>] Move &nbsp;•&nbsp; [<b>R/Space</b>] Restart<br>[<b>Q</b>] Exit to Google</div>
             </div>
@@ -321,7 +317,9 @@ function spawnFood() {
 
 function startGame() {
     const user = document.getElementById('username').value || 'Anonymous';
-    if (window.va) { window.va.track('GameStart', { username: user }); }
+    try {
+        if (window.va) { window.va.track('GameStart', { username: user }); }
+    } catch (e) {}
     
     AudioFX.playClick();
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
@@ -335,9 +333,7 @@ function startGame() {
 }
 
 window.addEventListener('keydown', e => {
-    // --- STOP GAME CONTROLS IF TYPING ---
     if (document.activeElement.tagName === 'INPUT') return;
-
     const k = e.key.toLowerCase();
     if (k === 'r' || k === ' ') startGame();
     if (k === 'q') window.location.href = "https://www.google.com";
