@@ -36,18 +36,18 @@
 
         .header-left { display: flex; align-items: center; gap: 15px; }
 
-        .logo-box {
-            width: 26px; height: 26px;
-            border: 2px solid var(--primary);
-            border-radius: 6px;
-            position: relative;
-            box-shadow: 0 0 10px var(--primary);
+        /* --- UPDATED LOGO.PNG STYLING --- */
+        .logo-img {
+            width: 32px; 
+            height: 32px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 5px var(--primary));
             animation: logoPulse 2s infinite ease-in-out;
         }
         
         @keyframes logoPulse {
-            0%, 100% { opacity: 1; transform: scale(1); filter: brightness(1); }
-            50% { opacity: 0.8; transform: scale(1.1); filter: brightness(1.3); }
+            0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 5px var(--primary)) brightness(1); }
+            50% { opacity: 0.8; transform: scale(1.1); filter: drop-shadow(0 0 12px var(--primary)) brightness(1.3); }
         }
 
         h1 { font-size: 20px; margin: 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 1px; }
@@ -65,17 +65,15 @@
             padding: 10px;
         }
 
-        /* --- UPDATED BRIGHTER DRAMATIC BORDER --- */
         canvas {
             background: #000;
             display: block;
-            border: 5px solid #ffffff; /* Permanent Bright White */
+            border: 5px solid #ffffff; 
             border-radius: 4px;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); /* Permanent subtle glow */
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); 
             transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        /* Intense White Surge when eating */
         canvas.pulse { 
             animation: flashWhite 0.4s ease-out; 
         }
@@ -84,7 +82,6 @@
             100% { border-color: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.3); transform: scale(1); }
         }
 
-        /* Violent Red Pulse on death */
         canvas.death-pulse { 
             animation: deathGlowRed 1s infinite alternate; 
         }
@@ -146,7 +143,7 @@
 
     <header>
         <div class="header-left">
-            <div class="logo-box"></div>
+            <img src="logo.png" alt="Logo" class="logo-img">
             <h1>NEON SNAKE</h1>
         </div>
         <div class="stats">SCORE: <span id="score">0</span> &nbsp;|&nbsp; BEST: <span id="high">0</span></div>
@@ -176,7 +173,7 @@
     <footer>HAPPY BIRTHDAY SANJIT</footer>
 
 <script>
-// --- AUDIO SYSTEM ---
+// Logic remains identical to your working version
 const AudioFX = {
     ctx: null,
     init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -319,7 +316,7 @@ function startGame() {
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.nextDir = []; state.score = 0; state.shake = 0; state.particles = [];
     document.getElementById('score').textContent = '0';
-    canvas.className = ""; // Reset border dramatic effects
+    canvas.className = ""; 
     spawnFood(); state.gameOver = false; state.lastTime = performance.now();
     document.getElementById('ui-layer').classList.add('hidden');
     requestAnimationFrame(loop);
@@ -356,7 +353,7 @@ function update() {
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; document.getElementById('score').textContent = state.score;
         AudioFX.playEat(); 
-        canvas.classList.remove('pulse'); void canvas.offsetWidth; // Reset animation
+        canvas.classList.remove('pulse'); void canvas.offsetWidth; 
         canvas.classList.add('pulse'); 
         const pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
         explode(state.food.x, state.food.y, pCol); spawnFood();
@@ -368,14 +365,12 @@ function render(now) {
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; }
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    // Brighter Grid
     ctx.strokeStyle = '#333333'; 
     ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
 
-    // Particles
     state.particles.forEach((p, i) => {
         p.x += p.vx; p.y += p.vy; p.life -= 0.02;
         if(p.life <= 0) { state.particles.splice(i,1); return; }
@@ -383,14 +378,12 @@ function render(now) {
     });
     ctx.globalAlpha = 1.0;
 
-    // Food
     const rHue = (now / 5) % 360;
     let bCol = state.activeBall.color === 'rainbow' ? `hsl(${rHue}, 100%, 60%)` : state.activeBall.color;
     ctx.fillStyle = bCol; ctx.shadowBlur = 15; ctx.shadowColor = bCol;
     ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*(1+Math.sin(now/200)*0.1), 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Snake
     state.snake.forEach((seg, i) => {
         let sH = state.activeSnake.head === 'rainbow' ? `hsl(${rHue}, 100%, 50%)` : state.activeSnake.head;
         let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
@@ -403,7 +396,6 @@ function render(now) {
         ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fill();
         ctx.shadowBlur = 0;
 
-        // Eyes
         if(i === 0) {
             ctx.fillStyle = '#000';
             const eyeSize = CONFIG.cellSize / 8;
