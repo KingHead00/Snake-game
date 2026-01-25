@@ -107,18 +107,11 @@
             width: 100%; padding: 12px; margin-bottom: 20px;
             background: #111; border: 1px solid #333; border-radius: 10px;
             color: var(--primary); font-weight: bold; text-align: center;
-            outline: none; transition: 0.3s; font-size: 14px; box-sizing: border-box;
+            outline: none; transition: 0.3s;
+            font-size: 14px;
+            box-sizing: border-box;
         }
         .user-input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 255, 204, 0.3); background: #000; }
-
-        /* Leaderboard Style */
-        .leaderboard {
-            margin: 15px 0; background: #000; border-radius: 10px;
-            border: 1px solid #222; font-size: 12px; overflow: hidden;
-        }
-        .leaderboard-row { display: flex; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid #111; }
-        .leaderboard-row:last-child { border: none; }
-        .leaderboard-row b { color: var(--primary); }
 
         .cheat-btn {
             background: linear-gradient(45deg, #ff0000, #ff8800, #ffff00, #00ff00, #0000ff, #8b00ff);
@@ -141,6 +134,13 @@
         .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 11px; }
         .skin-card.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
         .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; }
+
+        /* LEADERBOARD DESIGN */
+        #global-leaderboard { margin-top: 20px; background: #0a0a0a; border-radius: 10px; padding: 10px; border: 1px solid #222; }
+        .lb-title { font-size: 10px; color: #666; letter-spacing: 2px; margin-bottom: 8px; }
+        .lb-row { display: flex; justify-content: space-between; font-size: 13px; font-family: 'Courier New'; padding: 4px 0; border-bottom: 1px solid #111; }
+        .lb-row:last-child { border: none; }
+        .lb-name { color: var(--primary); font-weight: bold; }
 
         .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 10px; }
         .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 16px; cursor: pointer; border-radius: 8px; font-size: 12px; }
@@ -168,11 +168,10 @@
                 <div class="menu-title" id="menu-text">READY?</div>
                 <input type="text" id="username" class="user-input" placeholder="YOUR USERNAME..." maxlength="15">
                 
-                <div id="leaderboard-container" class="leaderboard">
-                    <div style="padding:10px; color:#555">Loading Global Scores...</div>
+                <div id="global-leaderboard">
+                    <div class="lb-title">GLOBAL TOP 5</div>
+                    <div id="lb-content">Loading...</div>
                 </div>
-
-                <button class="btn" id="start-btn">START GAME</button>
 
                 <button class="cheat-btn" id="cheat-btn" onclick="applyCheats()">Cheats Mode</button>
                 <div class="speed-selector">
@@ -184,7 +183,7 @@
                 <div id="snake-shop" class="shop-content"><div class="skin-grid" id="snake-grid"></div></div>
                 <button class="shop-btn" onclick="toggleShop('ball-shop')">BALL COLORS <span>▼</span></button>
                 <div id="ball-shop" class="shop-content"><div class="skin-grid" id="ball-grid"></div></div>
-                
+                <button class="btn" id="start-btn">START GAME</button>
                 <div class="menu-controls-hint">[<b>WASD</b>] Move &nbsp;•&nbsp; [<b>R/Space</b>] Restart<br>[<b>Q</b>] Exit to Google</div>
             </div>
         </div>
@@ -194,9 +193,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// --- PASTE YOUR SUPABASE INFO HERE ---
+// --- SUPABASE SETUP ---
 const SB_URL = 'https://koekifrfjhgmttafkynn.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvZWtpZnJmamhnbXR0YWZreW5uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyOTkyMDUsImV4cCI6MjA4NDg3NTIwNX0.hg6RjJjg7PTQQ1OmHlQhhGo_f_ijWxDvguL0dmg0h5EY';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvZWtpZnJmamhnbXR0YWZreW5uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyOTkyMDUsImV4cCI6MjA4NDg3NTIwNX0.hg6RjJjg7PTQQ1OmHlQhhGo_f_ijWxDvguL0dmg0h5E';
 const supabase = window.supabase ? window.supabase.createClient(SB_URL, SB_KEY) : null;
 
 const AudioFX = {
@@ -256,20 +255,19 @@ const state = {
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
 
+// DATABASE FUNCTIONS
 async function loadLeaderboard() {
     if(!supabase) return;
-    const { data, error } = await supabase.from('leaderboard').select('username, score').order('score', { ascending: false }).limit(5);
-    if(error) return;
-    const container = document.getElementById('leaderboard-container');
-    container.innerHTML = '<div style="padding:5px; font-size:10px; color:#888">GLOBAL TOP 5</div>';
-    data.forEach(row => {
-        container.innerHTML += `<div class="leaderboard-row"><span>${row.username}</span><b>${row.score}</b></div>`;
-    });
+    const { data, error } = await supabase.from('Leaderboard').select('username, score').order('score', { ascending: false }).limit(5);
+    const box = document.getElementById('lb-content');
+    if(error) { box.innerHTML = "Offline"; return; }
+    box.innerHTML = data.map(r => `<div class="lb-row"><span class="lb-name">${r.username}</span><span>${r.score}</span></div>`).join('');
 }
 
-async function submitScore(name, score) {
-    if(!supabase || score === 0 || state.cheatsActive) return;
-    await supabase.from('leaderboard').insert([{ username: name, score: score }]);
+async function submitScore() {
+    if(!supabase || state.score === 0 || state.cheatsActive) return;
+    const user = document.getElementById('username').value || 'Anonymous';
+    await supabase.from('Leaderboard').insert([{ username: user, score: state.score }]);
     loadLeaderboard();
 }
 
@@ -288,7 +286,7 @@ function applyCheats() {
     state.ownedSkins = SNAKE_SKINS.map(s => s.id);
     state.ownedBalls = BALL_COLORS.map(b => b.id);
     document.getElementById('cheat-btn').classList.add('active');
-    document.getElementById('cheat-btn').innerText = "CHEATS ON (NO GLOBAL SCORES)";
+    document.getElementById('cheat-btn').innerText = "CHEATS ON (NO SAVING)";
     renderShops();
 }
 
@@ -353,9 +351,6 @@ function spawnFood() {
 }
 
 function startGame() {
-    const user = document.getElementById('username').value || 'Anonymous';
-    try { if (window.va) { window.va.track('GameStart', { username: user }); } } catch (e) {}
-    
     AudioFX.playClick();
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
@@ -391,17 +386,19 @@ function update() {
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 10; AudioFX.playDeath();
         canvas.classList.add('death-pulse'); 
-        if (state.score > state.wallet) state.wallet = state.score;
-        save();
         
-        const currentName = document.getElementById('username').value || 'Anonymous';
-        submitScore(currentName, state.score);
-
+        if (state.score > state.wallet) {
+            state.wallet = state.score;
+            submitScore(); // Send to Supabase
+        }
+        
+        save(); 
         state.menuTimeout = setTimeout(() => { 
             if(state.gameOver) { 
                 document.getElementById('menu-text').textContent="CRASHED!"; 
                 document.getElementById('ui-layer').classList.remove('hidden'); 
                 renderShops(); 
+                loadLeaderboard(); 
             } 
         }, 800);
         return;
@@ -479,11 +476,10 @@ function loop(now) {
 
 document.querySelectorAll('.speed-btn').forEach(btn => btn.onclick = () => { AudioFX.playClick(); document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); CONFIG.currentMode=btn.dataset.speed; });
 document.getElementById('start-btn').onclick = startGame;
+
+// Start Up
 renderShops();
 loadLeaderboard();
 </script>
-
-<script defer src="/_vercel/insights/script.js"></script>
-
 </body>
 </html>
