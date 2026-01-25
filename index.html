@@ -103,14 +103,16 @@
 
         .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
         
-        /* --- USERNAME BOX STYLE --- */
+        /* --- IMPROVED USERNAME BOX --- */
         .user-input {
-            width: 100%; padding: 12px; margin-bottom: 10px;
+            width: 100%; padding: 12px; margin-bottom: 20px;
             background: #111; border: 1px solid #333; border-radius: 10px;
             color: var(--primary); font-weight: bold; text-align: center;
-            outline: none; transition: border-color 0.3s;
+            outline: none; transition: 0.3s;
+            font-size: 14px;
+            box-sizing: border-box;
         }
-        .user-input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0, 255, 204, 0.2); }
+        .user-input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 255, 204, 0.3); background: #000; }
 
         .cheat-btn {
             background: linear-gradient(45deg, #ff0000, #ff8800, #ffff00, #00ff00, #0000ff, #8b00ff);
@@ -122,7 +124,7 @@
         .cheat-btn.active { filter: brightness(0.6); pointer-events: none; opacity: 0.8; }
         @keyframes rainbowShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
 
-        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 5px; width: 100%; transition: 0.2s; }
+        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; transition: 0.2s; }
         .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--primary); }
 
         .shop-btn { background: #111; color: #fff; border: 1px solid #333; padding: 14px; width: 100%; margin-top: 12px; cursor: pointer; border-radius: 10px; font-weight: bold; display: flex; justify-content: space-between; }
@@ -158,6 +160,9 @@
         <div id="ui-layer">
             <div class="menu-box">
                 <div class="menu-title" id="menu-text">READY?</div>
+                
+                <input type="text" id="username" class="user-input" placeholder="YOUR USERNAME..." maxlength="15">
+
                 <button class="cheat-btn" id="cheat-btn" onclick="applyCheats()">Cheats Mode</button>
                 <div class="speed-selector">
                     <button class="speed-btn" data-speed="slow">SLOW</button>
@@ -168,8 +173,6 @@
                 <div id="snake-shop" class="shop-content"><div class="skin-grid" id="snake-grid"></div></div>
                 <button class="shop-btn" onclick="toggleShop('ball-shop')">BALL COLORS <span>▼</span></button>
                 <div id="ball-shop" class="shop-content"><div class="skin-grid" id="ball-grid"></div></div>
-                
-                <input type="text" id="username" class="user-input" placeholder="ENTER USERNAME..." maxlength="15">
                 
                 <button class="btn" id="start-btn">START GAME</button>
                 <div class="menu-controls-hint">[<b>WASD</b>] Move &nbsp;•&nbsp; [<b>R/Space</b>] Restart<br>[<b>Q</b>] Exit to Google</div>
@@ -318,10 +321,7 @@ function spawnFood() {
 
 function startGame() {
     const user = document.getElementById('username').value || 'Anonymous';
-    // --- VERCEL TRACKING ---
-    if (window.va) {
-        window.va.track('GameStart', { username: user });
-    }
+    if (window.va) { window.va.track('GameStart', { username: user }); }
     
     AudioFX.playClick();
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
@@ -335,6 +335,9 @@ function startGame() {
 }
 
 window.addEventListener('keydown', e => {
+    // --- STOP GAME CONTROLS IF TYPING ---
+    if (document.activeElement.tagName === 'INPUT') return;
+
     const k = e.key.toLowerCase();
     if (k === 'r' || k === ' ') startGame();
     if (k === 'q') window.location.href = "https://www.google.com";
