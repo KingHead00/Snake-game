@@ -135,12 +135,6 @@
         .skin-card.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
         .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; }
 
-        #global-leaderboard { margin-top: 20px; background: #0a0a0a; border-radius: 10px; padding: 10px; border: 1px solid #222; }
-        .lb-title { font-size: 10px; color: #666; letter-spacing: 2px; margin-bottom: 8px; }
-        .lb-row { display: flex; justify-content: space-between; font-size: 13px; font-family: 'Courier New'; padding: 4px 0; border-bottom: 1px solid #111; }
-        .lb-row:last-child { border: none; }
-        .lb-name { color: var(--primary); font-weight: bold; }
-
         .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 10px; }
         .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 16px; cursor: pointer; border-radius: 8px; font-size: 12px; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
@@ -167,11 +161,6 @@
                 <div class="menu-title" id="menu-text">READY?</div>
                 <input type="text" id="username" class="user-input" placeholder="YOUR USERNAME..." maxlength="15">
                 
-                <div id="global-leaderboard">
-                    <div class="lb-title">GLOBAL TOP 5</div>
-                    <div id="lb-content">Connecting...</div>
-                </div>
-
                 <button class="cheat-btn" id="cheat-btn" onclick="applyCheats()">Cheats Mode</button>
                 <div class="speed-selector">
                     <button class="speed-btn" data-speed="slow">SLOW</button>
@@ -190,14 +179,8 @@
 
     <footer>HAPPY BIRTHDAY SANJIT</footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// --- SUPABASE SETUP ---
-const SB_URL = 'https://koekifrfjhgmttafkynn.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvZWtpZnJmamhnbXR0YWZreW5uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyOTkyMDUsImV4cCI6MjA4NDg3NTIwNX0.hg6RjJjg7PTQQ1OmHlQhhGo_f_ijWxDvguL0dmg0h5E';
-let supabase = null;
-
-// Audio context fix
+// --- CORE SETUP ---
 const AudioFX = {
     ctx: null,
     init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -255,23 +238,6 @@ const state = {
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
 const CONFIG = { cols: 31, rows: 15, cellSize: 0, speeds: { slow: { base: 6, boost: 0.1, max: 12 }, normal: { base: 8, boost: 0.15, max: 18 }, hard: { base: 11, boost: 0.15, max: 22 } }, currentMode: 'hard' };
-
-function loadLeaderboard() {
-    const box = document.getElementById('lb-content');
-    if(!supabase || SB_URL.includes('PASTE_YOUR')) { box.innerHTML = "Offline Mode"; return; }
-    
-    supabase.from('Leaderboard').select('username, score').order('score', { ascending: false }).limit(5)
-    .then(({ data, error }) => {
-        if(error || !data || data.length === 0) { box.innerHTML = "No scores yet!"; return; }
-        box.innerHTML = data.map(r => `<div class="lb-row"><span class="lb-name">${r.username}</span><span>${r.score}</span></div>`).join('');
-    }).catch(() => { box.innerHTML = "Offline Mode"; });
-}
-
-function submitScore() {
-    if(!supabase || state.score === 0 || state.cheatsActive || SB_URL.includes('PASTE_YOUR')) return;
-    const user = document.getElementById('username').value || 'Anonymous';
-    supabase.from('Leaderboard').insert([{ username: user, score: state.score }]).then(() => loadLeaderboard());
-}
 
 function save() {
     if (state.cheatsActive) return; 
@@ -366,8 +332,8 @@ function update() {
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 10; AudioFX.playDeath();
         canvas.classList.add('death-pulse'); 
-        if (state.score > state.wallet) { state.wallet = state.score; submitScore(); }
-        save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); loadLeaderboard(); } }, 800);
+        if (state.score > state.wallet) { state.wallet = state.score; }
+        save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 800);
         return;
     }
     state.snake.unshift(head);
@@ -422,20 +388,10 @@ function loop(now) {
     render(now); requestAnimationFrame(loop);
 }
 
-// Initial Launch Logic
 document.addEventListener('DOMContentLoaded', () => {
-    // Resize first
     window.addEventListener('resize', resize); 
     resize();
     
-    // Supabase safety
-    try {
-        if (typeof window.supabase !== 'undefined' && SB_URL.includes('supabase.co')) {
-            supabase = window.supabase.createClient(SB_URL, SB_KEY);
-        }
-    } catch(e) { console.warn("Supabase load failed"); }
-
-    // Click handlers
     document.querySelectorAll('.speed-btn').forEach(btn => {
         btn.onclick = () => { 
             AudioFX.playClick(); 
@@ -465,7 +421,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     renderShops();
-    loadLeaderboard();
 });
 </script>
 </body>
