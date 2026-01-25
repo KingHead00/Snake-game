@@ -1,442 +1,202 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neon Snake - New skins</title>
-    
     <style>
-        :root {
-            --bg: #050505;
-            --grid: #333333; 
-            --primary: #00ffcc;
-            --text: #ffffff;
-            --ui-bg: rgba(0, 0, 0, 0.95);
-            --danger: #ff0044;
-        }
-
-        html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); }
-        body {
-            color: var(--text);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            user-select: none;
-        }
-
-        header {
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #0a0a0a;
-            border-bottom: 1px solid #222;
-            z-index: 10;
-        }
-
-        .header-left { display: flex; align-items: center; gap: 15px; }
-
-        .logo-img {
-            width: 32px; 
-            height: 32px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 5px var(--primary));
-            animation: logoPulse 2s infinite ease-in-out;
-        }
-        
-        @keyframes logoPulse {
-            0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 5px var(--primary)) brightness(1); }
-            50% { opacity: 0.8; transform: scale(1.1); filter: drop-shadow(0 0 12px var(--primary)) brightness(1.3); }
-        }
-
-        h1 { font-size: 20px; margin: 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 1px; }
-        .stats { font-family: 'Courier New', monospace; font-size: 16px; color: #888; font-weight: bold; }
-        #score, #high { color: #fff; }
-
-        #game-container {
-            flex: 1;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            padding: 10px;
-        }
-
-        canvas {
-            background: #000;
-            display: block;
-            border: 5px solid #ffffff; 
-            border-radius: 4px;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); 
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        canvas.pulse { animation: flashWhite 0.4s ease-out; }
-        @keyframes flashWhite {
-            0% { border-color: #fff; box-shadow: 0 0 50px #fff; transform: scale(1.02); }
-            100% { border-color: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.3); transform: scale(1); }
-        }
-
-        canvas.death-pulse { animation: deathGlowRed 1s infinite alternate; }
-        @keyframes deathGlowRed {
-            0% { border-color: var(--danger); box-shadow: 0 0 30px var(--danger); }
-            100% { border-color: #ff88aa; box-shadow: 0 0 80px var(--danger); transform: scale(1.01); }
-        }
-
-        #ui-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
-            transition: opacity 0.3s; z-index: 20;
-        }
-        #ui-layer.hidden { opacity: 0; pointer-events: none; }
-        
-        .menu-box {
-            text-align: center; background: var(--ui-bg); padding: 35px;
-            border: 1px solid #333; border-radius: 20px; width: 340px;
-            max-height: 85vh; overflow-y: auto;
-            scrollbar-width: none;
-        }
-
-        .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
-        
-        .user-input {
-            width: 100%; padding: 12px; margin-bottom: 20px;
-            background: #111; border: 1px solid #333; border-radius: 10px;
-            color: var(--primary); font-weight: bold; text-align: center;
-            outline: none; transition: 0.3s;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        .user-input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 255, 204, 0.3); background: #000; }
-
-        .cheat-btn {
-            background: linear-gradient(45deg, #ff0000, #ff8800, #ffff00, #00ff00, #0000ff, #8b00ff);
-            background-size: 400% 400%;
-            animation: rainbowShift 4s linear infinite;
-            border: none; color: white; padding: 12px; width: 100%; border-radius: 10px;
-            font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; margin-bottom: 15px;
-        }
-        .cheat-btn.active { filter: brightness(0.6); pointer-events: none; opacity: 0.8; }
-        @keyframes rainbowShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
-
-        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; transition: 0.2s; }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--primary); }
-
-        .shop-btn { background: #111; color: #fff; border: 1px solid #333; padding: 14px; width: 100%; margin-top: 12px; cursor: pointer; border-radius: 10px; font-weight: bold; display: flex; justify-content: space-between; }
-        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #000; }
-        .shop-content.open { max-height: 400px; border: 1px solid #333; border-top: none; padding-bottom: 10px; }
-        
-        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
-        .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 11px; }
-        .skin-card.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
-        .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; }
-
-        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 10px; }
-        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 16px; cursor: pointer; border-radius: 8px; font-size: 12px; }
-        .speed-btn.active { color: var(--primary); border-color: var(--primary); }
-
-        .menu-controls-hint { margin-top: 25px; padding-top: 15px; border-top: 1px solid #333; font-size: 11px; color: #666; text-transform: uppercase; line-height: 1.6; }
-        .menu-controls-hint b { color: var(--primary); }
-        footer { padding: 15px; text-align: center; font-size: 12px; color: #333; background: #050505; }
+        :root { --p: #0f0; --bg: #050505; }
+        body { background: var(--bg); color: var(--p); font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; margin: 0; overflow: hidden; }
+        #game-container { position: relative; margin-top: 20px; box-shadow: 0 0 20px rgba(0,255,0,0.2); }
+        canvas { border: 2px solid var(--p); display: block; }
+        #ui { position: absolute; top: 0; left: 0; width: 400px; height: 400px; pointer-events: none; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.8); }
+        .btn { pointer-events: auto; background: none; border: 1px solid var(--p); color: var(--p); padding: 10px 20px; cursor: pointer; font-family: inherit; margin: 5px; transition: 0.2s; }
+        .btn:hover { background: var(--p); color: #000; }
+        #leaderboard-container { margin-top: 15px; width: 200px; font-size: 12px; border-top: 1px solid #333; padding-top: 10px; }
+        .leaderboard-row { display: flex; justify-content: space-between; margin: 2px 0; }
+        #score-board { position: absolute; top: -30px; left: 0; width: 100%; display: flex; justify-content: space-between; font-size: 18px; }
+        .skin-select { pointer-events: auto; margin-top: 10px; display: flex; gap: 5px; }
+        .skin-btn { width: 30px; height: 30px; border: 1px solid #555; cursor: pointer; }
+        .skin-btn.active { border-color: #fff; transform: scale(1.1); }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-left">
-            <img src="logo.png" alt="Logo" class="logo-img">
-            <h1>NEON SNAKE</h1>
-        </div>
-        <div class="stats">SCORE: <span id="score">0</span> &nbsp;|&nbsp; BEST: <span id="high">0</span></div>
-    </header>
-
     <div id="game-container">
-        <canvas id="c"></canvas>
-        <div id="ui-layer">
-            <div class="menu-box">
-                <div class="menu-title" id="menu-text">READY?</div>
-                <input type="text" id="username" class="user-input" placeholder="YOUR USERNAME..." maxlength="15">
-                <button class="cheat-btn" id="cheat-btn" onclick="applyCheats()">Cheats Mode</button>
-                <div class="speed-selector">
-                    <button class="speed-btn" data-speed="slow">SLOW</button>
-                    <button class="speed-btn" data-speed="normal">NORMAL</button>
-                    <button class="speed-btn active" data-speed="hard">HARD</button>
-                </div>
-                <button class="shop-btn" onclick="toggleShop('snake-shop')">SNAKE SKINS <span>▼</span></button>
-                <div id="snake-shop" class="shop-content"><div class="skin-grid" id="snake-grid"></div></div>
-                <button class="shop-btn" onclick="toggleShop('ball-shop')">BALL COLORS <span>▼</span></button>
-                <div id="ball-shop" class="shop-content"><div class="skin-grid" id="ball-grid"></div></div>
-                <button class="btn" id="start-btn">START GAME</button>
-                <div class="menu-controls-hint">[<b>WASD</b>] Move &nbsp;•&nbsp; [<b>R/Space</b>] Restart<br>[<b>Q</b>] Exit to Google</div>
+        <div id="score-board">
+            <span>Score: <span id="score">0</span></span>
+            <span>Best: <span id="best">0</span></span>
+        </div>
+        <canvas id="game" width="400" height="400"></canvas>
+        
+        <div id="ui">
+            <h1 id="menu-title">NEON SNAKE</h1>
+            <button class="btn" id="start-btn">START GAME</button>
+            
+            <div class="skin-select" id="skin-menu">
+                <div class="skin-btn active" style="background:#0f0" data-skin="classic"></div>
+                <div class="skin-btn" style="background:linear-gradient(45deg, #ff00ff, #00ffff)" data-skin="cyber"></div>
+                <div class="skin-btn" style="background:#ff9500" data-skin="gold"></div>
+                <div class="skin-btn" style="background:#ff3b30" data-skin="lava"></div>
+            </div>
+
+            <div id="leaderboard-container">
+                <div style="text-align:center">Loading Global Scores...</div>
             </div>
         </div>
     </div>
 
-    <footer>HAPPY BIRTHDAY SANJIT</footer>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const AudioFX = {
-    ctx: null,
-    init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-    playEat() {
-        this.init(); const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
-        osc.type = 'triangle'; osc.frequency.setValueAtTime(440, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
-        osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.1);
-    },
-    playDeath() {
-        this.init(); const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
-        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.4);
-        gain.gain.setValueAtTime(0.2, this.ctx.currentTime); gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.4);
-        osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.4);
-    },
-    playClick() {
-        this.init(); const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
-        osc.type = 'sine'; osc.frequency.setValueAtTime(600, this.ctx.currentTime);
-        gain.gain.setValueAtTime(0.05, this.ctx.currentTime); gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.05);
-        osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.05);
+/** * FILL THESE TWO LINES WITH YOUR SUPABASE INFO:
+ */
+const SB_URL = 'PASTE_YOUR_URL_HERE';
+const SB_KEY = 'PASTE_YOUR_ANON_PUBLIC_KEY_HERE';
+
+// Connect to Database
+const supabase = window.supabase ? window.supabase.createClient(SB_URL, SB_KEY) : null;
+
+// Audio Setup
+const audio = {
+    ctx: new (window.AudioContext || window.webkitAudioContext)(),
+    play(freq, type, dur) {
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        g.gain.setValueAtTime(0.1, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + dur);
+        osc.connect(g); g.connect(this.ctx.destination);
+        osc.start(); osc.stop(this.ctx.currentTime + dur);
     }
 };
 
-const SNAKE_SKINS = [
-    { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
-    { id: 's2', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 10 },
-    { id: 's3', name: 'RED', head: '#ff0044', body: '#990022', price: 20 },
-    { id: 's4', name: 'BLUE', head: '#0088ff', body: '#0044aa', price: 30 },
-    { id: 's5', name: 'WHITE', head: '#ffffff', body: '#888888', price: 40 },
-    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 50 }
-];
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const startBtn = document.getElementById('start-btn');
+const ui = document.getElementById('ui');
+const scoreEl = document.getElementById('score');
+const bestEl = document.getElementById('best');
 
-const BALL_COLORS = [
-    { id: 'b1', name: 'PURPLE', color: '#ff00ff', price: 0 },
-    { id: 'b2', name: 'LIGHT BLUE', color: '#00ffff', price: 10 },
-    { id: 'b3', name: 'GREEN', color: '#00ff00', price: 20 },
-    { id: 'b4', name: 'ORANGE', color: '#ff8800', price: 30 },
-    { id: 'b5', name: 'RAINBOW', color: 'rainbow', price: 50 }
-];
-
-const state = {
-    snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
-    score: 0, particles: [],
-    wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
-    ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
-    ownedBalls: JSON.parse(localStorage.getItem('neon_v4_balls') || '["b1"]'),
-    activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
-    activeBall: JSON.parse(localStorage.getItem('neon_v4_active_b')) || BALL_COLORS[0],
-    lastTime: 0, accumTime: 0, gameOver: true, shake: 0,
-    menuTimeout: null, cheatsActive: false
+let state = {
+    score: 0,
+    best: localStorage.getItem('snakeBest') || 0,
+    active: false,
+    skin: 'classic'
 };
+bestEl.textContent = state.best;
 
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d', { alpha: false });
+const snake = {
+    x: 10, y: 10, dx: 0, dy: 0, cells: [], length: 4,
+    reset() { this.x = 10; this.y = 10; this.cells = []; this.length = 4; this.dx = 1; this.dy = 0; }
+};
+const food = { x: 15, y: 15 };
 
-function save() {
-    if (state.cheatsActive) return; 
-    localStorage.setItem('neon_v4_best', state.wallet);
-    localStorage.setItem('neon_v4_owned', JSON.stringify(state.ownedSkins));
-    localStorage.setItem('neon_v4_balls', JSON.stringify(state.ownedBalls));
-    localStorage.setItem('neon_v4_active_s', JSON.stringify(state.activeSnake));
-    localStorage.setItem('neon_v4_active_b', JSON.stringify(state.activeBall));
-}
-
-function applyCheats() {
-    AudioFX.playClick();
-    state.cheatsActive = true;
-    state.ownedSkins = SNAKE_SKINS.map(s => s.id);
-    state.ownedBalls = BALL_COLORS.map(b => b.id);
-    document.getElementById('cheat-btn').classList.add('active');
-    document.getElementById('cheat-btn').innerText = "CHEATS ON (NO SAVING)";
-    renderShops();
-}
-
-function explode(x, y, color) {
-    for(let i=0; i<15; i++) {
-        state.particles.push({
-            x: x * CONFIG.cellSize + CONFIG.cellSize/2,
-            y: y * CONFIG.cellSize + CONFIG.cellSize/2,
-            vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
-            life: 1.0, color: color
-        });
-    }
-}
-
-function toggleShop(id) {
-    AudioFX.playClick();
-    const el = document.getElementById(id);
-    const isOpen = el.classList.contains('open');
-    document.querySelectorAll('.shop-content').forEach(s => s.classList.remove('open'));
-    if (!isOpen) el.classList.add('open');
-}
-
-function renderShops() {
-    document.getElementById('high').textContent = state.wallet;
-    const sGrid = document.getElementById('snake-grid'); sGrid.innerHTML = '';
-    SNAKE_SKINS.forEach(skin => {
-        const isOwned = state.ownedSkins.includes(skin.id);
-        const isSel = state.activeSnake.id === skin.id;
-        const card = document.createElement('div');
-        card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        card.innerHTML = `<div class="swatch" style="background:${skin.head==='rainbow'?'linear-gradient(45deg,red,blue)':skin.head}"></div>
-            <b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
-        card.onclick = () => { AudioFX.playClick(); if(isOwned) state.activeSnake=skin; else if(state.wallet>=skin.price){state.wallet-=skin.price;state.ownedSkins.push(skin.id);state.activeSnake=skin;} save(); renderShops(); };
-        sGrid.appendChild(card);
-    });
-    const bGrid = document.getElementById('ball-grid'); bGrid.innerHTML = '';
-    BALL_COLORS.forEach(ball => {
-        const isOwned = state.ownedBalls.includes(ball.id);
-        const isSel = state.activeBall.id === ball.id;
-        const card = document.createElement('div');
-        card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        card.innerHTML = `<div class="swatch" style="background:${ball.color==='rainbow'?'linear-gradient(45deg,red,blue)':ball.color}"></div>
-            <b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
-        card.onclick = () => { AudioFX.playClick(); if(isOwned) state.activeBall=ball; else if(state.wallet>=ball.price){state.wallet-=ball.price;state.ownedBalls.push(ball.id);state.activeBall=ball;} save(); renderShops(); };
-        bGrid.appendChild(card);
+// Leaderboard Logic
+async function loadLeaderboard() {
+    if(!supabase) return;
+    const { data, error } = await supabase.from('Leaderboard').select('username, score').order('score', { ascending: false }).limit(5);
+    if(error) return;
+    const container = document.getElementById('leaderboard-container');
+    container.innerHTML = '<div style="padding:5px; font-size:10px; color:#888; text-align:center">GLOBAL TOP 5</div>';
+    data.forEach(row => {
+        container.innerHTML += `<div class="leaderboard-row"><span>${row.username}</span><b>${row.score}</b></div>`;
     });
 }
 
-const CONFIG = { cols: 31, rows: 15, cellSize: 0, speeds: { slow: { base: 6, boost: 0.1, max: 12 }, normal: { base: 8, boost: 0.15, max: 18 }, hard: { base: 11, boost: 0.15, max: 22 } }, currentMode: 'hard' };
-
-function resize() {
-    const container = document.getElementById('game-container');
-    const rawSize = Math.min((container.clientWidth-20)/CONFIG.cols, (container.clientHeight-20)/CONFIG.rows);
-    CONFIG.cellSize = Math.floor(rawSize);
-    canvas.width = CONFIG.cols * CONFIG.cellSize; canvas.height = CONFIG.rows * CONFIG.cellSize;
-}
-window.addEventListener('resize', resize); resize();
-
-function spawnFood() {
-    state.food = { x: Math.floor(Math.random()*CONFIG.cols), y: Math.floor(Math.random()*CONFIG.rows) };
-    if (state.snake.some(p => p.x === state.food.x && p.y === state.food.y)) spawnFood();
+async function submitScore(score) {
+    if(!supabase || score === 0) return;
+    const name = prompt("New High Score! Enter your name:") || "Player";
+    await supabase.from('Leaderboard').insert([{ username: name, score: score }]);
+    loadLeaderboard();
 }
 
-function startGame() {
-    const user = document.getElementById('username').value || 'Anonymous';
-    try {
-        if (window.va) { window.va.track('GameStart', { username: user }); }
-    } catch (e) {}
-    
-    AudioFX.playClick();
-    if(state.menuTimeout) clearTimeout(state.menuTimeout);
-    state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
-    state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.nextDir = []; state.score = 0; state.shake = 0; state.particles = [];
-    document.getElementById('score').textContent = '0';
-    canvas.className = ""; 
-    spawnFood(); state.gameOver = false; state.lastTime = performance.now();
-    document.getElementById('ui-layer').classList.add('hidden');
-    requestAnimationFrame(loop);
-}
-
-window.addEventListener('keydown', e => {
-    if (document.activeElement.tagName === 'INPUT') return;
-    const k = e.key.toLowerCase();
-    if (k === 'r' || k === ' ') startGame();
-    if (k === 'q') window.location.href = "https://www.google.com";
-    if (state.gameOver) return;
-    let nD = null;
-    if (k === 'w' || k === 'arrowup') nD = {x:0, y:-1};
-    if (k === 's' || k === 'arrowdown') nD = {x:0, y:1};
-    if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0};
-    if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
-    if (nD) {
-        const last = state.nextDir.length > 0 ? state.nextDir[state.nextDir.length-1] : state.dir;
-        if (nD.x !== -last.x || nD.y !== -last.y) state.nextDir.push(nD);
-    }
+// Skins Logic
+document.querySelectorAll('.skin-btn').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.skin-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.skin = btn.dataset.skin;
+        audio.play(400, 'square', 0.1);
+    };
 });
 
-function update() {
-    if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
-    state.lastD = state.dir; 
-    const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
-    if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
-        state.gameOver = true; state.shake = 10; AudioFX.playDeath();
-        canvas.classList.add('death-pulse'); 
-        if (state.score > state.wallet) state.wallet = state.score;
-        save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 800);
-        return;
-    }
-    state.snake.unshift(head);
-    if (head.x === state.food.x && head.y === state.food.y) {
-        state.score++; document.getElementById('score').textContent = state.score;
-        AudioFX.playEat(); 
-        canvas.classList.remove('pulse'); void canvas.offsetWidth; 
-        canvas.classList.add('pulse'); 
-        const pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
-        explode(state.food.x, state.food.y, pCol); spawnFood();
-    } else state.snake.pop();
-}
-
-function render(now) {
-    ctx.setTransform(1,0,0,1,0,0);
-    if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; }
-    ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
+function loop() {
+    if(!state.active) return;
+    setTimeout(() => requestAnimationFrame(loop), 100);
     
-    ctx.strokeStyle = '#333333'; 
-    ctx.lineWidth = 1; ctx.beginPath();
-    for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
-    for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
-    ctx.stroke();
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    snake.x += snake.dx; snake.y += snake.dy;
 
-    state.particles.forEach((p, i) => {
-        p.x += p.vx; p.y += p.vy; p.life -= 0.02;
-        if(p.life <= 0) { state.particles.splice(i,1); return; }
-        ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3);
-    });
-    ctx.globalAlpha = 1.0;
+    if(snake.x < 0) snake.x = 19; else if(snake.x > 19) snake.x = 0;
+    if(snake.y < 0) snake.y = 19; else if(snake.y > 19) snake.y = 0;
 
-    const rHue = (now / 5) % 360;
-    let bCol = state.activeBall.color === 'rainbow' ? `hsl(${rHue}, 100%, 60%)` : state.activeBall.color;
-    ctx.fillStyle = bCol; ctx.shadowBlur = 15; ctx.shadowColor = bCol;
-    ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*(1+Math.sin(now/200)*0.1), 0, Math.PI*2); ctx.fill();
-    ctx.shadowBlur = 0;
+    snake.cells.unshift({x: snake.x, y: snake.y});
+    if(snake.cells.length > snake.length) snake.cells.pop();
 
-    state.snake.forEach((seg, i) => {
-        let sH = state.activeSnake.head === 'rainbow' ? `hsl(${rHue}, 100%, 50%)` : state.activeSnake.head;
-        let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
-        ctx.fillStyle = (i === 0) ? sH : sB;
-        if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sH; }
+    // Draw Food
+    ctx.fillStyle = '#ff3b30';
+    ctx.shadowBlur = 10; ctx.shadowColor = '#ff3b30';
+    ctx.fillRect(food.x*20, food.y*20, 18, 18);
+
+    // Draw Snake
+    snake.cells.forEach((cell, index) => {
+        if(state.skin === 'classic') ctx.fillStyle = '#0f0';
+        if(state.skin === 'cyber') ctx.fillStyle = `hsl(${(index * 20) + (Date.now()/10)}, 100%, 50%)`;
+        if(state.skin === 'gold') ctx.fillStyle = '#ffd700';
+        if(state.skin === 'lava') ctx.fillStyle = index === 0 ? '#fff' : '#ff4500';
         
-        const r = i === 0 ? 8 : 4;
-        const x = seg.x*CONFIG.cellSize+1; const y = seg.y*CONFIG.cellSize+1;
-        const w = CONFIG.cellSize-2; const h = CONFIG.cellSize-2;
-        ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fill();
-        ctx.shadowBlur = 0;
+        ctx.shadowBlur = 15; ctx.shadowColor = ctx.fillStyle;
+        ctx.fillRect(cell.x*20, cell.y*20, 18, 18);
 
-        if(i === 0) {
-            ctx.fillStyle = '#000';
-            const eyeSize = CONFIG.cellSize / 8;
-            const offset = CONFIG.cellSize / 4;
-            let e1x, e1y, e2x, e2y;
-            if (state.lastD.x === 1) { e1x = e2x = x + w - offset; e1y = y + offset; e2y = y + h - offset; }
-            else if (state.lastD.x === -1) { e1x = e2x = x + offset; e1y = y + offset; e2y = y + h - offset; }
-            else if (state.lastD.y === -1) { e1y = e2y = y + offset; e1x = x + offset; e2x = x + w - offset; }
-            else { e1y = e2y = y + h - offset; e1x = x + offset; e2x = x + w - offset; }
-            ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill();
+        if(cell.x === food.x && cell.y === food.y) {
+            snake.length++;
+            state.score += 10;
+            scoreEl.textContent = state.score;
+            food.x = Math.floor(Math.random()*20);
+            food.y = Math.floor(Math.random()*20);
+            audio.play(600, 'sine', 0.1);
+        }
+
+        for(let i = index + 1; i < snake.cells.length; i++) {
+            if(cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+                gameOver();
+            }
         }
     });
 }
 
-function loop(now) {
-    if(state.gameOver) { render(now); if(state.shake > 0.1 || state.particles.length > 0) requestAnimationFrame(loop); return; }
-    const dt = now - state.lastTime; state.lastTime = now; state.accumTime += dt;
-    const p = CONFIG.speeds[CONFIG.currentMode];
-    const step = 1000 / Math.min(p.max, p.base + (state.score * p.boost));
-    while (state.accumTime >= step) { if (!state.gameOver) update(); state.accumTime -= step; }
-    render(now); requestAnimationFrame(loop);
+function gameOver() {
+    state.active = false;
+    audio.play(150, 'sawtooth', 0.5);
+    ui.style.display = 'flex';
+    document.getElementById('menu-title').textContent = "GAME OVER";
+    if(state.score > state.best) {
+        state.best = state.score;
+        localStorage.setItem('snakeBest', state.best);
+        bestEl.textContent = state.best;
+        submitScore(state.score);
+    }
 }
 
-document.querySelectorAll('.speed-btn').forEach(btn => btn.onclick = () => { AudioFX.playClick(); document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); CONFIG.currentMode=btn.dataset.speed; });
-document.getElementById('start-btn').onclick = startGame;
-renderShops();
+startBtn.onclick = () => {
+    state.score = 0;
+    scoreEl.textContent = "0";
+    state.active = true;
+    ui.style.display = 'none';
+    snake.reset();
+    audio.play(800, 'sine', 0.2);
+    loop();
+};
+
+document.addEventListener('keydown', e => {
+    if(e.key === 'ArrowUp' && snake.dy === 0) { snake.dx = 0; snake.dy = -1; }
+    if(e.key === 'ArrowDown' && snake.dy === 0) { snake.dx = 0; snake.dy = 1; }
+    if(e.key === 'ArrowLeft' && snake.dx === 0) { snake.dx = -1; snake.dy = 0; }
+    if(e.key === 'ArrowRight' && snake.dx === 0) { snake.dx = 1; snake.dy = 0; }
+});
+
+loadLeaderboard();
 </script>
-
-<script defer src="/_vercel/insights/script.js"></script>
-
 </body>
 </html>
