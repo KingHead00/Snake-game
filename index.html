@@ -261,6 +261,10 @@ async function loadLeaderboard() {
     const { data, error } = await supabase.from('Leaderboard').select('username, score').order('score', { ascending: false }).limit(5);
     const box = document.getElementById('lb-content');
     if(error) { box.innerHTML = "Offline"; return; }
+    if(!data || data.length === 0) {
+        box.innerHTML = `<div style="color:#555; font-size:11px; padding:10px;">BE THE FIRST TO SCORE!</div>`;
+        return;
+    }
     box.innerHTML = data.map(r => `<div class="lb-row"><span class="lb-name">${r.username}</span><span>${r.score}</span></div>`).join('');
 }
 
@@ -389,7 +393,7 @@ function update() {
         
         if (state.score > state.wallet) {
             state.wallet = state.score;
-            submitScore(); // Send to Supabase
+            submitScore();
         }
         
         save(); 
@@ -477,7 +481,6 @@ function loop(now) {
 document.querySelectorAll('.speed-btn').forEach(btn => btn.onclick = () => { AudioFX.playClick(); document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); CONFIG.currentMode=btn.dataset.speed; });
 document.getElementById('start-btn').onclick = startGame;
 
-// Start Up
 renderShops();
 loadLeaderboard();
 </script>
