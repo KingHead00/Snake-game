@@ -8,7 +8,7 @@
     <style>
         :root {
             --bg: #050505;
-            --grid: #333333; /* Brightened Grid Variable */
+            --grid: #333333; 
             --primary: #00ffcc;
             --text: #ffffff;
             --ui-bg: rgba(0, 0, 0, 0.95);
@@ -356,7 +356,7 @@ function render(now) {
     if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; }
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
     
-    // --- BRIGHTER GRID ---
+    // Brighter Grid
     ctx.strokeStyle = '#333333'; 
     ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
@@ -420,5 +420,8 @@ document.querySelectorAll('.speed-btn').forEach(btn => btn.onclick = () => { Aud
 document.getElementById('start-btn').onclick = startGame;
 renderShops();
 </script>
+
+<script defer src="/_vercel/insights/script.js"></script>
+
 </body>
 </html>
