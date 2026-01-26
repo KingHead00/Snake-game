@@ -6,7 +6,6 @@
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M79X9PGL');</script>
-    
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     <title>Neon Snake - New skins</title>
@@ -153,7 +152,6 @@
 <body>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M79X9PGL"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    
     <header>
         <div class="header-left">
             <img src="logo.png" alt="Logo" class="logo-img">
@@ -188,7 +186,6 @@
     <footer>HAPPY BIRTHDAY SANJIT</footer>
 
 <script>
-// --- CORE SETUP ---
 const AudioFX = {
     ctx: null,
     init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -232,7 +229,7 @@ const BALL_COLORS = [
 ];
 
 const state = {
-    snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0}, nextDir: [], food: {x:0, y:0},
+    snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0}, nextDir: null, food: {x:0, y:0},
     score: 0, particles: [],
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
@@ -326,7 +323,7 @@ function startGame() {
     AudioFX.playClick();
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
-    state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.nextDir = []; state.score = 0; state.shake = 0; state.particles = [];
+    state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.nextDir = null; state.score = 0; state.shake = 0; state.particles = [];
     document.getElementById('score').textContent = '0';
     canvas.className = ""; spawnFood(); state.gameOver = false; state.lastTime = performance.now();
     document.getElementById('ui-layer').classList.add('hidden');
@@ -334,7 +331,10 @@ function startGame() {
 }
 
 function update() {
-    if (state.nextDir.length > 0) state.dir = state.nextDir.shift();
+    if (state.nextDir) {
+        state.dir = state.nextDir;
+        state.nextDir = null;
+    }
     state.lastD = state.dir; 
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
@@ -422,10 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (k === 's' || k === 'arrowdown') nD = {x:0, y:1};
         if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0};
         if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
-        if (nD) { 
-            const last = state.nextDir.length > 0 ? state.nextDir[state.nextDir.length-1] : state.dir; 
-            if (nD.x !== -last.x || nD.y !== -last.y) state.nextDir.push(nD); 
-        }
+        if (nD && (nD.x !== -state.lastD.x || nD.y !== -state.lastD.y)) state.nextDir = nD;
     });
 
     renderShops();
