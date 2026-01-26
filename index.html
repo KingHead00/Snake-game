@@ -420,11 +420,10 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0};
         else if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
         
-        // Instant update: check if valid move and force state change
+        // Instant input fix: Update direction immediately for next frame 
+        // but don't force a "jump" in time.
         if (nD && (nD.x !== -state.lastD.x || nD.y !== -state.lastD.y)) {
             state.dir = nD;
-            // Force an update tick for immediate reaction
-            state.accumTime = 1000; 
         }
     });
 
