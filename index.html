@@ -356,54 +356,33 @@ function update() {
 function render(now) {
     ctx.setTransform(1,0,0,1,0,0); if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; }
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    
-    // Grid
-    ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath();
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
-
-    // Particles
     state.particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life -= 0.02; if(p.life <= 0) { state.particles.splice(i,1); return; } ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3); });
     ctx.globalAlpha = 1.0;
-
     const rHue = (now / 5) % 360;
-
-    // Food
     let bCol = state.activeBall.color === 'rainbow' ? `hsl(${rHue}, 100%, 60%)` : state.activeBall.color;
     ctx.fillStyle = bCol; ctx.shadowBlur = 15; ctx.shadowColor = bCol;
     ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*(1+Math.sin(now/200)*0.1), 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
-
-    // Snake (Connected Body Logic)
     state.snake.forEach((seg, i) => {
         let sH = state.activeSnake.head === 'rainbow' ? `hsl(${rHue}, 100%, 50%)` : state.activeSnake.head;
         let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
         ctx.fillStyle = (i === 0) ? sH : sB;
-        
-        const x = seg.x * CONFIG.cellSize;
-        const y = seg.y * CONFIG.cellSize;
-        const size = CONFIG.cellSize;
-
-        if(i === 0) { 
-            ctx.shadowBlur = 15; ctx.shadowColor = sH;
-            // Rounded head
-            ctx.beginPath(); ctx.roundRect(x + 1, y + 1, size - 2, size - 2, 8); ctx.fill(); 
-            ctx.shadowBlur = 0;
-
-            // Eyes
-            ctx.fillStyle = '#000'; const eyeSize = size / 8; const offset = size / 4;
+        if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sH; }
+        const r = i === 0 ? 8 : 4; const x = seg.x*CONFIG.cellSize+1; const y = seg.y*CONFIG.cellSize+1;
+        const w = CONFIG.cellSize-2; const h = CONFIG.cellSize-2;
+        ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.shadowBlur = 0;
+        if(i === 0) {
+            ctx.fillStyle = '#000'; const eyeSize = CONFIG.cellSize / 8; const offset = CONFIG.cellSize / 4;
             let e1x, e1y, e2x, e2y;
-            if (state.lastD.x === 1) { e1x = e2x = x + size - offset; e1y = y + offset; e2y = y + size - offset; }
-            else if (state.lastD.x === -1) { e1x = e2x = x + offset; e1y = y + offset; e2y = y + size - offset; }
-            else if (state.lastD.y === -1) { e1y = e2y = y + offset; e1x = x + offset; e2x = x + size - offset; }
-            else { e1y = e2y = y + size - offset; e1x = x + offset; e2x = x + size - offset; }
-            ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill(); 
-            ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill();
-        } else {
-            // Body segments touch by filling the whole square (no +1 or -2)
-            // We use a small roundRect to keep it slightly smooth but large enough to touch
-            ctx.beginPath(); ctx.roundRect(x, y, size, size, 2); ctx.fill();
+            if (state.lastD.x === 1) { e1x = e2x = x + w - offset; e1y = y + offset; e2y = y + h - offset; }
+            else if (state.lastD.x === -1) { e1x = e2x = x + offset; e1y = y + offset; e2y = y + h - offset; }
+            else if (state.lastD.y === -1) { e1y = e2y = y + offset; e1x = x + offset; e2x = x + w - offset; }
+            else { e1y = e2y = y + h - offset; e1x = x + offset; e2x = x + w - offset; }
+            ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill();
         }
     });
 }
