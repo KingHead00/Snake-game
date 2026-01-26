@@ -3,7 +3,7 @@
 <head>
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    j=d.createElement(j),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M79X9PGL');</script>
     <meta charset="utf-8">
@@ -229,7 +229,9 @@ const BALL_COLORS = [
 ];
 
 const state = {
-    snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0}, food: {x:0, y:0},
+    snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0}, 
+    inputQueue: [], // New queue to store keystrokes
+    food: {x:0, y:0},
     score: 0, particles: [],
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
@@ -323,7 +325,9 @@ function startGame() {
     AudioFX.playClick();
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
-    state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.score = 0; state.shake = 0; state.particles = [];
+    state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; 
+    state.inputQueue = []; // Clear queue on start
+    state.score = 0; state.shake = 0; state.particles = [];
     document.getElementById('score').textContent = '0';
     canvas.className = ""; spawnFood(); state.gameOver = false; state.lastTime = performance.now();
     document.getElementById('ui-layer').classList.add('hidden');
@@ -331,6 +335,15 @@ function startGame() {
 }
 
 function update() {
+    // Process the next direction from the queue
+    if (state.inputQueue.length > 0) {
+        const nextMove = state.inputQueue.shift();
+        // Double check against last direction to prevent self-collision
+        if (nextMove.x !== -state.lastD.x || nextMove.y !== -state.lastD.y) {
+            state.dir = nextMove;
+        }
+    }
+
     state.lastD = state.dir; 
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
@@ -420,10 +433,21 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0};
         else if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
         
-        // Instant input fix: Update direction immediately for next frame 
-        // but don't force a "jump" in time.
-        if (nD && (nD.x !== -state.lastD.x || nD.y !== -state.lastD.y)) {
-            state.dir = nD;
+        if (nD) {
+            // Get the last intended direction (either currently moving or last in queue)
+            const lastPlanned = state.inputQueue.length > 0 
+                ? state.inputQueue[state.inputQueue.length - 1] 
+                : state.lastD;
+
+            // Only add to queue if it's not the same as the last planned move 
+            // and not a 180-degree turn
+            if ((nD.x !== lastPlanned.x || nD.y !== lastPlanned.y) &&
+                (nD.x !== -lastPlanned.x || nD.y !== -lastPlanned.y)) {
+                // Limit queue to 2 inputs to prevent "laggy" feeling
+                if (state.inputQueue.length < 2) {
+                    state.inputQueue.push(nD);
+                }
+            }
         }
     });
 
