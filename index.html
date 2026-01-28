@@ -212,20 +212,32 @@ const AudioFX = {
 };
 
 const SNAKE_SKINS = [
-    { id: 's1', name: 'CYBER', head: '#00ffcc', body: '#004433', price: 0 },
-    { id: 's2', name: 'PLASMA', head: '#ff00ff', body: '#4a004a', price: 15 },
-    { id: 's3', name: 'INFERNO', head: '#ffcc00', body: '#aa0000', price: 30 },
-    { id: 's4', name: 'MATRIX', head: '#00ff00', body: '#002200', price: 50 },
-    { id: 's5', name: 'FROST', head: '#a0fbff', body: '#2c3e50', price: 75 },
-    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 100 }
+    { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
+    { id: 's2', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 10 },
+    { id: 's3', name: 'RED', head: '#ff0044', body: '#990022', price: 20 },
+    { id: 's4', name: 'BLUE', head: '#0088ff', body: '#0044aa', price: 30 },
+    { id: 's5', name: 'WHITE', head: '#ffffff', body: '#888888', price: 40 },
+    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 50 },
+    // NEW SKINS ADDED HERE
+    { id: 's7', name: 'EMERALD', head: '#2ecc71', body: '#1b5e20', price: 60 },
+    { id: 's8', name: 'CYBER', head: '#ff00ff', body: '#4a148c', price: 75 },
+    { id: 's9', name: 'MAGMA', head: '#ff4500', body: '#3e0000', price: 90 },
+    { id: 's10', name: 'VOID', head: '#333333', body: '#000000', price: 100 },
+    { id: 's11', name: 'GALAXY', head: '#6200ea', body: '#0d47a1', price: 125 }
 ];
 
 const BALL_COLORS = [
-    { id: 'b1', name: 'NEON PINK', color: '#ff00ff', price: 0 },
-    { id: 'b2', name: 'GOLD', color: '#ffcc00', price: 20 },
-    { id: 'b3', name: 'TOXIC', color: '#adff2f', price: 40 },
-    { id: 'b4', name: 'ICE', color: '#00ffff', price: 60 },
-    { id: 'b5', name: 'GLITCH', color: 'rainbow', price: 100 }
+    { id: 'b1', name: 'PURPLE', color: '#ff00ff', price: 0 },
+    { id: 'b2', name: 'LIGHT BLUE', color: '#00ffff', price: 10 },
+    { id: 'b3', name: 'GREEN', color: '#00ff00', price: 20 },
+    { id: 'b4', name: 'ORANGE', color: '#ff8800', price: 30 },
+    { id: 'b5', name: 'RAINBOW', color: 'rainbow', price: 50 },
+    // NEW COLORS ADDED HERE
+    { id: 'b6', name: 'PINK', color: '#e91e63', price: 60 },
+    { id: 'b7', name: 'YELLOW', color: '#ffff00', price: 70 },
+    { id: 'b8', name: 'MINT', color: '#b2ff59', price: 80 },
+    { id: 'b9', name: 'SILVER', color: '#e0e0e0', price: 95 },
+    { id: 'b10', name: 'RUBY', color: '#d50000', price: 110 }
 ];
 
 const state = {
@@ -346,7 +358,7 @@ function update() {
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 10; AudioFX.playDeath();
         canvas.classList.add('death-pulse'); 
-        if (state.score > 0) { state.wallet += state.score; }
+        if (state.score > state.wallet) { state.wallet = state.score; }
         save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 800);
         return;
     }
@@ -362,7 +374,7 @@ function update() {
 function render(now) {
     ctx.setTransform(1,0,0,1,0,0); if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; }
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath();
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
@@ -405,7 +417,9 @@ function loop(now) {
 document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resize); 
     resize();
+    
     if (state.username) document.getElementById('username').value = state.username;
+
     document.querySelectorAll('.speed-btn').forEach(btn => {
         btn.onclick = () => { 
             AudioFX.playClick(); 
@@ -414,7 +428,9 @@ document.addEventListener('DOMContentLoaded', () => {
             CONFIG.currentMode=btn.dataset.speed; 
         };
     });
+
     document.getElementById('start-btn').onclick = startGame;
+
     window.addEventListener('keydown', e => {
         if (document.activeElement.tagName === 'INPUT') return;
         const k = e.key.toLowerCase();
@@ -426,6 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (k === 's' || k === 'arrowdown') nD = {x:0, y:1};
         else if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0};
         else if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
+        
         if (nD) {
             const lastPlanned = state.inputQueue.length > 0 ? state.inputQueue[state.inputQueue.length - 1] : state.lastD;
             if ((nD.x !== lastPlanned.x || nD.y !== lastPlanned.y) && (nD.x !== -lastPlanned.x || nD.y !== -lastPlanned.y)) {
@@ -433,6 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
     renderShops();
 });
 </script>
