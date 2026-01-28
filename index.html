@@ -217,7 +217,12 @@ const SNAKE_SKINS = [
     { id: 's3', name: 'RED', head: '#ff0044', body: '#990022', price: 20 },
     { id: 's4', name: 'BLUE', head: '#0088ff', body: '#0044aa', price: 30 },
     { id: 's5', name: 'WHITE', head: '#ffffff', body: '#888888', price: 40 },
-    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 50 }
+    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 50 },
+    /* NEW SKINS */
+    { id: 's7', name: 'BANANA', head: '#ffe135', body: '#d4b000', price: 15 },
+    { id: 's8', name: 'SLATE', head: '#708090', body: '#506070', price: 15 },
+    { id: 's9', name: 'INDIGO', head: '#4b0082', body: '#2e0052', price: 15 },
+    { id: 's10', name: 'RUBY', head: '#e0115f', body: '#99053d', price: 15 }
 ];
 
 const BALL_COLORS = [
@@ -225,13 +230,19 @@ const BALL_COLORS = [
     { id: 'b2', name: 'LIGHT BLUE', color: '#00ffff', price: 10 },
     { id: 'b3', name: 'GREEN', color: '#00ff00', price: 20 },
     { id: 'b4', name: 'ORANGE', color: '#ff8800', price: 30 },
-    { id: 'b5', name: 'RAINBOW', color: 'rainbow', price: 50 }
+    { id: 'b5', name: 'RAINBOW', color: 'rainbow', price: 50 },
+    /* NEW BALLS */
+    { id: 'b6', name: 'BANANA', color: '#ffe135', price: 15 },
+    { id: 'b7', name: 'SLATE', color: '#708090', price: 15 },
+    { id: 'b8', name: 'INDIGO', color: '#4b0082', price: 15 },
+    { id: 'b9', name: 'RUBY', color: '#e0115f', price: 15 }
 ];
 
 const state = {
     snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0}, inputQueue: [],
     food: {x:0, y:0},
     score: 0, particles: [],
+    // Vercel fix: Persistent data storage
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     username: localStorage.getItem('neon_v4_user') || '',
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
