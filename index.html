@@ -217,13 +217,7 @@ const SNAKE_SKINS = [
     { id: 's3', name: 'RED', head: '#ff0044', body: '#990022', price: 20 },
     { id: 's4', name: 'BLUE', head: '#0088ff', body: '#0044aa', price: 30 },
     { id: 's5', name: 'WHITE', head: '#ffffff', body: '#888888', price: 40 },
-    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 50 },
-    // NEW SKINS ADDED HERE
-    { id: 's7', name: 'EMERALD', head: '#2ecc71', body: '#1b5e20', price: 60 },
-    { id: 's8', name: 'CYBER', head: '#ff00ff', body: '#4a148c', price: 75 },
-    { id: 's9', name: 'MAGMA', head: '#ff4500', body: '#3e0000', price: 90 },
-    { id: 's10', name: 'VOID', head: '#333333', body: '#000000', price: 100 },
-    { id: 's11', name: 'GALAXY', head: '#6200ea', body: '#0d47a1', price: 125 }
+    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 50 }
 ];
 
 const BALL_COLORS = [
@@ -231,19 +225,14 @@ const BALL_COLORS = [
     { id: 'b2', name: 'LIGHT BLUE', color: '#00ffff', price: 10 },
     { id: 'b3', name: 'GREEN', color: '#00ff00', price: 20 },
     { id: 'b4', name: 'ORANGE', color: '#ff8800', price: 30 },
-    { id: 'b5', name: 'RAINBOW', color: 'rainbow', price: 50 },
-    // NEW COLORS ADDED HERE
-    { id: 'b6', name: 'PINK', color: '#e91e63', price: 60 },
-    { id: 'b7', name: 'YELLOW', color: '#ffff00', price: 70 },
-    { id: 'b8', name: 'MINT', color: '#b2ff59', price: 80 },
-    { id: 'b9', name: 'SILVER', color: '#e0e0e0', price: 95 },
-    { id: 'b10', name: 'RUBY', color: '#d50000', price: 110 }
+    { id: 'b5', name: 'RAINBOW', color: 'rainbow', price: 50 }
 ];
 
 const state = {
     snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0}, inputQueue: [],
     food: {x:0, y:0},
     score: 0, particles: [],
+    // Vercel fix: Persistent data storage
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     username: localStorage.getItem('neon_v4_user') || '',
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
@@ -337,7 +326,7 @@ function spawnFood() {
 function startGame() {
     AudioFX.playClick();
     state.username = document.getElementById('username').value;
-    save(); 
+    save(); // Save username before start
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.inputQueue = [];
@@ -418,6 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resize); 
     resize();
     
+    // Load existing user data
     if (state.username) document.getElementById('username').value = state.username;
 
     document.querySelectorAll('.speed-btn').forEach(btn => {
