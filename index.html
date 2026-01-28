@@ -3,7 +3,7 @@
 <head>
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(j),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M79X9PGL');</script>
     <meta charset="utf-8">
@@ -213,16 +213,11 @@ const AudioFX = {
 
 const SNAKE_SKINS = [
     { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
-    { id: 's2', name: 'EMERALD', head: '#2ecc71', body: '#27ae60', price: 5 },
-    { id: 's3', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 10 },
-    { id: 's4', name: 'PLASMA', head: '#9b59b6', body: '#8e44ad', price: 15 },
-    { id: 's5', name: 'RED', head: '#ff0044', body: '#990022', price: 20 },
-    { id: 's6', name: 'SUNSET', head: '#e67e22', body: '#d35400', price: 25 },
-    { id: 's7', name: 'BLUE', head: '#0088ff', body: '#0044aa', price: 30 },
-    { id: 's8', name: 'GHOST', head: '#ecf0f1', body: '#bdc3c7', price: 35 },
-    { id: 's9', name: 'WHITE', head: '#ffffff', body: '#888888', price: 40 },
-    { id: 's10', name: 'CYBER', head: '#34495e', body: '#2c3e50', price: 45 },
-    { id: 's11', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 50 }
+    { id: 's2', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 10 },
+    { id: 's3', name: 'RED', head: '#ff0044', body: '#990022', price: 20 },
+    { id: 's4', name: 'BLUE', head: '#0088ff', body: '#0044aa', price: 30 },
+    { id: 's5', name: 'WHITE', head: '#ffffff', body: '#888888', price: 40 },
+    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 50 }
 ];
 
 const BALL_COLORS = [
@@ -237,6 +232,7 @@ const state = {
     snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0}, inputQueue: [],
     food: {x:0, y:0},
     score: 0, particles: [],
+    // Vercel fix: Persistent data storage
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     username: localStorage.getItem('neon_v4_user') || '',
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
@@ -330,7 +326,7 @@ function spawnFood() {
 function startGame() {
     AudioFX.playClick();
     state.username = document.getElementById('username').value;
-    save(); 
+    save(); // Save username before start
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.inputQueue = [];
@@ -410,6 +406,8 @@ function loop(now) {
 document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resize); 
     resize();
+    
+    // Load existing user data
     if (state.username) document.getElementById('username').value = state.username;
 
     document.querySelectorAll('.speed-btn').forEach(btn => {
