@@ -427,7 +427,7 @@ function render(now) {
         
         ctx.beginPath(); 
         if(state.activeSnake.id === 'svoid') {
-            ctx.strokeStyle = '#004433'; ctx.lineWidth = 2; // Subtle dark teal border for visibility
+            ctx.strokeStyle = '#333333'; ctx.lineWidth = 2; // Dark grey border for visibility
             ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.stroke();
         } else {
             if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sH; }
