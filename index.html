@@ -29,6 +29,11 @@
             user-select: none;
         }
 
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .menu-box::-webkit-scrollbar, .shop-content::-webkit-scrollbar {
+            display: none;
+        }
+
         header {
             padding: 15px 20px;
             display: flex;
@@ -103,7 +108,8 @@
             text-align: center; background: var(--ui-bg); padding: 35px;
             border: 1px solid #333; border-radius: 20px; width: 340px;
             max-height: 85vh; overflow-y: auto;
-            scrollbar-width: none;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
         }
 
         .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
@@ -132,7 +138,7 @@
         .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--primary); }
 
         .shop-btn { background: #111; color: #fff; border: 1px solid #333; padding: 14px; width: 100%; margin-top: 12px; cursor: pointer; border-radius: 10px; font-weight: bold; display: flex; justify-content: space-between; }
-        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #000; }
+        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #000; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
         .shop-content.open { max-height: 400px; border: 1px solid #333; border-top: none; padding-bottom: 10px; }
         
         .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
@@ -213,12 +219,10 @@ const AudioFX = {
 
 const SNAKE_SKINS = [
     { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
-    /* NEW SKINS ADDED RIGHT AFTER FREE */
     { id: 's7', name: 'BANANA', head: '#ffe135', body: '#d4b000', price: 15 },
     { id: 's8', name: 'SLATE', head: '#708090', body: '#506070', price: 15 },
     { id: 's9', name: 'INDIGO', head: '#4b0082', body: '#2e0052', price: 15 },
     { id: 's10', name: 'RUBY', head: '#e0115f', body: '#99053d', price: 15 },
-    /* ORIGINAL PAID SKINS */
     { id: 's2', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 10 },
     { id: 's3', name: 'RED', head: '#ff0044', body: '#990022', price: 20 },
     { id: 's4', name: 'BLUE', head: '#0088ff', body: '#0044aa', price: 30 },
@@ -228,12 +232,10 @@ const SNAKE_SKINS = [
 
 const BALL_COLORS = [
     { id: 'b1', name: 'PURPLE', color: '#ff00ff', price: 0 },
-    /* NEW BALLS ADDED RIGHT AFTER FREE */
     { id: 'b6', name: 'BANANA', color: '#ffe135', price: 15 },
     { id: 'b7', name: 'SLATE', color: '#708090', price: 15 },
     { id: 'b8', name: 'INDIGO', color: '#4b0082', price: 15 },
     { id: 'b9', name: 'RUBY', color: '#e0115f', price: 15 },
-    /* ORIGINAL PAID BALLS */
     { id: 'b2', name: 'LIGHT BLUE', color: '#00ffff', price: 10 },
     { id: 'b3', name: 'GREEN', color: '#00ff00', price: 20 },
     { id: 'b4', name: 'ORANGE', color: '#ff8800', price: 30 },
@@ -244,7 +246,6 @@ const state = {
     snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0}, inputQueue: [],
     food: {x:0, y:0},
     score: 0, particles: [],
-    // Vercel fix: Persistent data storage
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     username: localStorage.getItem('neon_v4_user') || '',
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
@@ -338,7 +339,7 @@ function spawnFood() {
 function startGame() {
     AudioFX.playClick();
     state.username = document.getElementById('username').value;
-    save(); // Save username before start
+    save(); 
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.inputQueue = [];
@@ -418,10 +419,7 @@ function loop(now) {
 document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resize); 
     resize();
-    
-    // Load existing user data
     if (state.username) document.getElementById('username').value = state.username;
-
     document.querySelectorAll('.speed-btn').forEach(btn => {
         btn.onclick = () => { 
             AudioFX.playClick(); 
@@ -430,9 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
             CONFIG.currentMode=btn.dataset.speed; 
         };
     });
-
     document.getElementById('start-btn').onclick = startGame;
-
     window.addEventListener('keydown', e => {
         if (document.activeElement.tagName === 'INPUT') return;
         const k = e.key.toLowerCase();
@@ -444,7 +440,6 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (k === 's' || k === 'arrowdown') nD = {x:0, y:1};
         else if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0};
         else if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
-        
         if (nD) {
             const lastPlanned = state.inputQueue.length > 0 ? state.inputQueue[state.inputQueue.length - 1] : state.lastD;
             if ((nD.x !== lastPlanned.x || nD.y !== lastPlanned.y) && (nD.x !== -lastPlanned.x || nD.y !== -lastPlanned.y)) {
@@ -452,7 +447,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
     renderShops();
 });
 </script>
