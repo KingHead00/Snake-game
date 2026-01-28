@@ -211,31 +211,32 @@ const AudioFX = {
     }
 };
 
-// COMBINED SKINS (OLD + NEW RAINBOW)
 const SNAKE_SKINS = [
-    { id: 'ns_default', name: 'CLASSIC', head: '#00ffcc', body: '#008866', price: 0 },
-    { id: 'ns_chroma', name: 'CHROMA', head: 'rainbow', body: 'rainbow', price: 0 },
-    { id: 'ns2', name: 'TOXIC', head: '#adff2f', body: '#006400', price: 25 },
-    { id: 'ns3', name: 'INFERNO', head: '#ff4500', body: '#8b0000', price: 50 },
-    { id: 'ns4', name: 'GLACIER', head: '#00ffff', body: '#00008b', price: 75 }
+    { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
+    { id: 's2', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 10 },
+    { id: 's3', name: 'RED', head: '#ff0044', body: '#990022', price: 20 },
+    { id: 's4', name: 'BLUE', head: '#0088ff', body: '#0044aa', price: 30 },
+    { id: 's5', name: 'WHITE', head: '#ffffff', body: '#888888', price: 40 },
+    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 50 }
 ];
 
 const BALL_COLORS = [
-    { id: 'nb_default', name: 'WHITE', color: '#ffffff', price: 0 },
-    { id: 'nb_rainbow', name: 'SPECTRUM', color: 'rainbow', price: 0 },
-    { id: 'nb2', name: 'PLASMA', color: '#00fbff', price: 20 },
-    { id: 'nb3', name: 'NEBULA', color: '#ff0055', price: 40 },
-    { id: 'nb4', name: 'SUNSET', color: '#ffcc33', price: 60 }
+    { id: 'b1', name: 'PURPLE', color: '#ff00ff', price: 0 },
+    { id: 'b2', name: 'LIGHT BLUE', color: '#00ffff', price: 10 },
+    { id: 'b3', name: 'GREEN', color: '#00ff00', price: 20 },
+    { id: 'b4', name: 'ORANGE', color: '#ff8800', price: 30 },
+    { id: 'b5', name: 'RAINBOW', color: 'rainbow', price: 50 }
 ];
 
 const state = {
     snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0}, inputQueue: [],
     food: {x:0, y:0},
     score: 0, particles: [],
+    // Vercel fix: Persistent data storage
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     username: localStorage.getItem('neon_v4_user') || '',
-    ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["ns_default", "ns_chroma"]'),
-    ownedBalls: JSON.parse(localStorage.getItem('neon_v4_balls') || '["nb_default", "nb_rainbow"]'),
+    ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
+    ownedBalls: JSON.parse(localStorage.getItem('neon_v4_balls') || '["b1"]'),
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
     activeBall: JSON.parse(localStorage.getItem('neon_v4_active_b')) || BALL_COLORS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0,
@@ -290,20 +291,20 @@ function renderShops() {
     const sGrid = document.getElementById('snake-grid'); sGrid.innerHTML = '';
     SNAKE_SKINS.forEach(skin => {
         const isOwned = state.ownedSkins.includes(skin.id);
-        const isSel = (state.activeSnake && state.activeSnake.id === skin.id);
+        const isSel = state.activeSnake.id === skin.id;
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        card.innerHTML = `<div class="swatch" style="background:${skin.head==='rainbow'?'linear-gradient(45deg,red,orange,yellow,green,blue,indigo,violet)':skin.head}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
+        card.innerHTML = `<div class="swatch" style="background:${skin.head==='rainbow'?'linear-gradient(45deg,red,blue)':skin.head}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
         card.onclick = () => { AudioFX.playClick(); if(isOwned) state.activeSnake=skin; else if(state.wallet>=skin.price){state.wallet-=skin.price;state.ownedSkins.push(skin.id);state.activeSnake=skin;} save(); renderShops(); };
         sGrid.appendChild(card);
     });
     const bGrid = document.getElementById('ball-grid'); bGrid.innerHTML = '';
     BALL_COLORS.forEach(ball => {
         const isOwned = state.ownedBalls.includes(ball.id);
-        const isSel = (state.activeBall && state.activeBall.id === ball.id);
+        const isSel = state.activeBall.id === ball.id;
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        card.innerHTML = `<div class="swatch" style="background:${ball.color==='rainbow'?'linear-gradient(45deg,red,orange,yellow,green,blue,indigo,violet)':ball.color}"></div><b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
+        card.innerHTML = `<div class="swatch" style="background:${ball.color==='rainbow'?'linear-gradient(45deg,red,blue)':ball.color}"></div><b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
         card.onclick = () => { AudioFX.playClick(); if(isOwned) state.activeBall=ball; else if(state.wallet>=ball.price){state.wallet-=ball.price;state.ownedBalls.push(ball.id);state.activeBall=ball;} save(); renderShops(); };
         bGrid.appendChild(card);
     });
@@ -325,7 +326,7 @@ function spawnFood() {
 function startGame() {
     AudioFX.playClick();
     state.username = document.getElementById('username').value;
-    save(); 
+    save(); // Save username before start
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.inputQueue = [];
@@ -369,13 +370,13 @@ function render(now) {
     state.particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life -= 0.02; if(p.life <= 0) { state.particles.splice(i,1); return; } ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3); });
     ctx.globalAlpha = 1.0;
     const rHue = (now / 5) % 360;
-    let bCol = (state.activeBall && state.activeBall.color === 'rainbow') ? `hsl(${rHue}, 100%, 60%)` : (state.activeBall ? state.activeBall.color : '#fff');
+    let bCol = state.activeBall.color === 'rainbow' ? `hsl(${rHue}, 100%, 60%)` : state.activeBall.color;
     ctx.fillStyle = bCol; ctx.shadowBlur = 15; ctx.shadowColor = bCol;
     ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*(1+Math.sin(now/200)*0.1), 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
     state.snake.forEach((seg, i) => {
-        let sH = (state.activeSnake && state.activeSnake.head === 'rainbow') ? `hsl(${rHue}, 100%, 50%)` : (state.activeSnake ? state.activeSnake.head : '#fff');
-        let sB = (state.activeSnake && state.activeSnake.body === 'rainbow') ? `hsl(${(rHue-i*10)%360}, 100%, 40%)` : (state.activeSnake ? state.activeSnake.body : '#ccc');
+        let sH = state.activeSnake.head === 'rainbow' ? `hsl(${rHue}, 100%, 50%)` : state.activeSnake.head;
+        let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
         ctx.fillStyle = (i === 0) ? sH : sB;
         if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sH; }
         const r = i === 0 ? 8 : 4; const x = seg.x*CONFIG.cellSize+1; const y = seg.y*CONFIG.cellSize+1;
@@ -406,6 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resize); 
     resize();
     
+    // Load existing user data
     if (state.username) document.getElementById('username').value = state.username;
 
     document.querySelectorAll('.speed-btn').forEach(btn => {
