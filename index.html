@@ -17,7 +17,7 @@
             --primary: #00ffcc;
             --text: #ffffff;
             --ui-bg: rgba(0, 0, 0, 0.95);
-            --danger: #ff0044;
+            --danger: #ff0000;
         }
 
         html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); }
@@ -84,10 +84,11 @@
             100% { border-color: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.3); transform: scale(1); }
         }
 
-        canvas.death-pulse { animation: deathGlowRed 1s infinite alternate; }
+        canvas.death-pulse { animation: deathGlowRed 0.15s infinite alternate; }
         @keyframes deathGlowRed {
-            0% { border-color: var(--danger); box-shadow: 0 0 30px var(--danger); }
-            100% { border-color: #ff88aa; box-shadow: 0 0 80px var(--danger); transform: scale(1.01); }
+            0% { border-color: #ff0000; box-shadow: 0 0 20px #770000; transform: translate(2px, 2px); }
+            50% { border-color: #aa0000; box-shadow: 0 0 60px #ff0000; transform: translate(-2px, -2px); }
+            100% { border-color: #ff0000; box-shadow: 0 0 100px #770000; transform: translate(0px, 0px); }
         }
 
         #ui-layer {
@@ -376,10 +377,10 @@ function update() {
     state.lastD = state.dir; 
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
-        state.gameOver = true; state.shake = 10; AudioFX.playDeath();
+        state.gameOver = true; state.shake = 20; AudioFX.playDeath();
         canvas.classList.add('death-pulse'); 
         if (state.score > state.wallet) { state.wallet = state.score; }
-        save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 800);
+        save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 1200);
         return;
     }
     state.snake.unshift(head);
@@ -396,7 +397,13 @@ function update() {
 }
 
 function render(now) {
-    ctx.setTransform(1,0,0,1,0,0); if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; }
+    ctx.setTransform(1,0,0,1,0,0); 
+    if (state.gameOver) {
+        ctx.translate((Math.random()-0.5)*10, (Math.random()-0.5)*10);
+    } else if (state.shake > 0) { 
+        ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; 
+    }
+    
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
     ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
@@ -427,7 +434,7 @@ function render(now) {
         
         ctx.beginPath(); 
         if(state.activeSnake.id === 'svoid') {
-            ctx.strokeStyle = '#333333'; ctx.lineWidth = 2; // Dark grey border for visibility
+            ctx.strokeStyle = '#333333'; ctx.lineWidth = 2;
             ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.stroke();
         } else {
             if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sH; }
@@ -464,7 +471,7 @@ function render(now) {
 }
 
 function loop(now) {
-    if(state.gameOver) { render(now); if(state.shake > 0.1 || state.particles.length > 0) requestAnimationFrame(loop); return; }
+    if(state.gameOver) { render(now); if(state.shake > 0.1 || state.particles.length > 0 || state.gameOver) requestAnimationFrame(loop); return; }
     const dt = now - state.lastTime; state.lastTime = now; state.accumTime += dt;
     const p = CONFIG.speeds[CONFIG.currentMode];
     const step = 1000 / Math.min(p.max, p.base + (state.score * p.boost));
