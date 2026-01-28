@@ -211,16 +211,18 @@ const AudioFX = {
     }
 };
 
-// REMOVED OLD SKINS - ADDED NEW ONES
+// COMBINED SKINS (OLD + NEW RAINBOW)
 const SNAKE_SKINS = [
-    { id: 'ns1', name: 'CHROMA', head: 'rainbow', body: 'rainbow', price: 0 },
+    { id: 'ns_default', name: 'CLASSIC', head: '#00ffcc', body: '#008866', price: 0 },
+    { id: 'ns_chroma', name: 'CHROMA', head: 'rainbow', body: 'rainbow', price: 0 },
     { id: 'ns2', name: 'TOXIC', head: '#adff2f', body: '#006400', price: 25 },
     { id: 'ns3', name: 'INFERNO', head: '#ff4500', body: '#8b0000', price: 50 },
     { id: 'ns4', name: 'GLACIER', head: '#00ffff', body: '#00008b', price: 75 }
 ];
 
 const BALL_COLORS = [
-    { id: 'nb1', name: 'SPECTRUM', color: 'rainbow', price: 0 },
+    { id: 'nb_default', name: 'WHITE', color: '#ffffff', price: 0 },
+    { id: 'nb_rainbow', name: 'SPECTRUM', color: 'rainbow', price: 0 },
     { id: 'nb2', name: 'PLASMA', color: '#00fbff', price: 20 },
     { id: 'nb3', name: 'NEBULA', color: '#ff0055', price: 40 },
     { id: 'nb4', name: 'SUNSET', color: '#ffcc33', price: 60 }
@@ -232,8 +234,8 @@ const state = {
     score: 0, particles: [],
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     username: localStorage.getItem('neon_v4_user') || '',
-    ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["ns1"]'),
-    ownedBalls: JSON.parse(localStorage.getItem('neon_v4_balls') || '["nb1"]'),
+    ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["ns_default", "ns_chroma"]'),
+    ownedBalls: JSON.parse(localStorage.getItem('neon_v4_balls') || '["nb_default", "nb_rainbow"]'),
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
     activeBall: JSON.parse(localStorage.getItem('neon_v4_active_b')) || BALL_COLORS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0,
