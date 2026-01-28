@@ -3,7 +3,7 @@
 <head>
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(j),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M79X9PGL');</script>
     <meta charset="utf-8">
@@ -100,7 +100,7 @@
         #ui-layer.hidden { opacity: 0; pointer-events: none; }
         
         .menu-box {
-            text-align: center; background: var(--ui-bg); padding: 25px;
+            text-align: center; background: var(--ui-bg); padding: 35px;
             border: 1px solid #333; border-radius: 20px; width: 340px;
             max-height: 85vh; overflow-y: auto;
             scrollbar-width: none;
@@ -109,7 +109,7 @@
         .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
         
         .user-input {
-            width: 100%; padding: 12px; margin-bottom: 15px;
+            width: 100%; padding: 12px; margin-bottom: 20px;
             background: #111; border: 1px solid #333; border-radius: 10px;
             color: var(--primary); font-weight: bold; text-align: center;
             outline: none; transition: 0.3s;
@@ -123,42 +123,30 @@
             background-size: 400% 400%;
             animation: rainbowShift 4s linear infinite;
             border: none; color: white; padding: 12px; width: 100%; border-radius: 10px;
-            font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; margin-bottom: 10px;
+            font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; margin-bottom: 15px;
         }
         .cheat-btn.active { filter: brightness(0.6); pointer-events: none; opacity: 0.8; }
         @keyframes rainbowShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
 
-        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 10px; width: 100%; transition: 0.2s; }
+        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; transition: 0.2s; }
         .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--primary); }
 
-        .shop-btn { background: #111; color: #fff; border: 1px solid #333; padding: 12px; width: 100%; margin-top: 8px; cursor: pointer; border-radius: 10px; font-weight: bold; display: flex; justify-content: space-between; }
+        .shop-btn { background: #111; color: #fff; border: 1px solid #333; padding: 14px; width: 100%; margin-top: 12px; cursor: pointer; border-radius: 10px; font-weight: bold; display: flex; justify-content: space-between; }
+        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #000; }
+        .shop-content.open { max-height: 400px; border: 1px solid #333; border-top: none; padding-bottom: 10px; }
         
-        /* SHOP SCROLLING FIX */
-        .shop-content { 
-            max-height: 0; 
-            overflow-y: auto; 
-            transition: max-height 0.3s ease-out; 
-            background: #000; 
-        }
-        .shop-content.open { 
-            max-height: 220px; 
-            border: 1px solid #333; 
-            border-top: none; 
-            padding-bottom: 10px; 
-        }
-        
-        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; }
-        .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 11px; }
+        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+        .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 11px; }
         .skin-card.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
-        .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+        .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; }
 
-        .speed-selector { margin: 10px 0; display: flex; justify-content: center; gap: 8px; }
-        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 6px 12px; cursor: pointer; border-radius: 8px; font-size: 12px; }
+        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 10px; }
+        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 16px; cursor: pointer; border-radius: 8px; font-size: 12px; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
 
-        .menu-controls-hint { margin-top: 20px; padding-top: 10px; border-top: 1px solid #333; font-size: 11px; color: #666; text-transform: uppercase; line-height: 1.6; }
+        .menu-controls-hint { margin-top: 25px; padding-top: 15px; border-top: 1px solid #333; font-size: 11px; color: #666; text-transform: uppercase; line-height: 1.6; }
         .menu-controls-hint b { color: var(--primary); }
-        footer { padding: 10px; text-align: center; font-size: 12px; color: #333; background: #050505; }
+        footer { padding: 15px; text-align: center; font-size: 12px; color: #333; background: #050505; }
     </style>
 </head>
 <body>
@@ -223,22 +211,21 @@ const AudioFX = {
     }
 };
 
-// "NORMAL" NAMES FOR SKINS
 const SNAKE_SKINS = [
-    { id: 's1', name: 'GREEN', head: '#00ffcc', body: '#004433', price: 0 },
-    { id: 's2', name: 'YELLOW', head: '#ffd700', body: '#4a3c00', price: 10 },
-    { id: 's3', name: 'RED', head: '#ff2a2a', body: '#4a0000', price: 20 },
-    { id: 's4', name: 'BLUE', head: '#00fbff', body: '#003a3d', price: 30 },
-    { id: 's5', name: 'WHITE', head: '#ffffff', body: '#333333', price: 40 },
-    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 50 }
+    { id: 's1', name: 'CYBER', head: '#00ffcc', body: '#004433', price: 0 },
+    { id: 's2', name: 'PLASMA', head: '#ff00ff', body: '#4a004a', price: 15 },
+    { id: 's3', name: 'INFERNO', head: '#ffcc00', body: '#aa0000', price: 30 },
+    { id: 's4', name: 'MATRIX', head: '#00ff00', body: '#002200', price: 50 },
+    { id: 's5', name: 'FROST', head: '#a0fbff', body: '#2c3e50', price: 75 },
+    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 100 }
 ];
 
 const BALL_COLORS = [
-    { id: 'b1', name: 'PINK', color: '#ff00ff', price: 0 },
-    { id: 'b2', name: 'CYAN', color: '#00ffff', price: 10 },
-    { id: 'b3', name: 'LIME', color: '#32cd32', price: 20 },
-    { id: 'b4', name: 'ORANGE', color: '#ff8800', price: 30 },
-    { id: 'b5', name: 'RAINBOW', color: 'rainbow', price: 50 }
+    { id: 'b1', name: 'NEON PINK', color: '#ff00ff', price: 0 },
+    { id: 'b2', name: 'GOLD', color: '#ffcc00', price: 20 },
+    { id: 'b3', name: 'TOXIC', color: '#adff2f', price: 40 },
+    { id: 'b4', name: 'ICE', color: '#00ffff', price: 60 },
+    { id: 'b5', name: 'GLITCH', color: 'rainbow', price: 100 }
 ];
 
 const state = {
@@ -359,7 +346,7 @@ function update() {
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 10; AudioFX.playDeath();
         canvas.classList.add('death-pulse'); 
-        if (state.score > state.wallet) { state.wallet = state.score; }
+        if (state.score > 0) { state.wallet += state.score; }
         save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 800);
         return;
     }
@@ -419,7 +406,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resize); 
     resize();
     if (state.username) document.getElementById('username').value = state.username;
-
     document.querySelectorAll('.speed-btn').forEach(btn => {
         btn.onclick = () => { 
             AudioFX.playClick(); 
@@ -428,9 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
             CONFIG.currentMode=btn.dataset.speed; 
         };
     });
-
     document.getElementById('start-btn').onclick = startGame;
-
     window.addEventListener('keydown', e => {
         if (document.activeElement.tagName === 'INPUT') return;
         const k = e.key.toLowerCase();
@@ -442,7 +426,6 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (k === 's' || k === 'arrowdown') nD = {x:0, y:1};
         else if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0};
         else if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
-        
         if (nD) {
             const lastPlanned = state.inputQueue.length > 0 ? state.inputQueue[state.inputQueue.length - 1] : state.lastD;
             if ((nD.x !== lastPlanned.x || nD.y !== lastPlanned.y) && (nD.x !== -lastPlanned.x || nD.y !== -lastPlanned.y)) {
@@ -450,7 +433,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
     renderShops();
 });
 </script>
