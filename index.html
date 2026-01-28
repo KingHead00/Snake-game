@@ -100,16 +100,16 @@
         #ui-layer.hidden { opacity: 0; pointer-events: none; }
         
         .menu-box {
-            text-align: center; background: var(--ui-bg); padding: 35px;
+            text-align: center; background: var(--ui-bg); padding: 25px;
             border: 1px solid #333; border-radius: 20px; width: 340px;
-            max-height: 85vh; overflow-y: auto;
+            max-height: 90vh; overflow-y: auto;
             scrollbar-width: none;
         }
 
         .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
         
         .user-input {
-            width: 100%; padding: 12px; margin-bottom: 20px;
+            width: 100%; padding: 12px; margin-bottom: 15px;
             background: #111; border: 1px solid #333; border-radius: 10px;
             color: var(--primary); font-weight: bold; text-align: center;
             outline: none; transition: 0.3s;
@@ -123,30 +123,43 @@
             background-size: 400% 400%;
             animation: rainbowShift 4s linear infinite;
             border: none; color: white; padding: 12px; width: 100%; border-radius: 10px;
-            font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; margin-bottom: 15px;
+            font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; margin-bottom: 10px;
         }
         .cheat-btn.active { filter: brightness(0.6); pointer-events: none; opacity: 0.8; }
         @keyframes rainbowShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
 
-        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; transition: 0.2s; }
+        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 10px; width: 100%; transition: 0.2s; }
         .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--primary); }
 
-        .shop-btn { background: #111; color: #fff; border: 1px solid #333; padding: 14px; width: 100%; margin-top: 12px; cursor: pointer; border-radius: 10px; font-weight: bold; display: flex; justify-content: space-between; }
-        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #000; }
-        .shop-content.open { max-height: 400px; border: 1px solid #333; border-top: none; padding-bottom: 10px; }
+        .shop-btn { background: #111; color: #fff; border: 1px solid #333; padding: 12px; width: 100%; margin-top: 8px; cursor: pointer; border-radius: 10px; font-weight: bold; display: flex; justify-content: space-between; }
         
-        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
-        .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 11px; }
+        /* SCROLL FIX HERE */
+        .shop-content { 
+            max-height: 0; 
+            overflow-y: auto; 
+            transition: max-height 0.3s ease-out; 
+            background: #000; 
+            border-radius: 0 0 10px 10px;
+        }
+        .shop-content.open { 
+            max-height: 250px; 
+            border: 1px solid #333; 
+            border-top: none; 
+            padding-bottom: 10px; 
+        }
+        
+        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; }
+        .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 11px; }
         .skin-card.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
-        .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; }
+        .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
 
-        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 10px; }
-        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 16px; cursor: pointer; border-radius: 8px; font-size: 12px; }
+        .speed-selector { margin: 10px 0; display: flex; justify-content: center; gap: 8px; }
+        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 6px 12px; cursor: pointer; border-radius: 8px; font-size: 12px; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
 
-        .menu-controls-hint { margin-top: 25px; padding-top: 15px; border-top: 1px solid #333; font-size: 11px; color: #666; text-transform: uppercase; line-height: 1.6; }
+        .menu-controls-hint { margin-top: 20px; padding-top: 10px; border-top: 1px solid #333; font-size: 11px; color: #666; text-transform: uppercase; line-height: 1.6; }
         .menu-controls-hint b { color: var(--primary); }
-        footer { padding: 15px; text-align: center; font-size: 12px; color: #333; background: #050505; }
+        footer { padding: 10px; text-align: center; font-size: 12px; color: #333; background: #050505; }
     </style>
 </head>
 <body>
@@ -211,25 +224,26 @@ const AudioFX = {
     }
 };
 
+// IMPROVED COLOR PALETTE
 const SNAKE_SKINS = [
-    { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
-    { id: 's2', name: 'EMERALD', head: '#2ecc71', body: '#27ae60', price: 5 },
-    { id: 's3', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 10 },
-    { id: 's4', name: 'PLASMA', head: '#9b59b6', body: '#8e44ad', price: 15 },
-    { id: 's5', name: 'RED', head: '#ff0044', body: '#990022', price: 20 },
-    { id: 's6', name: 'SUNSET', head: '#e67e22', body: '#d35400', price: 25 },
-    { id: 's7', name: 'BLUE', head: '#0088ff', body: '#0044aa', price: 30 },
-    { id: 's8', name: 'GHOST', head: '#ecf0f1', body: '#bdc3c7', price: 35 },
-    { id: 's9', name: 'WHITE', head: '#ffffff', body: '#888888', price: 40 },
-    { id: 's10', name: 'CYBER', head: '#34495e', body: '#2c3e50', price: 45 },
+    { id: 's1', name: 'NEON', head: '#00ffcc', body: '#004433', price: 0 },
+    { id: 's2', name: 'EMERALD', head: '#2dfc52', body: '#0a3d15', price: 5 },
+    { id: 's3', name: 'GOLD', head: '#ffd700', body: '#4a3c00', price: 10 },
+    { id: 's4', name: 'PLASMA', head: '#ff00ff', body: '#4a004a', price: 15 },
+    { id: 's5', name: 'RED', head: '#ff2a2a', body: '#4a0000', price: 20 },
+    { id: 's6', name: 'SUNSET', head: '#ff8c00', body: '#4a2800', price: 25 },
+    { id: 's7', name: 'CYAN', head: '#00fbff', body: '#003a3d', price: 30 },
+    { id: 's8', name: 'VIOLET', head: '#8a2be2', body: '#2d004d', price: 35 },
+    { id: 's9', name: 'SNOW', head: '#ffffff', body: '#333333', price: 40 },
+    { id: 's10', name: 'TOXIC', head: '#adff2f', body: '#2a4d00', price: 45 },
     { id: 's11', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 50 }
 ];
 
 const BALL_COLORS = [
-    { id: 'b1', name: 'PURPLE', color: '#ff00ff', price: 0 },
-    { id: 'b2', name: 'LIGHT BLUE', color: '#00ffff', price: 10 },
-    { id: 'b3', name: 'GREEN', color: '#00ff00', price: 20 },
-    { id: 'b4', name: 'ORANGE', color: '#ff8800', price: 30 },
+    { id: 'b1', name: 'MAGENTA', color: '#ff00ff', price: 0 },
+    { id: 'b2', name: 'ICE', color: '#00ffff', price: 10 },
+    { id: 'b3', name: 'LIME', color: '#32cd32', price: 20 },
+    { id: 'b4', name: 'FLAME', color: '#ff4500', price: 30 },
     { id: 'b5', name: 'RAINBOW', color: 'rainbow', price: 50 }
 ];
 
@@ -367,7 +381,7 @@ function update() {
 function render(now) {
     ctx.setTransform(1,0,0,1,0,0); if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; }
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.beginPath();
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
