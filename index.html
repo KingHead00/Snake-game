@@ -29,9 +29,13 @@
             user-select: none;
         }
 
-        /* Hide scrollbar for Chrome, Safari and Opera */
+        /* Hides scrollbar while allowing scrolling */
         .menu-box::-webkit-scrollbar, .shop-content::-webkit-scrollbar {
             display: none;
+        }
+        .menu-box, .shop-content {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
         }
 
         header {
@@ -51,12 +55,6 @@
             height: 32px;
             object-fit: contain;
             filter: drop-shadow(0 0 5px var(--primary));
-            animation: logoPulse 2s infinite ease-in-out;
-        }
-        
-        @keyframes logoPulse {
-            0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 5px var(--primary)) brightness(1); }
-            50% { opacity: 0.8; transform: scale(1.1); filter: drop-shadow(0 0 12px var(--primary)) brightness(1.3); }
         }
 
         h1 { font-size: 20px; margin: 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 1px; }
@@ -80,19 +78,6 @@
             border: 5px solid #ffffff; 
             border-radius: 4px;
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); 
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        canvas.pulse { animation: flashWhite 0.4s ease-out; }
-        @keyframes flashWhite {
-            0% { border-color: #fff; box-shadow: 0 0 50px #fff; transform: scale(1.02); }
-            100% { border-color: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.3); transform: scale(1); }
-        }
-
-        canvas.death-pulse { animation: deathGlowRed 1s infinite alternate; }
-        @keyframes deathGlowRed {
-            0% { border-color: var(--danger); box-shadow: 0 0 30px var(--danger); }
-            100% { border-color: #ff88aa; box-shadow: 0 0 80px var(--danger); transform: scale(1.01); }
         }
 
         #ui-layer {
@@ -108,8 +93,6 @@
             text-align: center; background: var(--ui-bg); padding: 35px;
             border: 1px solid #333; border-radius: 20px; width: 340px;
             max-height: 85vh; overflow-y: auto;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE/Edge */
         }
 
         .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
@@ -118,11 +101,8 @@
             width: 100%; padding: 12px; margin-bottom: 20px;
             background: #111; border: 1px solid #333; border-radius: 10px;
             color: var(--primary); font-weight: bold; text-align: center;
-            outline: none; transition: 0.3s;
-            font-size: 14px;
-            box-sizing: border-box;
+            outline: none; font-size: 14px; box-sizing: border-box;
         }
-        .user-input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 255, 204, 0.3); background: #000; }
 
         .cheat-btn {
             background: linear-gradient(45deg, #ff0000, #ff8800, #ffff00, #00ff00, #0000ff, #8b00ff);
@@ -131,14 +111,12 @@
             border: none; color: white; padding: 12px; width: 100%; border-radius: 10px;
             font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; margin-bottom: 15px;
         }
-        .cheat-btn.active { filter: brightness(0.6); pointer-events: none; opacity: 0.8; }
         @keyframes rainbowShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
 
-        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; transition: 0.2s; }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--primary); }
-
+        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; }
+        
         .shop-btn { background: #111; color: #fff; border: 1px solid #333; padding: 14px; width: 100%; margin-top: 12px; cursor: pointer; border-radius: 10px; font-weight: bold; display: flex; justify-content: space-between; }
-        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #000; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+        .shop-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #000; overflow-y: auto; }
         .shop-content.open { max-height: 400px; border: 1px solid #333; border-top: none; padding-bottom: 10px; }
         
         .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
@@ -150,14 +128,11 @@
         .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 16px; cursor: pointer; border-radius: 8px; font-size: 12px; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
 
-        .menu-controls-hint { margin-top: 25px; padding-top: 15px; border-top: 1px solid #333; font-size: 11px; color: #666; text-transform: uppercase; line-height: 1.6; }
-        .menu-controls-hint b { color: var(--primary); }
         footer { padding: 15px; text-align: center; font-size: 12px; color: #333; background: #050505; }
     </style>
 </head>
 <body>
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M79X9PGL"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M79X9PGL" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <header>
         <div class="header-left">
             <img src="logo.png" alt="Logo" class="logo-img">
@@ -184,7 +159,6 @@
                 <button class="shop-btn" onclick="toggleShop('ball-shop')">BALL COLORS <span>▼</span></button>
                 <div id="ball-shop" class="shop-content"><div class="skin-grid" id="ball-grid"></div></div>
                 <button class="btn" id="start-btn">START GAME</button>
-                <div class="menu-controls-hint">[<b>WASD</b>] Move &nbsp;•&nbsp; [<b>R/Space</b>] Restart<br>[<b>Q</b>] Exit to Google</div>
             </div>
         </div>
     </div>
@@ -244,8 +218,7 @@ const BALL_COLORS = [
 
 const state = {
     snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0}, inputQueue: [],
-    food: {x:0, y:0},
-    score: 0, particles: [],
+    food: {x:0, y:0}, score: 0, particles: [],
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     username: localStorage.getItem('neon_v4_user') || '',
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
@@ -253,7 +226,7 @@ const state = {
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
     activeBall: JSON.parse(localStorage.getItem('neon_v4_active_b')) || BALL_COLORS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0,
-    menuTimeout: null, cheatsActive: false
+    cheatsActive: false
 };
 
 const canvas = document.getElementById('c');
@@ -275,20 +248,8 @@ function applyCheats() {
     state.cheatsActive = true;
     state.ownedSkins = SNAKE_SKINS.map(s => s.id);
     state.ownedBalls = BALL_COLORS.map(b => b.id);
-    document.getElementById('cheat-btn').classList.add('active');
     document.getElementById('cheat-btn').innerText = "CHEATS ON (NO SAVING)";
     renderShops();
-}
-
-function explode(x, y, color) {
-    for(let i=0; i<15; i++) {
-        state.particles.push({
-            x: x * CONFIG.cellSize + CONFIG.cellSize/2,
-            y: y * CONFIG.cellSize + CONFIG.cellSize/2,
-            vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
-            life: 1.0, color: color
-        });
-    }
 }
 
 function toggleShop(id) {
@@ -325,27 +286,21 @@ function renderShops() {
 
 function resize() {
     const container = document.getElementById('game-container');
-    if(!container) return;
     const rawSize = Math.min((container.clientWidth-20)/CONFIG.cols, (container.clientHeight-20)/CONFIG.rows);
     CONFIG.cellSize = Math.floor(rawSize);
     canvas.width = CONFIG.cols * CONFIG.cellSize; canvas.height = CONFIG.rows * CONFIG.cellSize;
-}
-
-function spawnFood() {
-    state.food = { x: Math.floor(Math.random()*CONFIG.cols), y: Math.floor(Math.random()*CONFIG.rows) };
-    if (state.snake.some(p => p.x === state.food.x && p.y === state.food.y)) spawnFood();
 }
 
 function startGame() {
     AudioFX.playClick();
     state.username = document.getElementById('username').value;
     save(); 
-    if(state.menuTimeout) clearTimeout(state.menuTimeout);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.inputQueue = [];
-    state.score = 0; state.shake = 0; state.particles = [];
+    state.score = 0; state.particles = [];
     document.getElementById('score').textContent = '0';
-    canvas.className = ""; spawnFood(); state.gameOver = false; state.lastTime = performance.now();
+    state.food = { x: Math.floor(Math.random()*CONFIG.cols), y: Math.floor(Math.random()*CONFIG.rows) };
+    state.gameOver = false; state.lastTime = performance.now();
     document.getElementById('ui-layer').classList.add('hidden');
     requestAnimationFrame(loop);
 }
@@ -358,57 +313,47 @@ function update() {
     state.lastD = state.dir; 
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
-        state.gameOver = true; state.shake = 10; AudioFX.playDeath();
-        canvas.classList.add('death-pulse'); 
+        state.gameOver = true; AudioFX.playDeath();
         if (state.score > state.wallet) { state.wallet = state.score; }
-        save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 800);
+        save(); setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 800);
         return;
     }
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; document.getElementById('score').textContent = state.score;
-        AudioFX.playEat(); canvas.classList.remove('pulse'); void canvas.offsetWidth; canvas.classList.add('pulse'); 
-        const pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
-        explode(state.food.x, state.food.y, pCol); spawnFood();
+        AudioFX.playEat(); state.food = { x: Math.floor(Math.random()*CONFIG.cols), y: Math.floor(Math.random()*CONFIG.rows) };
     } else state.snake.pop();
 }
 
 function render(now) {
-    ctx.setTransform(1,0,0,1,0,0); if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; }
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.beginPath();
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
-    state.particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life -= 0.02; if(p.life <= 0) { state.particles.splice(i,1); return; } ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3); });
-    ctx.globalAlpha = 1.0;
+
     const rHue = (now / 5) % 360;
+    
+    // --- RESTORED BALL RENDER ---
     let bCol = state.activeBall.color === 'rainbow' ? `hsl(${rHue}, 100%, 60%)` : state.activeBall.color;
     ctx.fillStyle = bCol; ctx.shadowBlur = 15; ctx.shadowColor = bCol;
-    ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*(1+Math.sin(now/200)*0.1), 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); 
+    ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, CONFIG.cellSize/3, 0, Math.PI*2); 
+    ctx.fill();
     ctx.shadowBlur = 0;
+
     state.snake.forEach((seg, i) => {
         let sH = state.activeSnake.head === 'rainbow' ? `hsl(${rHue}, 100%, 50%)` : state.activeSnake.head;
         let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
         ctx.fillStyle = (i === 0) ? sH : sB;
-        if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sH; }
-        const r = i === 0 ? 8 : 4; const x = seg.x*CONFIG.cellSize+1; const y = seg.y*CONFIG.cellSize+1;
-        const w = CONFIG.cellSize-2; const h = CONFIG.cellSize-2;
-        ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.shadowBlur = 0;
-        if(i === 0) {
-            ctx.fillStyle = '#000'; const eyeSize = CONFIG.cellSize / 8; const offset = CONFIG.cellSize / 4;
-            let e1x, e1y, e2x, e2y;
-            if (state.lastD.x === 1) { e1x = e2x = x + w - offset; e1y = y + offset; e2y = y + h - offset; }
-            else if (state.lastD.x === -1) { e1x = e2x = x + offset; e1y = y + offset; e2y = y + h - offset; }
-            else if (state.lastD.y === -1) { e1y = e2y = y + offset; e1x = x + offset; e2x = x + w - offset; }
-            else { e1y = e2y = y + h - offset; e1x = x + offset; e2x = x + w - offset; }
-            ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill();
-        }
+        if(i === 0) { ctx.shadowBlur = 10; ctx.shadowColor = sH; }
+        ctx.beginPath(); ctx.roundRect(seg.x*CONFIG.cellSize+1, seg.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2, i===0?8:4); ctx.fill();
+        ctx.shadowBlur = 0;
     });
 }
 
 function loop(now) {
-    if(state.gameOver) { render(now); if(state.shake > 0.1 || state.particles.length > 0) requestAnimationFrame(loop); return; }
+    if(state.gameOver) { render(now); return; }
     const dt = now - state.lastTime; state.lastTime = now; state.accumTime += dt;
     const p = CONFIG.speeds[CONFIG.currentMode];
     const step = 1000 / Math.min(p.max, p.base + (state.score * p.boost));
@@ -417,8 +362,7 @@ function loop(now) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    window.addEventListener('resize', resize); 
-    resize();
+    window.addEventListener('resize', resize); resize();
     if (state.username) document.getElementById('username').value = state.username;
     document.querySelectorAll('.speed-btn').forEach(btn => {
         btn.onclick = () => { 
@@ -434,7 +378,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const k = e.key.toLowerCase();
         if (k === 'r' || k === ' ') startGame();
         if (k === 'q') window.location.href = "https://www.google.com";
-        if (state.gameOver) return;
         let nD = null;
         if (k === 'w' || k === 'arrowup') nD = {x:0, y:-1};
         else if (k === 's' || k === 'arrowdown') nD = {x:0, y:1};
