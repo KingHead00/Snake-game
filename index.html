@@ -14,7 +14,7 @@
         :root {
             --bg: #050505;
             --grid: #333333; 
-            --primary: #ffe135; /* Banana Yellow Default */
+            --primary: #00ffcc;
             --text: #ffffff;
             --ui-bg: rgba(0, 0, 0, 0.95);
             --danger: #ff0044;
@@ -80,7 +80,7 @@
 
         canvas.pulse { animation: flashWhite 0.4s ease-out; }
         @keyframes flashWhite {
-            0% { border-color: var(--primary); box-shadow: 0 0 50px var(--primary); transform: scale(1.02); }
+            0% { border-color: #fff; box-shadow: 0 0 50px #fff; transform: scale(1.02); }
             100% { border-color: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.3); transform: scale(1); }
         }
 
@@ -116,7 +116,7 @@
             font-size: 14px;
             box-sizing: border-box;
         }
-        .user-input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(255, 225, 53, 0.3); background: #000; }
+        .user-input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 255, 204, 0.3); background: #000; }
 
         .cheat-btn {
             background: linear-gradient(45deg, #ff0000, #ff8800, #ffff00, #00ff00, #0000ff, #8b00ff);
@@ -137,14 +137,14 @@
         
         .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
         .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 11px; }
-        .skin-card.selected { border-color: var(--primary); background: rgba(255, 225, 53, 0.1); }
-        .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; }
+        .skin-card.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
+        .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; border: 1px solid #333; }
 
-        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; }
-        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 12px; cursor: pointer; border-radius: 8px; font-size: 11px; font-weight: bold; }
-        .speed-btn.active { color: var(--primary); border-color: var(--primary); background: rgba(255, 225, 53, 0.05); }
-        .speed-btn[data-speed="impossible"] { color: #ff0044; border-color: #330000; }
-        .speed-btn[data-speed="impossible"].active { background: #330000; border-color: #ff0044; color: #ff0044; box-shadow: 0 0 10px #ff0044; }
+        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 12px; cursor: pointer; border-radius: 8px; font-size: 12px; }
+        .speed-btn.active { color: var(--primary); border-color: var(--primary); }
+        .speed-btn[data-speed="impossible"] { color: #ff0044; }
+        .speed-btn[data-speed="impossible"].active { background: rgba(255, 0, 68, 0.1); border-color: #ff0044; }
 
         .menu-controls-hint { margin-top: 25px; padding-top: 15px; border-top: 1px solid #333; font-size: 11px; color: #666; text-transform: uppercase; line-height: 1.6; }
         .menu-controls-hint b { color: var(--primary); }
@@ -215,9 +215,10 @@ const AudioFX = {
 };
 
 const SNAKE_SKINS = [
-    { id: 's_banana', name: 'BANANA', head: '#ffe135', body: '#e6c200', price: 0 },
-    { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 10 },
-    { id: 's2', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 20 },
+    { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
+    { id: 'svoid', name: 'VOID', head: '#000000', body: '#000000', price: 0, pair: 'bvoid' },
+    { id: 's_banana', name: 'BANANA', head: '#ffe135', body: '#ccb52b', price: 0 },
+    { id: 's2', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 10 },
     { id: 's3', name: 'RED', head: '#ff0044', body: '#990022', price: 20 },
     { id: 's4', name: 'BLUE', head: '#0088ff', body: '#0044aa', price: 30 },
     { id: 's5', name: 'WHITE', head: '#ffffff', body: '#888888', price: 40 },
@@ -225,8 +226,9 @@ const SNAKE_SKINS = [
 ];
 
 const BALL_COLORS = [
+    { id: 'b1', name: 'PURPLE', color: '#ff00ff', price: 0 },
+    { id: 'bvoid', name: 'VOID', color: '#000000', price: 0, pair: 'svoid' },
     { id: 'b_banana', name: 'BANANA', color: '#ffe135', price: 0 },
-    { id: 'b1', name: 'PURPLE', color: '#ff00ff', price: 10 },
     { id: 'b2', name: 'LIGHT BLUE', color: '#00ffff', price: 10 },
     { id: 'b3', name: 'GREEN', color: '#00ff00', price: 20 },
     { id: 'b4', name: 'ORANGE', color: '#ff8800', price: 30 },
@@ -239,26 +241,18 @@ const state = {
     score: 0, particles: [],
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     username: localStorage.getItem('neon_v4_user') || '',
-    ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s_banana"]'),
-    ownedBalls: JSON.parse(localStorage.getItem('neon_v4_balls') || '["b_banana"]'),
+    ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1", "svoid", "s_banana"]'),
+    ownedBalls: JSON.parse(localStorage.getItem('neon_v4_balls') || '["b1", "bvoid", "b_banana"]'),
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
     activeBall: JSON.parse(localStorage.getItem('neon_v4_active_b')) || BALL_COLORS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0,
-    menuTimeout: null, cheatsActive: false
+    menuTimeout: null, cheatsActive: false,
+    eyeFlash: 0
 };
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
-const CONFIG = { 
-    cols: 31, rows: 15, cellSize: 0, 
-    speeds: { 
-        slow: { base: 6, boost: 0.1, max: 12 }, 
-        normal: { base: 8, boost: 0.15, max: 18 }, 
-        hard: { base: 11, boost: 0.15, max: 22 },
-        impossible: { base: 20, boost: 0.8, max: 35 } 
-    }, 
-    currentMode: 'hard' 
-};
+const CONFIG = { cols: 31, rows: 15, cellSize: 0, speeds: { slow: { base: 6, boost: 0.1, max: 12 }, normal: { base: 8, boost: 0.15, max: 18 }, hard: { base: 11, boost: 0.15, max: 22 }, impossible: { base: 18, boost: 0.3, max: 40 } }, currentMode: 'hard' };
 
 function save() {
     if (state.cheatsActive) return; 
@@ -286,7 +280,7 @@ function explode(x, y, color) {
             x: x * CONFIG.cellSize + CONFIG.cellSize/2,
             y: y * CONFIG.cellSize + CONFIG.cellSize/2,
             vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
-            life: 1.0, color: color
+            life: 1.0, color: color === '#000000' ? '#ffffff' : color
         });
     }
 }
@@ -308,7 +302,20 @@ function renderShops() {
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
         card.innerHTML = `<div class="swatch" style="background:${skin.head==='rainbow'?'linear-gradient(45deg,red,blue)':skin.head}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
-        card.onclick = () => { AudioFX.playClick(); if(isOwned) state.activeSnake=skin; else if(state.wallet>=skin.price){state.wallet-=skin.price;state.ownedSkins.push(skin.id);state.activeSnake=skin;} save(); renderShops(); };
+        card.onclick = () => { 
+            AudioFX.playClick(); 
+            if(isOwned) {
+                state.activeSnake=skin;
+                if(skin.pair) state.activeBall = BALL_COLORS.find(b => b.id === skin.pair);
+            } else if(state.wallet>=skin.price){
+                state.wallet-=skin.price; state.ownedSkins.push(skin.id); state.activeSnake=skin;
+                if(skin.pair) {
+                    if(!state.ownedBalls.includes(skin.pair)) state.ownedBalls.push(skin.pair);
+                    state.activeBall = BALL_COLORS.find(b => b.id === skin.pair);
+                }
+            } 
+            save(); renderShops(); 
+        };
         sGrid.appendChild(card);
     });
     const bGrid = document.getElementById('ball-grid'); bGrid.innerHTML = '';
@@ -318,7 +325,20 @@ function renderShops() {
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
         card.innerHTML = `<div class="swatch" style="background:${ball.color==='rainbow'?'linear-gradient(45deg,red,blue)':ball.color}"></div><b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
-        card.onclick = () => { AudioFX.playClick(); if(isOwned) state.activeBall=ball; else if(state.wallet>=ball.price){state.wallet-=ball.price;state.ownedBalls.push(ball.id);state.activeBall=ball;} save(); renderShops(); };
+        card.onclick = () => { 
+            AudioFX.playClick(); 
+            if(isOwned) {
+                state.activeBall=ball;
+                if(ball.pair) state.activeSnake = SNAKE_SKINS.find(s => s.id === ball.pair);
+            } else if(state.wallet>=ball.price){
+                state.wallet-=ball.price; state.ownedBalls.push(ball.id); state.activeBall=ball;
+                if(ball.pair) {
+                    if(!state.ownedSkins.includes(ball.pair)) state.ownedSkins.push(ball.pair);
+                    state.activeSnake = SNAKE_SKINS.find(s => s.id === ball.pair);
+                }
+            } 
+            save(); renderShops(); 
+        };
         bGrid.appendChild(card);
     });
 }
@@ -339,11 +359,11 @@ function spawnFood() {
 function startGame() {
     AudioFX.playClick();
     state.username = document.getElementById('username').value;
-    save();
+    save(); 
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.inputQueue = [];
-    state.score = 0; state.shake = 0; state.particles = [];
+    state.score = 0; state.shake = 0; state.particles = []; state.eyeFlash = 0;
     document.getElementById('score').textContent = '0';
     canvas.className = ""; spawnFood(); state.gameOver = false; state.lastTime = performance.now();
     document.getElementById('ui-layer').classList.add('hidden');
@@ -369,14 +389,18 @@ function update() {
         state.score++; document.getElementById('score').textContent = state.score;
         AudioFX.playEat(); canvas.classList.remove('pulse'); void canvas.offsetWidth; canvas.classList.add('pulse'); 
         const pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
-        explode(state.food.x, state.food.y, pCol); spawnFood();
+        explode(state.food.x, state.food.y, pCol); 
+        if(state.activeSnake.id === 'svoid') state.eyeFlash = 1.0;
+        spawnFood();
     } else state.snake.pop();
+
+    if(state.eyeFlash > 0) state.eyeFlash -= 0.05;
 }
 
 function render(now) {
     ctx.setTransform(1,0,0,1,0,0); if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; }
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath();
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
@@ -384,25 +408,60 @@ function render(now) {
     ctx.globalAlpha = 1.0;
     const rHue = (now / 5) % 360;
     let bCol = state.activeBall.color === 'rainbow' ? `hsl(${rHue}, 100%, 60%)` : state.activeBall.color;
-    ctx.fillStyle = bCol; ctx.shadowBlur = 15; ctx.shadowColor = bCol;
-    ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*(1+Math.sin(now/200)*0.1), 0, Math.PI*2); ctx.fill();
+    
+    // Draw Ball
+    ctx.fillStyle = bCol === '#000000' ? '#111' : bCol; 
+    ctx.shadowBlur = bCol === '#000000' ? 0 : 15; ctx.shadowColor = bCol;
+    if(bCol === '#000000') { ctx.strokeStyle = '#555'; ctx.lineWidth = 2; }
+    ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*(1+Math.sin(now/200)*0.1), 0, Math.PI*2); 
+    ctx.fill(); if(bCol === '#000000') ctx.stroke();
     ctx.shadowBlur = 0;
+
+    // Draw Snake
     state.snake.forEach((seg, i) => {
         let sH = state.activeSnake.head === 'rainbow' ? `hsl(${rHue}, 100%, 50%)` : state.activeSnake.head;
         let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
+        
         ctx.fillStyle = (i === 0) ? sH : sB;
-        if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sH; }
+        if(i === 0 && sH !== '#000000') { ctx.shadowBlur = 15; ctx.shadowColor = sH; }
+        
         const r = i === 0 ? 8 : 4; const x = seg.x*CONFIG.cellSize+1; const y = seg.y*CONFIG.cellSize+1;
         const w = CONFIG.cellSize-2; const h = CONFIG.cellSize-2;
-        ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.shadowBlur = 0;
+        
+        ctx.beginPath(); 
+        if(state.activeSnake.id === 'svoid') {
+            ctx.strokeStyle = '#222'; ctx.lineWidth = 1;
+            ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.stroke();
+        } else {
+            ctx.roundRect(x,y,w,h,r); ctx.fill();
+        }
+        ctx.shadowBlur = 0;
+
         if(i === 0) {
-            ctx.fillStyle = '#000'; const eyeSize = CONFIG.cellSize / 8; const offset = CONFIG.cellSize / 4;
+            let eyeColor = '#fff';
+            if(state.activeSnake.id === 'svoid') {
+                // Mix white and green based on flash
+                const g = Math.floor(255);
+                const rb = Math.floor(255 * (1 - state.eyeFlash));
+                eyeColor = `rgb(${rb}, ${g}, ${rb})`;
+            } else {
+                eyeColor = '#000';
+            }
+
+            ctx.fillStyle = eyeColor; 
+            if(state.eyeFlash > 0 && state.activeSnake.id === 'svoid') {
+                ctx.shadowBlur = 10; ctx.shadowColor = '#0f0';
+            }
+            
+            const eyeSize = CONFIG.cellSize / 8; const offset = CONFIG.cellSize / 4;
             let e1x, e1y, e2x, e2y;
             if (state.lastD.x === 1) { e1x = e2x = x + w - offset; e1y = y + offset; e2y = y + h - offset; }
             else if (state.lastD.x === -1) { e1x = e2x = x + offset; e1y = y + offset; e2y = y + h - offset; }
             else if (state.lastD.y === -1) { e1y = e2y = y + offset; e1x = x + offset; e2x = x + w - offset; }
             else { e1y = e2y = y + h - offset; e1x = x + offset; e2x = x + w - offset; }
-            ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill(); 
+            ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill();
+            ctx.shadowBlur = 0;
         }
     });
 }
