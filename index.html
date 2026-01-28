@@ -211,28 +211,29 @@ const AudioFX = {
     }
 };
 
+// MODIFIED SKINS: Defined by Hue (0-360) and Saturation (0-100)
+// 'rainbow' triggers the full spectrum cycle
 const SNAKE_SKINS = [
-    { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
-    { id: 's2', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 10 },
-    { id: 's3', name: 'RED', head: '#ff0044', body: '#990022', price: 20 },
-    { id: 's4', name: 'BLUE', head: '#0088ff', body: '#0044aa', price: 30 },
-    { id: 's5', name: 'WHITE', head: '#ffffff', body: '#888888', price: 40 },
-    { id: 's6', name: 'RAINBOW', head: 'rainbow', body: 'rainbow', price: 50 }
+    { id: 's1', name: 'NEON', hue: 165, sat: 100, price: 0 },   // Cyan Cycle
+    { id: 's2', name: 'GOLD', hue: 45, sat: 100, price: 10 },   // Gold Cycle
+    { id: 's3', name: 'RED', hue: 355, sat: 100, price: 20 },   // Red Cycle
+    { id: 's4', name: 'BLUE', hue: 220, sat: 100, price: 30 },  // Blue Cycle
+    { id: 's5', name: 'WHITE', hue: 0, sat: 0, price: 40 },     // White/Grey Cycle
+    { id: 's6', name: 'RAINBOW', hue: 'rainbow', sat: 100, price: 50 }
 ];
 
 const BALL_COLORS = [
-    { id: 'b1', name: 'PURPLE', color: '#ff00ff', price: 0 },
-    { id: 'b2', name: 'LIGHT BLUE', color: '#00ffff', price: 10 },
-    { id: 'b3', name: 'GREEN', color: '#00ff00', price: 20 },
-    { id: 'b4', name: 'ORANGE', color: '#ff8800', price: 30 },
-    { id: 'b5', name: 'RAINBOW', color: 'rainbow', price: 50 }
+    { id: 'b1', name: 'PURPLE', hue: 290, sat: 100, price: 0 }, // Purple Cycle
+    { id: 'b2', name: 'LIGHT BLUE', hue: 180, sat: 100, price: 10 },
+    { id: 'b3', name: 'GREEN', hue: 120, sat: 100, price: 20 },
+    { id: 'b4', name: 'ORANGE', hue: 30, sat: 100, price: 30 },
+    { id: 'b5', name: 'RAINBOW', hue: 'rainbow', sat: 100, price: 50 }
 ];
 
 const state = {
     snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0}, inputQueue: [],
     food: {x:0, y:0},
     score: 0, particles: [],
-    // Vercel fix: Persistent data storage
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     username: localStorage.getItem('neon_v4_user') || '',
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1"]'),
@@ -288,23 +289,32 @@ function toggleShop(id) {
 
 function renderShops() {
     document.getElementById('high').textContent = state.wallet;
+    
+    // Helper to generate preview gradient for shop
+    const getPreview = (skin) => {
+        if(skin.hue === 'rainbow') return 'linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet)';
+        // For static skins, show a gradient of their "cycle"
+        return `linear-gradient(45deg, hsl(${skin.hue}, ${skin.sat}%, 40%), hsl(${skin.hue}, ${skin.sat}%, 70%))`;
+    };
+
     const sGrid = document.getElementById('snake-grid'); sGrid.innerHTML = '';
     SNAKE_SKINS.forEach(skin => {
         const isOwned = state.ownedSkins.includes(skin.id);
         const isSel = state.activeSnake.id === skin.id;
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        card.innerHTML = `<div class="swatch" style="background:${skin.head==='rainbow'?'linear-gradient(45deg,red,blue)':skin.head}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
+        card.innerHTML = `<div class="swatch" style="background:${getPreview(skin)}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
         card.onclick = () => { AudioFX.playClick(); if(isOwned) state.activeSnake=skin; else if(state.wallet>=skin.price){state.wallet-=skin.price;state.ownedSkins.push(skin.id);state.activeSnake=skin;} save(); renderShops(); };
         sGrid.appendChild(card);
     });
+    
     const bGrid = document.getElementById('ball-grid'); bGrid.innerHTML = '';
     BALL_COLORS.forEach(ball => {
         const isOwned = state.ownedBalls.includes(ball.id);
         const isSel = state.activeBall.id === ball.id;
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        card.innerHTML = `<div class="swatch" style="background:${ball.color==='rainbow'?'linear-gradient(45deg,red,blue)':ball.color}"></div><b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
+        card.innerHTML = `<div class="swatch" style="background:${getPreview(ball)}"></div><b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
         card.onclick = () => { AudioFX.playClick(); if(isOwned) state.activeBall=ball; else if(state.wallet>=ball.price){state.wallet-=ball.price;state.ownedBalls.push(ball.id);state.activeBall=ball;} save(); renderShops(); };
         bGrid.appendChild(card);
     });
@@ -326,7 +336,7 @@ function spawnFood() {
 function startGame() {
     AudioFX.playClick();
     state.username = document.getElementById('username').value;
-    save(); // Save username before start
+    save(); 
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.inputQueue = [];
@@ -355,7 +365,16 @@ function update() {
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; document.getElementById('score').textContent = state.score;
         AudioFX.playEat(); canvas.classList.remove('pulse'); void canvas.offsetWidth; canvas.classList.add('pulse'); 
-        const pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
+        
+        // Calculate dynamic color for explosion
+        let pCol;
+        if(state.activeBall.hue === 'rainbow') {
+             pCol = `hsl(${Math.random()*360}, 100%, 60%)`;
+        } else {
+             // Explode with the ball's current approximate color
+             pCol = `hsl(${state.activeBall.hue}, ${state.activeBall.sat}%, 60%)`;
+        }
+        
         explode(state.food.x, state.food.y, pCol); spawnFood();
     } else state.snake.pop();
 }
@@ -369,26 +388,56 @@ function render(now) {
     ctx.stroke();
     state.particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life -= 0.02; if(p.life <= 0) { state.particles.splice(i,1); return; } ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3); });
     ctx.globalAlpha = 1.0;
-    const rHue = (now / 5) % 360;
-    let bCol = state.activeBall.color === 'rainbow' ? `hsl(${rHue}, 100%, 60%)` : state.activeBall.color;
+    
+    // Global Time Variables for Cycling
+    const rHue = (now / 5) % 360; // Fast Rainbow Cycle
+    const cyclePulse = Math.sin(now / 200); // -1 to 1 slow wave
+    
+    // --- BALL RENDERING ---
+    let bCol;
+    if (state.activeBall.hue === 'rainbow') {
+        bCol = `hsl(${rHue}, 100%, 60%)`;
+    } else {
+        // Cycle hue slightly (+/- 20 degrees) and lightness for "Neon" effect
+        let dynamicHue = state.activeBall.hue + (cyclePulse * 20);
+        let dynamicLight = 60 + (cyclePulse * 10);
+        bCol = `hsl(${dynamicHue}, ${state.activeBall.sat}%, ${dynamicLight}%)`;
+    }
+    
     ctx.fillStyle = bCol; ctx.shadowBlur = 15; ctx.shadowColor = bCol;
     ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*(1+Math.sin(now/200)*0.1), 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
+
+    // --- SNAKE RENDERING ---
     state.snake.forEach((seg, i) => {
-        let sH = state.activeSnake.head === 'rainbow' ? `hsl(${rHue}, 100%, 50%)` : state.activeSnake.head;
-        let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
-        ctx.fillStyle = (i === 0) ? sH : sB;
-        if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sH; }
+        let h, l;
+        
+        if (state.activeSnake.hue === 'rainbow') {
+            h = (rHue - i * 10) % 360;
+            l = 50;
+        } else {
+            // "Monochromatic Cycle" logic
+            // We shift the hue slightly based on time AND body index (to make it flow)
+            h = state.activeSnake.hue + Math.sin((now/200) + (i * 0.1)) * 15;
+            // We also shift lightness down the body so it glows
+            l = 50 + Math.sin((now/150) - (i * 0.2)) * 10;
+        }
+        
+        let colorString = `hsl(${h}, ${state.activeSnake.sat}%, ${l}%)`;
+        
+        ctx.fillStyle = colorString;
+        
+        if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = colorString; }
         const r = i === 0 ? 8 : 4; const x = seg.x*CONFIG.cellSize+1; const y = seg.y*CONFIG.cellSize+1;
-        const w = CONFIG.cellSize-2; const h = CONFIG.cellSize-2;
-        ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.shadowBlur = 0;
+        const w = CONFIG.cellSize-2; const hBox = CONFIG.cellSize-2; // renamed h to hBox to avoid conflict
+        ctx.beginPath(); ctx.roundRect(x,y,w,hBox,r); ctx.fill(); ctx.shadowBlur = 0;
         if(i === 0) {
             ctx.fillStyle = '#000'; const eyeSize = CONFIG.cellSize / 8; const offset = CONFIG.cellSize / 4;
             let e1x, e1y, e2x, e2y;
-            if (state.lastD.x === 1) { e1x = e2x = x + w - offset; e1y = y + offset; e2y = y + h - offset; }
-            else if (state.lastD.x === -1) { e1x = e2x = x + offset; e1y = y + offset; e2y = y + h - offset; }
+            if (state.lastD.x === 1) { e1x = e2x = x + w - offset; e1y = y + offset; e2y = y + hBox - offset; }
+            else if (state.lastD.x === -1) { e1x = e2x = x + offset; e1y = y + offset; e2y = y + hBox - offset; }
             else if (state.lastD.y === -1) { e1y = e2y = y + offset; e1x = x + offset; e2x = x + w - offset; }
-            else { e1y = e2y = y + h - offset; e1x = x + offset; e2x = x + w - offset; }
+            else { e1y = e2y = y + hBox - offset; e1x = x + offset; e2x = x + w - offset; }
             ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill();
         }
     });
