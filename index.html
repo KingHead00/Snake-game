@@ -299,7 +299,7 @@ function renderShops() {
         const isSel = state.activeSnake.id === skin.id;
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        card.innerHTML = `<div class="swatch" style="background:${skin.head==='rainbow'?'linear-gradient(45deg,red,blue)':skin.head}; border: ${skin.head==='#000000'?'1px solid #444':'none'}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
+        card.innerHTML = `<div class="swatch" style="background:${skin.head==='rainbow'?'linear-gradient(45deg,red,blue)':skin.head}; border: ${skin.head==='#000000'?'1px solid #666':'none'}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
         card.onclick = () => { 
             AudioFX.playClick(); 
             if(isOwned) {
@@ -322,7 +322,7 @@ function renderShops() {
         const isSel = state.activeBall.id === ball.id;
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        card.innerHTML = `<div class="swatch" style="background:${ball.color==='rainbow'?'linear-gradient(45deg,red,blue)':ball.color}; border: ${ball.color==='#000000'?'1px solid #444':'none'}"></div><b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
+        card.innerHTML = `<div class="swatch" style="background:${ball.color==='rainbow'?'linear-gradient(45deg,red,blue)':ball.color}; border: ${ball.color==='#000000'?'1px solid #666':'none'}"></div><b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
         card.onclick = () => { 
             AudioFX.playClick(); 
             if(isOwned) {
@@ -421,19 +421,21 @@ function render(now) {
         let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
         
         ctx.fillStyle = (i === 0) ? sH : sB;
-        if(i === 0 && sH !== '#000000') { ctx.shadowBlur = 15; ctx.shadowColor = sH; }
         
         const r = i === 0 ? 8 : 4; const x = seg.x*CONFIG.cellSize+1; const y = seg.y*CONFIG.cellSize+1;
         const w = CONFIG.cellSize-2; const h = CONFIG.cellSize-2;
         
         ctx.beginPath(); 
         if(state.activeSnake.id === 'svoid') {
-            ctx.strokeStyle = '#222'; ctx.lineWidth = 1;
+            ctx.shadowBlur = 10; ctx.shadowColor = "#ffffff"; // Added glow for visibility
+            ctx.strokeStyle = '#555'; ctx.lineWidth = 1.5; // Stronger stroke
             ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.stroke();
+            ctx.shadowBlur = 0;
         } else {
+            if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sH; }
             ctx.roundRect(x,y,w,h,r); ctx.fill();
+            ctx.shadowBlur = 0;
         }
-        ctx.shadowBlur = 0;
 
         if(i === 0) {
             let eyeColor = '#fff';
@@ -447,7 +449,7 @@ function render(now) {
 
             ctx.fillStyle = eyeColor; 
             if(state.eyeFlash > 0 && state.activeSnake.id === 'svoid') {
-                ctx.shadowBlur = 10; ctx.shadowColor = '#0f0';
+                ctx.shadowBlur = 15; ctx.shadowColor = '#0f0';
             }
             
             const eyeSize = CONFIG.cellSize / 8; const offset = CONFIG.cellSize / 4;
