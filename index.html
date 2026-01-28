@@ -299,7 +299,7 @@ function renderShops() {
         const isSel = state.activeSnake.id === skin.id;
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        card.innerHTML = `<div class="swatch" style="background:${skin.head==='rainbow'?'linear-gradient(45deg,red,blue)':skin.head}; border: ${skin.head==='#000000'?'1px solid #666':'none'}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
+        card.innerHTML = `<div class="swatch" style="background:${skin.head==='rainbow'?'linear-gradient(45deg,red,blue)':skin.head}; border: ${skin.head==='#000000'?'1px solid #333':'none'}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
         card.onclick = () => { 
             AudioFX.playClick(); 
             if(isOwned) {
@@ -322,7 +322,7 @@ function renderShops() {
         const isSel = state.activeBall.id === ball.id;
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        card.innerHTML = `<div class="swatch" style="background:${ball.color==='rainbow'?'linear-gradient(45deg,red,blue)':ball.color}; border: ${ball.color==='#000000'?'1px solid #666':'none'}"></div><b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
+        card.innerHTML = `<div class="swatch" style="background:${ball.color==='rainbow'?'linear-gradient(45deg,red,blue)':ball.color}; border: ${ball.color==='#000000'?'1px solid #333':'none'}"></div><b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
         card.onclick = () => { 
             AudioFX.playClick(); 
             if(isOwned) {
@@ -410,7 +410,7 @@ function render(now) {
     // Draw Ball
     ctx.fillStyle = bCol === '#000000' ? '#111' : bCol; 
     ctx.shadowBlur = bCol === '#000000' ? 0 : 15; ctx.shadowColor = bCol;
-    if(bCol === '#000000') { ctx.strokeStyle = '#555'; ctx.lineWidth = 2; }
+    if(bCol === '#000000') { ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; }
     ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, (CONFIG.cellSize/2.8)*(1+Math.sin(now/200)*0.1), 0, Math.PI*2); 
     ctx.fill(); if(bCol === '#000000') ctx.stroke();
     ctx.shadowBlur = 0;
@@ -427,10 +427,8 @@ function render(now) {
         
         ctx.beginPath(); 
         if(state.activeSnake.id === 'svoid') {
-            ctx.shadowBlur = 10; ctx.shadowColor = "#ffffff"; // Added glow for visibility
-            ctx.strokeStyle = '#555'; ctx.lineWidth = 1.5; // Stronger stroke
+            ctx.strokeStyle = '#004433'; ctx.lineWidth = 2; // Subtle dark teal border for visibility
             ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.stroke();
-            ctx.shadowBlur = 0;
         } else {
             if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sH; }
             ctx.roundRect(x,y,w,h,r); ctx.fill();
