@@ -41,10 +41,10 @@
 
         .header-left { display: flex; align-items: center; gap: 15px; }
 
-        .logo-img {
+        /* The New SVG Logo Animation */
+        .logo-svg {
             width: 32px; 
             height: 32px;
-            object-fit: contain;
             filter: drop-shadow(0 0 5px var(--primary));
             animation: logoPulse 2s infinite ease-in-out;
         }
@@ -84,7 +84,6 @@
             100% { border-color: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.3); transform: scale(1); }
         }
 
-        /* The Death Glow You Wanted Kept */
         canvas.death-pulse { animation: deathGlowRed 1s infinite alternate; }
         @keyframes deathGlowRed {
             0% { border-color: var(--danger); box-shadow: 0 0 30px var(--danger); }
@@ -156,7 +155,10 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <header>
         <div class="header-left">
-            <img src="logo.png" alt="Logo" class="logo-img">
+            <svg class="logo-svg" viewBox="0 0 100 100">
+                <path d="M20,50 Q20,20 50,20 T80,50 T50,80 T20,50" fill="none" stroke="var(--primary)" stroke-width="8" stroke-linecap="round"/>
+                <circle cx="50" cy="50" r="10" fill="var(--primary)"/>
+            </svg>
             <h1>NEON SNAKE</h1>
         </div>
         <div class="stats">SCORE: <span id="score">0</span> &nbsp;|&nbsp; BEST: <span id="high">0</span></div>
@@ -189,6 +191,7 @@
     <footer>HAPPY BIRTHDAY SANJIT</footer>
 
 <script>
+/* JS Logic Remains the Same */
 const AudioFX = {
     ctx: null,
     init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -440,7 +443,7 @@ function render(now) {
             let eyeColor = '#fff';
             if(state.activeSnake.id === 'svoid') {
                 const gb = Math.floor(255 * (1 - state.eyeFlash));
-                eyeColor = `rgb(255, ${gb}, ${gb})`; // Flash RED logic
+                eyeColor = `rgb(255, ${gb}, ${gb})`; 
             } else {
                 eyeColor = (state.activeSnake.head === '#000000') ? '#fff' : '#000';
             }
