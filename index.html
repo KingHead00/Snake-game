@@ -152,8 +152,9 @@
         .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 10px; cursor: pointer; border-radius: 8px; font-size: 11px; font-weight: bold; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
         
-        /* Impossible Button Red State */
-        .speed-btn[data-speed="impossible"].active { color: #ff4444; border-color: #ff4444; }
+        /* Impossible Button Always Red */
+        .speed-btn[data-speed="impossible"] { color: #880022; border-color: #440011; }
+        .speed-btn[data-speed="impossible"].active { color: #ff4444; border-color: #ff4444; box-shadow: 0 0 10px rgba(255, 68, 68, 0.3); }
 
         .menu-controls-hint { margin-top: 25px; padding-top: 15px; border-top: 1px solid #333; font-size: 11px; color: #666; text-transform: uppercase; line-height: 1.6; }
         .menu-controls-hint b { color: var(--primary); }
