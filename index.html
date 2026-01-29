@@ -6,6 +6,9 @@
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M79X9PGL');</script>
+    
+    <script defer src="/_vercel/insights/script.js"></script>
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     
@@ -44,9 +47,19 @@
         }
 
         .header-left { display: flex; align-items: center; gap: 15px; }
+
+        .logo-img {
+            width: 32px; 
+            height: 32px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 5px var(--primary));
+            animation: logoPulse 2s infinite ease-in-out;
+        }
         
-        /* Your logo style */
-        .logo { width: 40px; height: 40px; object-fit: contain; }
+        @keyframes logoPulse {
+            0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 5px var(--primary)) brightness(1); }
+            50% { opacity: 0.8; transform: scale(1.1); filter: drop-shadow(0 0 12px var(--primary)) brightness(1.3); }
+        }
 
         h1 { font-size: 20px; margin: 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 1px; }
         .stats { font-family: 'Courier New', monospace; font-size: 16px; color: #888; font-weight: bold; }
@@ -135,9 +148,8 @@
         .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; }
 
         .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 10px; }
-        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 12px; cursor: pointer; border-radius: 8px; font-size: 12px; }
+        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 16px; cursor: pointer; border-radius: 8px; font-size: 12px; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
-        .speed-btn[data-speed="impossible"] { color: var(--danger); }
 
         .menu-controls-hint { margin-top: 25px; padding-top: 15px; border-top: 1px solid #333; font-size: 11px; color: #666; text-transform: uppercase; line-height: 1.6; }
         .menu-controls-hint b { color: var(--primary); }
@@ -149,7 +161,7 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <header>
         <div class="header-left">
-            <img src="logo.png" alt="Logo" class="logo">
+            <img src="logo.png" alt="Logo" class="logo-img">
             <h1>NEON SNAKE</h1>
         </div>
         <div class="stats">SCORE: <span id="score">0</span> &nbsp;|&nbsp; BEST: <span id="high">0</span></div>
@@ -167,7 +179,6 @@
                     <button class="speed-btn" data-speed="slow">SLOW</button>
                     <button class="speed-btn" data-speed="normal">NORMAL</button>
                     <button class="speed-btn active" data-speed="hard">HARD</button>
-                    <button class="speed-btn" data-speed="impossible">IMPOSSIBLE</button>
                 </div>
                 <button class="shop-btn" onclick="toggleShop('snake-shop')">SNAKE SKINS <span>▼</span></button>
                 <div id="snake-shop" class="shop-content"><div class="skin-grid" id="snake-grid"></div></div>
@@ -182,7 +193,6 @@
     <footer>HAPPY BIRTHDAY SANJIT</footer>
 
 <script>
-/* JS Logic Remains Exactly the Same */
 const AudioFX = {
     ctx: null,
     init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -245,7 +255,7 @@ const state = {
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
-const CONFIG = { cols: 31, rows: 15, cellSize: 0, speeds: { slow: { base: 6, boost: 0.1, max: 12 }, normal: { base: 8, boost: 0.15, max: 18 }, hard: { base: 11, boost: 0.15, max: 22 }, impossible: { base: 18, boost: 0.3, max: 40 } }, currentMode: 'hard' };
+const CONFIG = { cols: 31, rows: 15, cellSize: 0, speeds: { slow: { base: 6, boost: 0.1, max: 12 }, normal: { base: 8, boost: 0.15, max: 18 }, hard: { base: 11, boost: 0.15, max: 22 } }, currentMode: 'hard' };
 
 function save() {
     if (state.cheatsActive) return; 
