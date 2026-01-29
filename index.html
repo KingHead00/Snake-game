@@ -17,7 +17,7 @@
             --primary: #00ffcc;
             --text: #ffffff;
             --ui-bg: rgba(0, 0, 0, 0.95);
-            --danger: #ff0000;
+            --danger: #ff0044;
         }
 
         html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); }
@@ -82,13 +82,6 @@
         @keyframes flashWhite {
             0% { border-color: #fff; box-shadow: 0 0 50px #fff; transform: scale(1.02); }
             100% { border-color: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.3); transform: scale(1); }
-        }
-
-        canvas.death-pulse { animation: deathGlowRed 0.15s infinite alternate; }
-        @keyframes deathGlowRed {
-            0% { border-color: #ff0000; box-shadow: 0 0 20px #770000; transform: translate(2px, 2px); }
-            50% { border-color: #aa0000; box-shadow: 0 0 60px #ff0000; transform: translate(-2px, -2px); }
-            100% { border-color: #ff0000; box-shadow: 0 0 100px #770000; transform: translate(0px, 0px); }
         }
 
         #ui-layer {
@@ -376,20 +369,30 @@ function update() {
     }
     state.lastD = state.dir; 
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
+    
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
-        state.gameOver = true; state.shake = 20; AudioFX.playDeath();
-        canvas.classList.add('death-pulse'); 
+        state.gameOver = true; AudioFX.playDeath();
         if (state.score > state.wallet) { state.wallet = state.score; }
-        save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 1200);
+        save(); state.menuTimeout = setTimeout(() => { 
+            if(state.gameOver) { 
+                document.getElementById('menu-text').textContent="CRASHED!"; 
+                document.getElementById('ui-layer').classList.remove('hidden'); 
+                renderShops(); 
+            } 
+        }, 500);
         return;
     }
+
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; document.getElementById('score').textContent = state.score;
         AudioFX.playEat(); canvas.classList.remove('pulse'); void canvas.offsetWidth; canvas.classList.add('pulse'); 
         const pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
         explode(state.food.x, state.food.y, pCol); 
+        
+        // VOID SKIN EYE FLASH
         if(state.activeSnake.id === 'svoid') state.eyeFlash = 1.0;
+        
         spawnFood();
     } else state.snake.pop();
 
@@ -397,24 +400,26 @@ function update() {
 }
 
 function render(now) {
-    ctx.setTransform(1,0,0,1,0,0); 
-    if (state.gameOver) {
-        ctx.translate((Math.random()-0.5)*10, (Math.random()-0.5)*10);
-    } else if (state.shake > 0) { 
-        ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; 
-    }
-    
+    ctx.setTransform(1,0,0,1,0,0);
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    
+    // Grid
     ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
     for(let y=0; y<=canvas.height; y+=CONFIG.cellSize) { ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); }
     ctx.stroke();
-    state.particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life -= 0.02; if(p.life <= 0) { state.particles.splice(i,1); return; } ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3); });
+
+    state.particles.forEach((p, i) => { 
+        p.x += p.vx; p.y += p.vy; p.life -= 0.02; 
+        if(p.life <= 0) { state.particles.splice(i,1); return; } 
+        ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3); 
+    });
     ctx.globalAlpha = 1.0;
+
     const rHue = (now / 5) % 360;
     let bCol = state.activeBall.color === 'rainbow' ? `hsl(${rHue}, 100%, 60%)` : state.activeBall.color;
     
-    // Draw Ball
+    // Draw Food
     ctx.fillStyle = bCol === '#000000' ? '#111' : bCol; 
     ctx.shadowBlur = bCol === '#000000' ? 0 : 15; ctx.shadowColor = bCol;
     if(bCol === '#000000') { ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; }
@@ -442,27 +447,26 @@ function render(now) {
             ctx.shadowBlur = 0;
         }
 
+        // HEAD EYES
         if(i === 0) {
-            let eyeColor = '#fff';
+            let eyeColor = '#000';
             if(state.activeSnake.id === 'svoid') {
-                // RED FLASH LOGIC: GB channels drop as eyeFlash increases
+                // RED FLASH: Drains green/blue based on eyeFlash state
                 const gb = Math.floor(255 * (1 - state.eyeFlash));
-                eyeColor = `rgb(255, ${gb}, ${gb})`;
+                eyeColor = `rgb(255, ${gb}, ${gb})`; 
+                if(state.eyeFlash > 0) { ctx.shadowBlur = 10; ctx.shadowColor = '#f00'; }
             } else {
-                eyeColor = '#000';
+                eyeColor = (state.activeSnake.head === '#000000') ? '#fff' : '#000';
             }
 
             ctx.fillStyle = eyeColor; 
-            if(state.eyeFlash > 0 && state.activeSnake.id === 'svoid') {
-                ctx.shadowBlur = 15; ctx.shadowColor = '#f00'; // Scary red shadow
-            }
-            
             const eyeSize = CONFIG.cellSize / 8; const offset = CONFIG.cellSize / 4;
             let e1x, e1y, e2x, e2y;
             if (state.lastD.x === 1) { e1x = e2x = x + w - offset; e1y = y + offset; e2y = y + h - offset; }
             else if (state.lastD.x === -1) { e1x = e2x = x + offset; e1y = y + offset; e2y = y + h - offset; }
             else if (state.lastD.y === -1) { e1y = e2y = y + offset; e1x = x + offset; e2x = x + w - offset; }
             else { e1y = e2y = y + h - offset; e1x = x + offset; e2x = x + w - offset; }
+            
             ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill(); 
             ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill();
             ctx.shadowBlur = 0;
@@ -471,7 +475,7 @@ function render(now) {
 }
 
 function loop(now) {
-    if(state.gameOver) { render(now); if(state.shake > 0.1 || state.particles.length > 0 || state.gameOver) requestAnimationFrame(loop); return; }
+    if(state.gameOver) { render(now); return; }
     const dt = now - state.lastTime; state.lastTime = now; state.accumTime += dt;
     const p = CONFIG.speeds[CONFIG.currentMode];
     const step = 1000 / Math.min(p.max, p.base + (state.score * p.boost));
