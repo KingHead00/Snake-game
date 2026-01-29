@@ -25,6 +25,7 @@
             --text: #ffffff;
             --ui-bg: rgba(0, 0, 0, 0.95);
             --danger: #ff0044;
+            --impossible: #ff00ff;
         }
 
         html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); }
@@ -83,6 +84,17 @@
             border-radius: 4px;
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); 
             transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        /* Impossible Mode Glitch Effect */
+        canvas.impossible-glitch {
+            animation: glitchBorder 0.2s infinite;
+        }
+
+        @keyframes glitchBorder {
+            0% { border-color: var(--impossible); box-shadow: 0 0 20px var(--impossible); }
+            50% { border-color: #fff; box-shadow: 0 0 40px #ff0000; }
+            100% { border-color: var(--impossible); box-shadow: 0 0 20px var(--impossible); }
         }
 
         canvas.pulse { animation: flashWhite 0.4s ease-out; }
@@ -147,9 +159,10 @@
         .skin-card.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
         .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; }
 
-        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 10px; }
-        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 16px; cursor: pointer; border-radius: 8px; font-size: 12px; }
+        .speed-selector { margin: 15px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 6px 12px; cursor: pointer; border-radius: 8px; font-size: 11px; font-weight: bold; transition: 0.3s; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
+        .speed-btn[data-speed="impossible"].active { color: var(--impossible); border-color: var(--impossible); text-shadow: 0 0 5px var(--impossible); }
 
         .menu-controls-hint { margin-top: 25px; padding-top: 15px; border-top: 1px solid #333; font-size: 11px; color: #666; text-transform: uppercase; line-height: 1.6; }
         .menu-controls-hint b { color: var(--primary); }
@@ -178,7 +191,8 @@
                 <div class="speed-selector">
                     <button class="speed-btn" data-speed="slow">SLOW</button>
                     <button class="speed-btn" data-speed="normal">NORMAL</button>
-                    <button class="speed-btn active" data-speed="hard">HARD</button>
+                    <button class="speed-btn" data-speed="hard">HARD</button>
+                    <button class="speed-btn" data-speed="impossible">IMPOSSIBLE</button>
                 </div>
                 <button class="shop-btn" onclick="toggleShop('snake-shop')">SNAKE SKINS <span>▼</span></button>
                 <div id="snake-shop" class="shop-content"><div class="skin-grid" id="snake-grid"></div></div>
@@ -255,7 +269,18 @@ const state = {
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d', { alpha: false });
-const CONFIG = { cols: 31, rows: 15, cellSize: 0, speeds: { slow: { base: 6, boost: 0.1, max: 12 }, normal: { base: 8, boost: 0.15, max: 18 }, hard: { base: 11, boost: 0.15, max: 22 } }, currentMode: 'hard' };
+const CONFIG = { 
+    cols: 31, 
+    rows: 15, 
+    cellSize: 0, 
+    speeds: { 
+        slow: { base: 6, boost: 0.1, max: 12 }, 
+        normal: { base: 8, boost: 0.15, max: 18 }, 
+        hard: { base: 11, boost: 0.15, max: 22 },
+        impossible: { base: 18, boost: 0.3, max: 40 } // IMPOSSIBLE MODE SETTINGS
+    }, 
+    currentMode: 'hard' 
+};
 
 function save() {
     if (state.cheatsActive) return; 
@@ -368,7 +393,11 @@ function startGame() {
     state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.inputQueue = [];
     state.score = 0; state.shake = 0; state.particles = []; state.eyeFlash = 0;
     document.getElementById('score').textContent = '0';
-    canvas.className = ""; spawnFood(); state.gameOver = false; state.lastTime = performance.now();
+    
+    // Apply Impossible Glitch
+    canvas.className = CONFIG.currentMode === 'impossible' ? "impossible-glitch" : "";
+    
+    spawnFood(); state.gameOver = false; state.lastTime = performance.now();
     document.getElementById('ui-layer').classList.add('hidden');
     requestAnimationFrame(loop);
 }
@@ -381,7 +410,8 @@ function update() {
     state.lastD = state.dir; 
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
-        state.gameOver = true; state.shake = 10; AudioFX.playDeath();
+        state.gameOver = true; state.shake = 15; AudioFX.playDeath();
+        canvas.classList.remove('impossible-glitch');
         canvas.classList.add('death-pulse'); 
         if (state.score > state.wallet) { state.wallet = state.score; }
         save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 800);
@@ -390,7 +420,10 @@ function update() {
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; document.getElementById('score').textContent = state.score;
-        AudioFX.playEat(); canvas.classList.remove('pulse'); void canvas.offsetWidth; canvas.classList.add('pulse'); 
+        AudioFX.playEat(); 
+        if(CONFIG.currentMode !== 'impossible') {
+            canvas.classList.remove('pulse'); void canvas.offsetWidth; canvas.classList.add('pulse'); 
+        }
         const pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
         explode(state.food.x, state.food.y, pCol); 
         if(state.activeSnake.id === 'svoid') state.eyeFlash = 1.0;
@@ -401,7 +434,17 @@ function update() {
 }
 
 function render(now) {
-    ctx.setTransform(1,0,0,1,0,0); if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.85; }
+    ctx.setTransform(1,0,0,1,0,0); 
+    if (state.shake > 0) { 
+        ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); 
+        state.shake *= 0.85; 
+    }
+    
+    // Impossible mode screen shake
+    if(CONFIG.currentMode === 'impossible' && !state.gameOver) {
+        ctx.translate((Math.random()-0.5)*2, (Math.random()-0.5)*2);
+    }
+
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
     ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=0; x<=canvas.width; x+=CONFIG.cellSize) { ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); }
