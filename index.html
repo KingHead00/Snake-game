@@ -26,6 +26,7 @@
             --ui-bg: rgba(0, 0, 0, 0.95);
             --danger: #ff0044;
             --imp-red: #cc0033;
+            --admin-gold: #ffcc00;
         }
 
         html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); }
@@ -142,6 +143,16 @@
         .cheat-btn.active { filter: brightness(0.6); pointer-events: none; opacity: 0.8; }
         @keyframes rainbowShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
 
+        /* Admin Panel Styles */
+        #admin-panel {
+            display: none; margin-top: 20px; padding: 15px;
+            background: #1a1a1a; border: 2px dashed var(--admin-gold); border-radius: 15px;
+        }
+        .admin-title { color: var(--admin-gold); font-weight: 900; margin-bottom: 10px; font-size: 14px; }
+        .admin-row { display: flex; gap: 5px; margin-bottom: 10px; }
+        .admin-input { flex: 1; background: #000; border: 1px solid #444; color: #fff; padding: 5px; border-radius: 5px; }
+        .admin-btn { background: var(--admin-gold); border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
         .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; transition: 0.2s; }
         .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--primary); }
 
@@ -183,6 +194,16 @@
                 <input type="text" id="username" class="user-input" placeholder="YOUR USERNAME..." maxlength="15">
                 
                 <button class="cheat-btn" id="cheat-btn" onclick="applyCheats()">Cheats Mode</button>
+                
+                <div id="admin-panel">
+                    <div class="admin-title">🛠 ADMIN CONSOLE</div>
+                    <div class="admin-row">
+                        <input type="number" id="pts-input" class="admin-input" placeholder="Add Pts...">
+                        <button class="admin-btn" onclick="addAdminPts()">ADD</button>
+                    </div>
+                    <button class="admin-btn" style="width:100%" onclick="unlockEverything()">UNLOCK ALL SKINS</button>
+                </div>
+
                 <div class="speed-selector">
                     <button class="speed-btn" data-speed="slow">SLOW</button>
                     <button class="speed-btn" data-speed="normal">NORMAL</button>
@@ -268,7 +289,8 @@ const state = {
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
     activeBall: JSON.parse(localStorage.getItem('neon_v4_active_b')) || BALL_COLORS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0,
-    menuTimeout: null, cheatsActive: false, eyeFlash: 0
+    menuTimeout: null, cheatsActive: false, eyeFlash: 0,
+    adminCode: ""
 };
 
 const canvas = document.getElementById('c');
@@ -294,14 +316,27 @@ function save() {
     localStorage.setItem('neon_v4_active_b', JSON.stringify(state.activeBall));
 }
 
+// --- ADMIN FUNCTIONS ---
+function addAdminPts() {
+    const amt = parseInt(document.getElementById('pts-input').value) || 0;
+    state.wallet += amt;
+    renderShops();
+    save();
+}
+
+function unlockEverything() {
+    state.ownedSkins = SNAKE_SKINS.map(s => s.id);
+    state.ownedBalls = BALL_COLORS.map(b => b.id);
+    renderShops();
+    save();
+}
+
 function applyCheats() {
     AudioFX.playClick();
     state.cheatsActive = true;
-    state.ownedSkins = SNAKE_SKINS.map(s => s.id);
-    state.ownedBalls = BALL_COLORS.map(b => b.id);
+    unlockEverything();
     document.getElementById('cheat-btn').classList.add('active');
     document.getElementById('cheat-btn').innerText = "CHEATS ON (NO SAVING)";
-    renderShops();
 }
 
 function explode(x, y, color) {
@@ -527,7 +562,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resize); resize();
     if (state.username) document.getElementById('username').value = state.username;
     
-    // Default to Hard mode
     CONFIG.currentMode = 'hard';
     document.querySelectorAll('.speed-btn').forEach(btn => {
         if(btn.dataset.speed === 'hard') btn.classList.add('active');
@@ -536,6 +570,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('start-btn').onclick = startGame;
     window.addEventListener('keydown', e => {
+        // Admin Trigger
+        state.adminCode += e.key.toLowerCase();
+        if(state.adminCode.includes("admin")) { 
+            document.getElementById('admin-panel').style.display = 'block'; 
+            state.adminCode = ""; 
+        }
+
         if (document.activeElement.tagName === 'INPUT') return;
         const k = e.key.toLowerCase();
         if (k === 'r' || k === ' ') startGame();
