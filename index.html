@@ -123,15 +123,22 @@
 
         .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
         
-        /* Admin Panel Styles */
+        /* Admin Button and Panel Styles */
+        .admin-toggle-btn {
+            background: #1a1a1a; color: var(--admin-gold); border: 1px solid var(--admin-gold);
+            padding: 8px; width: 100%; border-radius: 10px; font-weight: 900;
+            font-size: 12px; cursor: pointer; margin-bottom: 10px; transition: 0.2s;
+        }
+        .admin-toggle-btn:hover { background: var(--admin-gold); color: #000; }
+
         #admin-panel {
             display: none; margin-bottom: 20px; padding: 15px;
-            background: #1a1a1a; border: 2px dashed var(--admin-gold); border-radius: 15px;
+            background: #111; border: 1px solid var(--admin-gold); border-radius: 15px;
         }
         .admin-title { color: var(--admin-gold); font-weight: 900; margin-bottom: 10px; font-size: 14px; }
         .admin-row { display: flex; gap: 5px; margin-bottom: 10px; }
         .admin-input { flex: 1; background: #000; border: 1px solid #444; color: #fff; padding: 5px; border-radius: 5px; }
-        .admin-btn { background: var(--admin-gold); border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .admin-btn { background: var(--admin-gold); border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold; color: #000; }
 
         .user-input {
             width: 100%; padding: 12px; margin-bottom: 20px;
@@ -192,10 +199,11 @@
             <div class="menu-box">
                 <div class="menu-title" id="menu-text">READY?</div>
                 
+                <button class="admin-toggle-btn" onclick="toggleAdminPanel()">🛠 OPEN ADMIN CONSOLE</button>
                 <div id="admin-panel">
-                    <div class="admin-title">🛠 ADMIN CONSOLE</div>
+                    <div class="admin-title">ADMIN TOOLS</div>
                     <div class="admin-row">
-                        <input type="number" id="pts-input" class="admin-input" placeholder="Add Pts...">
+                        <input type="number" id="pts-input" class="admin-input" placeholder="Points...">
                         <button class="admin-btn" onclick="addAdminPts()">ADD</button>
                     </div>
                     <button class="admin-btn" style="width:100%" onclick="unlockEverything()">UNLOCK ALL SKINS</button>
@@ -289,8 +297,7 @@ const state = {
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
     activeBall: JSON.parse(localStorage.getItem('neon_v4_active_b')) || BALL_COLORS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0,
-    menuTimeout: null, cheatsActive: false, eyeFlash: 0,
-    adminCode: ""
+    menuTimeout: null, cheatsActive: false, eyeFlash: 0
 };
 
 const canvas = document.getElementById('c');
@@ -316,7 +323,13 @@ function save() {
     localStorage.setItem('neon_v4_active_b', JSON.stringify(state.activeBall));
 }
 
-// ADMIN LOGIC
+// ADMIN PANEL TOGGLE
+function toggleAdminPanel() {
+    AudioFX.playClick();
+    const panel = document.getElementById('admin-panel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+}
+
 function addAdminPts() {
     const amt = parseInt(document.getElementById('pts-input').value) || 0;
     state.wallet += amt;
@@ -570,14 +583,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('start-btn').onclick = startGame;
     window.addEventListener('keydown', e => {
-        // ADMIN KEYWORD TRIGGER
-        state.adminCode += e.key.toLowerCase();
-        if(state.adminCode.includes("admin")) { 
-            const panel = document.getElementById('admin-panel');
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-            state.adminCode = ""; 
-        }
-
         if (document.activeElement.tagName === 'INPUT') return;
         const k = e.key.toLowerCase();
         if (k === 'r' || k === ' ') startGame();
