@@ -333,7 +333,7 @@ function renderShops() {
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
         
         let preview = skin.head;
-        if(skin.id === 's_pink') preview = 'linear-gradient(45deg, #ff00ff, #ffff00)';
+        if(skin.head === 'special_pink_yellow') preview = 'linear-gradient(45deg, #ff00ff, #ffff00)';
         else if(skin.head === 'rainbow') preview = 'linear-gradient(45deg, red, blue)';
 
         card.innerHTML = `<div class="swatch" style="background:${preview}; border: ${skin.head==='#000000'?'1px solid #333':'none'}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
@@ -361,7 +361,7 @@ function renderShops() {
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
         
         let preview = ball.color;
-        if(ball.id === 'b_yellow') preview = 'linear-gradient(45deg, #ff00ff, #ffff00)';
+        if(ball.color === 'special_pink_yellow') preview = 'linear-gradient(45deg, #ff00ff, #ffff00)';
         else if(ball.color === 'rainbow') preview = 'linear-gradient(45deg, red, blue)';
 
         card.innerHTML = `<div class="swatch" style="background:${preview}; border: ${ball.color==='#000000'?'1px solid #333':'none'}"></div><b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
@@ -423,12 +423,9 @@ function update() {
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 10; AudioFX.playDeath();
         canvas.classList.add('death-pulse'); 
-        
-        // --- FIXED LOGIC HERE ---
         if (!state.cheatsActive && state.score > state.wallet) { 
             state.wallet = state.score; 
         }
-        
         save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 800);
         return;
     }
@@ -529,9 +526,14 @@ function loop(now) {
 document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resize); resize();
     if (state.username) document.getElementById('username').value = state.username;
+    
+    // Default to Hard mode
+    CONFIG.currentMode = 'hard';
     document.querySelectorAll('.speed-btn').forEach(btn => {
+        if(btn.dataset.speed === 'hard') btn.classList.add('active');
         btn.onclick = () => { AudioFX.playClick(); document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); CONFIG.currentMode=btn.dataset.speed; };
     });
+
     document.getElementById('start-btn').onclick = startGame;
     window.addEventListener('keydown', e => {
         if (document.activeElement.tagName === 'INPUT') return;
