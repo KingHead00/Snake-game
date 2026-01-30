@@ -124,12 +124,13 @@
         .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
         
         /* Admin Button and Panel Styles */
-        .admin-toggle-btn {
+        #admin-trigger-btn {
+            display: none; /* Hidden by default */
             background: #1a1a1a; color: var(--admin-gold); border: 1px solid var(--admin-gold);
             padding: 8px; width: 100%; border-radius: 10px; font-weight: 900;
             font-size: 12px; cursor: pointer; margin-bottom: 10px; transition: 0.2s;
         }
-        .admin-toggle-btn:hover { background: var(--admin-gold); color: #000; }
+        #admin-trigger-btn:hover { background: var(--admin-gold); color: #000; }
 
         #admin-panel {
             display: none; margin-bottom: 20px; padding: 15px;
@@ -199,7 +200,7 @@
             <div class="menu-box">
                 <div class="menu-title" id="menu-text">READY?</div>
                 
-                <button class="admin-toggle-btn" onclick="toggleAdminPanel()">🛠 OPEN ADMIN CONSOLE</button>
+                <button id="admin-trigger-btn" onclick="toggleAdminPanel()">🛠 OPEN ADMIN CONSOLE</button>
                 <div id="admin-panel">
                     <div class="admin-title">ADMIN TOOLS</div>
                     <div class="admin-row">
@@ -209,7 +210,7 @@
                     <button class="admin-btn" style="width:100%" onclick="unlockEverything()">UNLOCK ALL SKINS</button>
                 </div>
 
-                <input type="text" id="username" class="user-input" placeholder="YOUR USERNAME..." maxlength="15">
+                <input type="text" id="username" class="user-input" placeholder="YOUR USERNAME..." maxlength="15" oninput="checkAdminPassword(this.value)">
                 
                 <button class="cheat-btn" id="cheat-btn" onclick="applyCheats()">Cheats Mode</button>
                 <div class="speed-selector">
@@ -231,6 +232,7 @@
     <footer>HAPPY BIRTHDAY SANJIT</footer>
 
 <script>
+// --- GLOBAL SOUNDS ---
 const AudioFX = {
     ctx: null,
     init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -263,6 +265,7 @@ const AudioFX = {
     }
 };
 
+// --- DATA ---
 const SNAKE_SKINS = [
     { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
     { id: 'svoid', name: 'VOID', head: '#000000', body: '#000000', price: 0, pair: 'bvoid' },
@@ -323,7 +326,18 @@ function save() {
     localStorage.setItem('neon_v4_active_b', JSON.stringify(state.activeBall));
 }
 
-// ADMIN PANEL TOGGLE
+// --- PASSWORD CHECK ---
+function checkAdminPassword(val) {
+    const btn = document.getElementById('admin-trigger-btn');
+    const panel = document.getElementById('admin-panel');
+    if (val.toLowerCase() === "admin") {
+        btn.style.display = "block";
+    } else {
+        btn.style.display = "none";
+        panel.style.display = "none";
+    }
+}
+
 function toggleAdminPanel() {
     AudioFX.playClick();
     const panel = document.getElementById('admin-panel');
@@ -573,7 +587,10 @@ function loop(now) {
 
 document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resize); resize();
-    if (state.username) document.getElementById('username').value = state.username;
+    if (state.username) {
+        document.getElementById('username').value = state.username;
+        checkAdminPassword(state.username); // Re-check on load
+    }
     
     CONFIG.currentMode = 'hard';
     document.querySelectorAll('.speed-btn').forEach(btn => {
