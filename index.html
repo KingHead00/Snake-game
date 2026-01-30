@@ -86,9 +86,10 @@
             transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        canvas.pulse { animation: flashWhite 0.4s ease-out; }
+        /* Border flash animation when eating */
+        canvas.eat-flash { animation: flashWhite 0.3s ease-out; }
         @keyframes flashWhite {
-            0% { border-color: #fff; box-shadow: 0 0 50px #fff; transform: scale(1.02); }
+            0% { border-color: #fff; box-shadow: 0 0 40px #fff; transform: scale(1.03); }
             100% { border-color: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.3); transform: scale(1); }
         }
 
@@ -107,7 +108,6 @@
         }
         #ui-layer.hidden { opacity: 0; pointer-events: none; }
         
-        /* UPDATED MENU BOX FOR SCROLLING */
         .menu-box {
             text-align: center; background: var(--ui-bg); padding: 35px;
             border: 1px solid #333; border-radius: 20px; width: 360px;
@@ -424,7 +424,12 @@ function update() {
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; document.getElementById('score').textContent = state.score;
-        AudioFX.playEat(); canvas.classList.remove('pulse'); void canvas.offsetWidth; canvas.classList.add('pulse'); 
+        AudioFX.playEat(); 
+        
+        // TRIGGER EAT ANIMATIONS
+        state.shake = 8;
+        canvas.classList.remove('eat-flash'); void canvas.offsetWidth; canvas.classList.add('eat-flash'); 
+        
         const pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
         explode(state.food.x, state.food.y, pCol); 
         if(state.activeSnake.id === 'svoid') state.eyeFlash = 1.0;
