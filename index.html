@@ -50,24 +50,24 @@
         .header-left { display: flex; align-items: center; gap: 15px; }
         .logo-img { width: 32px; height: 32px; filter: drop-shadow(0 0 5px var(--primary)); }
         h1 { font-size: 20px; margin: 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 1px; }
-        
         .stats { font-family: 'Courier New', monospace; font-size: 16px; color: #888; font-weight: bold; }
         #score, #high { color: #fff; }
 
-        #game-container {
-            flex: 1;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-        }
+        #game-container { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; padding: 10px; }
 
         canvas {
             background: #000;
+            display: block;
             border: 5px solid #ffffff; 
             border-radius: 4px;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); 
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        canvas.eat-flash { animation: flashWhite 0.3s ease-out; }
+        @keyframes flashWhite {
+            0% { border-color: #fff; box-shadow: 0 0 40px #fff; transform: scale(1.03); }
+            100% { border-color: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.3); transform: scale(1); }
         }
 
         #ui-layer {
@@ -75,7 +75,7 @@
             top: 0; left: 0; width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
             background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
-            z-index: 20; transition: opacity 0.3s;
+            transition: opacity 0.3s; z-index: 20;
         }
         #ui-layer.hidden { opacity: 0; pointer-events: none; }
         
@@ -86,11 +86,11 @@
         }
 
         .admin-trigger-btn {
-            background: transparent; color: #444; border: 1px solid #222;
-            padding: 6px; width: 100%; border-radius: 8px; font-weight: 900;
-            font-size: 10px; cursor: pointer; margin-bottom: 15px; transition: 0.3s;
+            background: #1a1a1a; color: #444; border: 1px solid #222;
+            padding: 8px; width: 100%; border-radius: 10px; font-weight: 900;
+            font-size: 11px; cursor: pointer; margin-bottom: 15px; transition: 0.2s;
         }
-        .admin-trigger-btn.waiting { border-color: var(--admin-gold); color: var(--admin-gold); box-shadow: 0 0 10px rgba(255, 204, 0, 0.2); }
+        .admin-trigger-btn.waiting { border-color: var(--admin-gold); color: var(--admin-gold); }
 
         #admin-panel {
             display: none; margin-bottom: 20px; padding: 15px;
@@ -119,19 +119,19 @@
         }
         @keyframes rainbowShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
 
-        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; width: 100%; }
+        .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 15px; }
         
         .shop-btn { background: #111; color: #fff; border: 1px solid #333; padding: 14px; width: 100%; margin-top: 10px; border-radius: 10px; cursor: pointer; display: flex; justify-content: space-between; }
         .shop-content { max-height: 0; overflow: hidden; transition: 0.4s ease-out; background: #000; }
         .shop-content.open { max-height: 500px; padding: 10px; border: 1px solid #333; border-top: none; }
         
-        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 10px; }
+        .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .skin-card { background: #0a0a0a; border: 1px solid #222; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 11px; }
         .skin-card.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
-        .swatch { width: 14px; height: 14px; margin: 0 auto 5px; border-radius: 3px; }
+        .swatch { width: 16px; height: 16px; margin: 0 auto 8px; border-radius: 4px; }
 
-        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 5px; }
-        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 6px 8px; cursor: pointer; border-radius: 6px; font-size: 10px; }
+        .speed-selector { margin: 15px 0; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .speed-btn { background: transparent; color: #555; border: 1px solid #222; padding: 8px 10px; cursor: pointer; border-radius: 8px; font-size: 11px; }
         .speed-btn.active { color: var(--primary); border-color: var(--primary); }
 
         footer { padding: 15px; text-align: center; font-size: 12px; color: #333; }
@@ -150,7 +150,7 @@
         <canvas id="c"></canvas>
         <div id="ui-layer">
             <div class="menu-box">
-                <button id="admin-trigger" class="admin-trigger-btn" onclick="handleAdminButtonClick()">🛠 ADMIN CONSOLE</button>
+                <button id="admin-trigger" class="admin-trigger-btn" onclick="handleAdminTrigger()">🛠 ADMIN CONSOLE</button>
                 
                 <div id="admin-panel">
                     <div class="admin-title">ADMIN TOOLS</div>
@@ -158,15 +158,14 @@
                         <input type="number" id="pts-input" class="admin-input" placeholder="Points...">
                         <button class="admin-btn" onclick="addAdminPts()">ADD</button>
                     </div>
-                    <button class="admin-btn" style="width:100%" onclick="unlockEverything()">UNLOCK ALL</button>
+                    <button class="admin-btn" style="width:100%" onclick="unlockEverything()">UNLOCK ALL SKINS</button>
                 </div>
 
                 <div class="menu-title" id="menu-text">READY?</div>
-
                 <input type="text" id="username" class="user-input" placeholder="YOUR USERNAME..." maxlength="15">
                 
                 <button class="cheat-btn" id="cheat-btn" onclick="applyCheats()">Cheats Mode</button>
-
+                
                 <div class="speed-selector">
                     <button class="speed-btn" data-speed="slow">SLOW</button>
                     <button class="speed-btn" data-speed="normal">NORMAL</button>
@@ -188,58 +187,42 @@
     <footer>HAPPY BIRTHDAY SANJIT</footer>
 
 <script>
-// Logic for Admin Toggle
-let isAdminInputActive = false;
-
-function handleAdminButtonClick() {
+// --- ADMIN SYSTEM ---
+let adminModeActive = false;
+function handleAdminTrigger() {
     const input = document.getElementById('username');
     const btn = document.getElementById('admin-trigger');
     const panel = document.getElementById('admin-panel');
 
-    if (!isAdminInputActive) {
-        // Switch to Password Mode
-        isAdminInputActive = true;
+    if (!adminModeActive) {
+        adminModeActive = true;
         input.value = "";
         input.placeholder = "ENTER ADMIN PASS...";
         input.classList.add('admin-mode');
         btn.classList.add('waiting');
         btn.innerText = "⚡ SUBMIT PASSWORD";
     } else {
-        // Check Password
         if (input.value === "sanjit2026") {
             panel.style.display = "block";
-            resetAdminButton();
+            resetAdminInput();
         } else {
-            // Wrong or Empty
-            alert("ACCESS DENIED");
-            resetAdminButton();
+            alert("WRONG PASSWORD");
+            resetAdminInput();
         }
     }
 }
-
-function resetAdminButton() {
+function resetAdminInput() {
     const input = document.getElementById('username');
     const btn = document.getElementById('admin-trigger');
-    isAdminInputActive = false;
+    adminModeActive = false;
     input.placeholder = "YOUR USERNAME...";
     input.classList.remove('admin-mode');
-    input.value = state.username; // Restore username
+    input.value = state.username;
     btn.classList.remove('waiting');
     btn.innerText = "🛠 ADMIN CONSOLE";
 }
 
-// Rest of Snake Game Logic
-const AudioFX = {
-    ctx: null,
-    init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-    play(freq, type, dur) {
-        this.init(); try { const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
-        osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-        gain.gain.setValueAtTime(0.1, this.ctx.currentTime); gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + dur);
-        osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + dur); } catch(e){}
-    }
-};
-
+// --- CORE GAME DATA ---
 const SNAKE_SKINS = [
     { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
     { id: 'svoid', name: 'VOID', head: '#000000', body: '#000000', price: 0, pair: 'bvoid' },
@@ -255,26 +238,22 @@ const BALL_COLORS = [
 ];
 
 const state = {
-    snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0},
-    food: {x:0, y:0}, score: 0, 
+    snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0}, inputQueue: [],
+    food: {x:0, y:0}, score: 0, particles: [],
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     username: localStorage.getItem('neon_v4_user') || '',
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1", "svoid"]'),
     ownedBalls: JSON.parse(localStorage.getItem('neon_v4_balls') || '["b1", "bvoid"]'),
     activeSnake: SNAKE_SKINS[0], activeBall: BALL_COLORS[0],
-    gameOver: true, lastTime: 0, accumTime: 0, cheatsActive: false
+    gameOver: true, lastTime: 0, accumTime: 0, shake: 0, cheatsActive: false
 };
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
-const CONFIG = { cols: 31, rows: 15, cellSize: 20, currentMode: 'hard' };
-const SPEEDS = { slow: 7, normal: 10, hard: 15, impossible: 25 };
+const CONFIG = { cols: 31, rows: 15, cellSize: 0, currentMode: 'hard' };
+const MODES = { slow: 7, normal: 10, hard: 15, impossible: 25 };
 
-function save() {
-    if (state.cheatsActive) return;
-    localStorage.setItem('neon_v4_best', state.wallet);
-    localStorage.setItem('neon_v4_user', state.username);
-}
+function save() { if(!state.cheatsActive) { localStorage.setItem('neon_v4_best', state.wallet); localStorage.setItem('neon_v4_user', state.username); } }
 
 function addAdminPts() {
     state.wallet += parseInt(document.getElementById('pts-input').value) || 0;
@@ -289,87 +268,134 @@ function unlockEverything() {
 
 function applyCheats() {
     state.cheatsActive = true; unlockEverything();
-    document.getElementById('cheat-btn').innerText = "CHEATS ACTIVE";
+    document.getElementById('cheat-btn').innerText = "CHEATS ON";
 }
 
-function toggleShop(id) {
-    document.getElementById(id).classList.toggle('open');
+function explode(x, y, color) {
+    for(let i=0; i<12; i++) {
+        state.particles.push({
+            x: x * CONFIG.cellSize + CONFIG.cellSize/2,
+            y: y * CONFIG.cellSize + CONFIG.cellSize/2,
+            vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8,
+            life: 1.0, color: (color === '#000000' ? '#ffffff' : color)
+        });
+    }
 }
 
+function getPinkYellow(timeOffset) {
+    const cycle = (Math.sin(timeOffset / 400) + 1) / 2;
+    return `rgb(255, ${Math.floor(255 * cycle)}, ${Math.floor(255 * (1-cycle))})`;
+}
+
+function update() {
+    if (state.inputQueue.length > 0) {
+        const nextMove = state.inputQueue.shift();
+        if (nextMove.x !== -state.lastD.x || nextMove.y !== -state.lastD.y) state.dir = nextMove;
+    }
+    state.lastD = state.dir;
+    const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
+    
+    if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
+        state.gameOver = true;
+        setTimeout(() => { document.getElementById('ui-layer').classList.remove('hidden'); }, 800);
+        return;
+    }
+
+    state.snake.unshift(head);
+    if (head.x === state.food.x && head.y === state.food.y) {
+        state.score++; state.wallet++;
+        document.getElementById('score').innerText = state.score;
+        canvas.classList.remove('eat-flash'); void canvas.offsetWidth; canvas.classList.add('eat-flash');
+        explode(state.food.x, state.food.y, state.activeBall.color === 'rainbow' ? 'cyan' : state.activeBall.color);
+        state.food = { x: Math.floor(Math.random()*CONFIG.cols), y: Math.floor(Math.random()*CONFIG.rows) };
+    } else state.snake.pop();
+}
+
+function render(now) {
+    ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    
+    // Grid
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 1;
+    for(let i=0; i<=canvas.width; i+=CONFIG.cellSize) { ctx.moveTo(i,0); ctx.lineTo(i, canvas.height); }
+    for(let i=0; i<=canvas.height; i+=CONFIG.cellSize) { ctx.moveTo(0,i); ctx.lineTo(canvas.width, i); }
+    ctx.stroke();
+
+    // Particles
+    state.particles.forEach((p, i) => {
+        p.x += p.vx; p.y += p.vy; p.life -= 0.03;
+        if(p.life <= 0) state.particles.splice(i,1);
+        ctx.fillStyle = p.color; ctx.globalAlpha = p.life;
+        ctx.fillRect(p.x, p.y, 3, 3);
+    });
+    ctx.globalAlpha = 1;
+
+    // Food
+    let bCol = state.activeBall.color === 'rainbow' ? `hsl(${now/5%360}, 100%, 60%)` : (state.activeBall.color === 'special_pink_yellow' ? getPinkYellow(now) : state.activeBall.color);
+    ctx.fillStyle = bCol; ctx.shadowBlur = 10; ctx.shadowColor = bCol;
+    ctx.beginPath(); ctx.arc(state.food.x*CONFIG.cellSize+CONFIG.cellSize/2, state.food.y*CONFIG.cellSize+CONFIG.cellSize/2, CONFIG.cellSize/3, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Snake
+    state.snake.forEach((s, i) => {
+        let sCol = state.activeSnake.head === 'rainbow' ? `hsl(${(now/5 - i*10)%360}, 100%, 50%)` : (state.activeSnake.head === 'special_pink_yellow' ? getPinkYellow(now - i*100) : (i===0 ? state.activeSnake.head : state.activeSnake.body));
+        ctx.fillStyle = sCol;
+        ctx.fillRect(s.x*CONFIG.cellSize+1, s.y*CONFIG.cellSize+1, CONFIG.cellSize-2, CONFIG.cellSize-2);
+    });
+}
+
+function loop(now) {
+    if(state.gameOver) return;
+    const dt = now - state.lastTime;
+    if(dt > 1000/MODES[CONFIG.currentMode]) { update(); state.lastTime = now; }
+    render(now);
+    requestAnimationFrame(loop);
+}
+
+function startGame() {
+    state.username = document.getElementById('username').value; save();
+    state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
+    state.dir = {x:1, y:0}; state.score = 0; state.inputQueue = [];
+    document.getElementById('score').innerText = '0';
+    state.gameOver = false; document.getElementById('ui-layer').classList.add('hidden');
+    requestAnimationFrame(loop);
+}
+
+function toggleShop(id) { document.getElementById(id).classList.toggle('open'); }
 function renderShops() {
     document.getElementById('high').textContent = state.wallet;
     const sGrid = document.getElementById('snake-grid'); sGrid.innerHTML = '';
     SNAKE_SKINS.forEach(s => {
+        const isOwned = state.ownedSkins.includes(s.id);
         const card = document.createElement('div');
         card.className = `skin-card ${state.activeSnake.id === s.id ? 'selected' : ''}`;
-        card.innerHTML = `<b>${s.name}</b>`;
-        card.onclick = () => { if(state.ownedSkins.includes(s.id)) state.activeSnake = s; renderShops(); };
+        card.innerHTML = `<b>${s.name}</b><br>${isOwned ? 'OWNED' : s.price + ' pts'}`;
+        card.onclick = () => { if(isOwned) state.activeSnake = s; else if(state.wallet >= s.price) { state.wallet -= s.price; state.ownedSkins.push(s.id); state.activeSnake = s; } renderShops(); };
         sGrid.appendChild(card);
     });
 }
 
 function resize() {
-    const ww = window.innerWidth;
-    CONFIG.cellSize = ww < 600 ? 10 : 20;
-    canvas.width = CONFIG.cols * CONFIG.cellSize;
-    canvas.height = CONFIG.rows * CONFIG.cellSize;
-}
-
-function spawnFood() {
-    state.food = { x: Math.floor(Math.random()*CONFIG.cols), y: Math.floor(Math.random()*CONFIG.rows) };
-}
-
-function startGame() {
-    state.username = document.getElementById('username').value;
-    save();
-    state.snake = [{x:5,y:5},{x:4,y:5},{x:3,y:5}];
-    state.dir = {x:1,y:0}; state.score = 0;
-    spawnFood(); state.gameOver = false;
-    document.getElementById('ui-layer').classList.add('hidden');
-    requestAnimationFrame(loop);
-}
-
-function update() {
-    const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
-    if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows) {
-        state.gameOver = true;
-        document.getElementById('ui-layer').classList.remove('hidden');
-        return;
-    }
-    state.snake.unshift(head);
-    if (head.x === state.food.x && head.y === state.food.y) {
-        state.score++; state.wallet++;
-        document.getElementById('score').innerText = state.score;
-        spawnFood();
-    } else state.snake.pop();
-}
-
-function loop(t) {
-    if (state.gameOver) return;
-    const dt = t - state.lastTime;
-    if (dt > 1000/SPEEDS[CONFIG.currentMode]) {
-        update();
-        state.lastTime = t;
-    }
-    ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle = state.activeBall.color === 'rainbow' ? 'red' : state.activeBall.color;
-    ctx.fillRect(state.food.x*CONFIG.cellSize, state.food.y*CONFIG.cellSize, CONFIG.cellSize, CONFIG.cellSize);
-    state.snake.forEach(s => {
-        ctx.fillStyle = state.activeSnake.head === 'rainbow' ? 'cyan' : state.activeSnake.head;
-        ctx.fillRect(s.x*CONFIG.cellSize, s.y*CONFIG.cellSize, CONFIG.cellSize-1, CONFIG.cellSize-1);
-    });
-    requestAnimationFrame(loop);
+    const container = document.getElementById('game-container');
+    const size = Math.min((container.clientWidth-20)/CONFIG.cols, (container.clientHeight-20)/CONFIG.rows);
+    CONFIG.cellSize = Math.floor(size);
+    canvas.width = CONFIG.cols * CONFIG.cellSize; canvas.height = CONFIG.rows * CONFIG.cellSize;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    resize(); renderShops();
+    window.addEventListener('resize', resize); resize();
     document.getElementById('start-btn').onclick = startGame;
-    window.addEventListener('keydown', e => {
-        if(e.key === "w") state.dir = {x:0, y:-1};
-        if(e.key === "s") state.dir = {x:0, y:1};
-        if(e.key === "a") state.dir = {x:-1, y:0};
-        if(e.key === "d") state.dir = {x:1, y:0};
+    document.querySelectorAll('.speed-btn').forEach(b => {
+        b.onclick = () => { document.querySelectorAll('.speed-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); CONFIG.currentMode = b.dataset.speed; };
     });
+    window.addEventListener('keydown', e => {
+        if(document.activeElement.tagName === 'INPUT') return;
+        const k = e.key.toLowerCase();
+        if(k === 'w' || k === 'arrowup') state.inputQueue.push({x:0,y:-1});
+        if(k === 's' || k === 'arrowdown') state.inputQueue.push({x:0,y:1});
+        if(k === 'a' || k === 'arrowleft') state.inputQueue.push({x:-1,y:0});
+        if(k === 'd' || k === 'arrowright') state.inputQueue.push({x:1,y:0});
+    });
+    renderShops();
 });
 </script>
 </body>
