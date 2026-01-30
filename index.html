@@ -123,11 +123,12 @@
 
         .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
         
-        /* Always Visible Admin Button */
+        /* THE ADMIN BUTTON */
         .admin-trigger-btn {
             background: #1a1a1a; color: var(--admin-gold); border: 1px solid var(--admin-gold);
             padding: 8px; width: 100%; border-radius: 10px; font-weight: 900;
-            font-size: 12px; cursor: pointer; margin-bottom: 10px; transition: 0.2s;
+            font-size: 11px; cursor: pointer; margin-bottom: 15px; transition: 0.2s;
+            text-transform: uppercase;
         }
         .admin-trigger-btn:hover { background: var(--admin-gold); color: #000; }
 
@@ -197,9 +198,8 @@
         <canvas id="c"></canvas>
         <div id="ui-layer">
             <div class="menu-box">
-                <div class="menu-title" id="menu-text">READY?</div>
+                <button class="admin-trigger-btn" onclick="checkAdminFromUsername()">🛠 ADMIN CONSOLE</button>
                 
-                <button class="admin-trigger-btn" onclick="requestAdminAccess()">🛠 OPEN ADMIN CONSOLE</button>
                 <div id="admin-panel">
                     <div class="admin-title">ADMIN TOOLS</div>
                     <div class="admin-row">
@@ -208,6 +208,8 @@
                     </div>
                     <button class="admin-btn" style="width:100%" onclick="unlockEverything()">UNLOCK ALL SKINS</button>
                 </div>
+
+                <div class="menu-title" id="menu-text">READY?</div>
 
                 <input type="text" id="username" class="user-input" placeholder="YOUR USERNAME..." maxlength="15">
                 
@@ -231,7 +233,7 @@
     <footer>HAPPY BIRTHDAY SANJIT</footer>
 
 <script>
-// --- SOUND FX ---
+// --- SOUNDS ---
 const AudioFX = {
     ctx: null,
     init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -325,15 +327,15 @@ function save() {
     localStorage.setItem('neon_v4_active_b', JSON.stringify(state.activeBall));
 }
 
-// --- ADMIN ACCESS LOGIC ---
-function requestAdminAccess() {
+// --- NEW ADMIN LOGIC ---
+function checkAdminFromUsername() {
     AudioFX.playClick();
-    const pw = prompt("ENTER ADMIN PASSWORD:");
-    if (pw === "admin") {
+    const currentVal = document.getElementById('username').value.trim();
+    if (currentVal === "sanjit2026") {
         const panel = document.getElementById('admin-panel');
-        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-    } else if (pw !== null) {
-        alert("ACCESS DENIED");
+        panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+    } else {
+        alert("ACCESS DENIED: Enter password in Username box.");
     }
 }
 
