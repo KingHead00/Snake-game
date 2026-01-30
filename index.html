@@ -220,6 +220,13 @@ const AudioFX = {
         osc.type = 'sine'; osc.frequency.setValueAtTime(600, this.ctx.currentTime);
         gain.gain.setValueAtTime(0.05, this.ctx.currentTime); gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.05);
         osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.05); } catch(e){}
+    },
+    playTurn() {
+        this.init(); try { const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+        osc.type = 'sine'; osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.05);
+        gain.gain.setValueAtTime(0.02, this.ctx.currentTime); gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.05);
+        osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.05); } catch(e){}
     }
 };
 
@@ -267,7 +274,7 @@ const CONFIG = {
     speeds: { 
         slow: { base: 6, boost: 0.1, max: 12 }, 
         normal: { base: 8, boost: 0.15, max: 18 }, 
-        hard: { base: 13, boost: 0.2, max: 26 }, // Hard is now harder
+        hard: { base: 13, boost: 0.2, max: 26 }, 
         impossible: { base: 18, boost: 0.3, max: 40 } 
     }, 
     currentMode: 'hard' 
@@ -392,7 +399,10 @@ function startGame() {
 function update() {
     if (state.inputQueue.length > 0) {
         const nextMove = state.inputQueue.shift();
-        if (nextMove.x !== -state.lastD.x || nextMove.y !== -state.lastD.y) state.dir = nextMove;
+        if (nextMove.x !== -state.lastD.x || nextMove.y !== -state.lastD.y) {
+            state.dir = nextMove;
+            AudioFX.playTurn();
+        }
     }
     state.lastD = state.dir; 
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
