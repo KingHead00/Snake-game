@@ -238,7 +238,7 @@ const SNAKE_SKINS = [
     { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
     { id: 'svoid', name: 'VOID', head: '#000000', body: '#000000', price: 0, pair: 'bvoid' },
     { id: 's_banana', name: 'BANANA', head: '#ffe135', body: '#ccb52b', price: 0 },
-    { id: 's_pink', name: 'PINK', head: 'rainbow', body: 'rainbow', price: 0, pair: 'b_yellow' }, 
+    { id: 's_pink', name: 'SANJIT FAV', head: 'pinkyellow', body: 'pinkyellow', price: 0, pair: 'b_yellow' }, 
     { id: 's2', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 10 },
     { id: 's3', name: 'RED', head: '#ff0044', body: '#990022', price: 20 },
     { id: 's4', name: 'BLUE', head: '#0088ff', body: '#0044aa', price: 30 },
@@ -331,7 +331,10 @@ function renderShops() {
         const isSel = state.activeSnake.id === skin.id;
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        card.innerHTML = `<div class="swatch" style="background:${skin.head==='rainbow'?'linear-gradient(45deg,red,blue)':skin.head}; border: ${skin.head==='#000000'?'1px solid #333':'none'}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
+        let bg = skin.head;
+        if(bg === 'rainbow') bg = 'linear-gradient(45deg,red,blue)';
+        if(bg === 'pinkyellow') bg = 'linear-gradient(45deg,#ff00ff,#ffff00)';
+        card.innerHTML = `<div class="swatch" style="background:${bg}; border: ${skin.head==='#000000'?'1px solid #333':'none'}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
         card.onclick = () => { 
             AudioFX.playClick(); 
             if(isOwned) {
@@ -413,7 +416,6 @@ function update() {
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 10; AudioFX.playDeath();
         canvas.classList.add('death-pulse'); 
-        // FIXED: Only update record if current score is actually higher than best
         if (state.score > state.wallet) { state.wallet = state.score; }
         save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 800);
         return;
@@ -452,8 +454,18 @@ function render(now) {
     ctx.shadowBlur = 0;
 
     state.snake.forEach((seg, i) => {
-        let sH = state.activeSnake.head === 'rainbow' ? `hsl(${rHue}, 100%, 50%)` : state.activeSnake.head;
-        let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
+        let sH, sB;
+        if (state.activeSnake.head === 'rainbow') {
+            sH = `hsl(${rHue}, 100%, 50%)`;
+            sB = `hsl(${(rHue-i*10)%360}, 100%, 40%)`;
+        } else if (state.activeSnake.head === 'pinkyellow') {
+            const cycle = (Math.sin(now/300 - i*0.3) + 1) / 2;
+            sH = sB = `rgb(${255}, ${Math.floor(255 * cycle)}, ${Math.floor(255 * (1 - cycle))})`;
+        } else {
+            sH = state.activeSnake.head;
+            sB = state.activeSnake.body;
+        }
+
         ctx.fillStyle = (i === 0) ? sH : sB;
         const r = i === 0 ? 8 : 4; const x = seg.x*CONFIG.cellSize+1; const y = seg.y*CONFIG.cellSize+1;
         const w = CONFIG.cellSize-2; const h = CONFIG.cellSize-2;
