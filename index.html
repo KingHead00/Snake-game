@@ -123,6 +123,16 @@
 
         .menu-title { font-size: 32px; font-weight: 900; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
         
+        /* Admin Panel Styles */
+        #admin-panel {
+            display: none; margin-bottom: 20px; padding: 15px;
+            background: #1a1a1a; border: 2px dashed var(--admin-gold); border-radius: 15px;
+        }
+        .admin-title { color: var(--admin-gold); font-weight: 900; margin-bottom: 10px; font-size: 14px; }
+        .admin-row { display: flex; gap: 5px; margin-bottom: 10px; }
+        .admin-input { flex: 1; background: #000; border: 1px solid #444; color: #fff; padding: 5px; border-radius: 5px; }
+        .admin-btn { background: var(--admin-gold); border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
         .user-input {
             width: 100%; padding: 12px; margin-bottom: 20px;
             background: #111; border: 1px solid #333; border-radius: 10px;
@@ -142,16 +152,6 @@
         }
         .cheat-btn.active { filter: brightness(0.6); pointer-events: none; opacity: 0.8; }
         @keyframes rainbowShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
-
-        /* Admin Panel Styles */
-        #admin-panel {
-            display: none; margin-top: 20px; padding: 15px;
-            background: #1a1a1a; border: 2px dashed var(--admin-gold); border-radius: 15px;
-        }
-        .admin-title { color: var(--admin-gold); font-weight: 900; margin-bottom: 10px; font-size: 14px; }
-        .admin-row { display: flex; gap: 5px; margin-bottom: 10px; }
-        .admin-input { flex: 1; background: #000; border: 1px solid #444; color: #fff; padding: 5px; border-radius: 5px; }
-        .admin-btn { background: var(--admin-gold); border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
         .btn { background: var(--primary); color: #000; border: none; padding: 16px; font-size: 20px; font-weight: 800; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; transition: 0.2s; }
         .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--primary); }
@@ -191,9 +191,6 @@
         <div id="ui-layer">
             <div class="menu-box">
                 <div class="menu-title" id="menu-text">READY?</div>
-                <input type="text" id="username" class="user-input" placeholder="YOUR USERNAME..." maxlength="15">
-                
-                <button class="cheat-btn" id="cheat-btn" onclick="applyCheats()">Cheats Mode</button>
                 
                 <div id="admin-panel">
                     <div class="admin-title">🛠 ADMIN CONSOLE</div>
@@ -204,6 +201,9 @@
                     <button class="admin-btn" style="width:100%" onclick="unlockEverything()">UNLOCK ALL SKINS</button>
                 </div>
 
+                <input type="text" id="username" class="user-input" placeholder="YOUR USERNAME..." maxlength="15">
+                
+                <button class="cheat-btn" id="cheat-btn" onclick="applyCheats()">Cheats Mode</button>
                 <div class="speed-selector">
                     <button class="speed-btn" data-speed="slow">SLOW</button>
                     <button class="speed-btn" data-speed="normal">NORMAL</button>
@@ -316,7 +316,7 @@ function save() {
     localStorage.setItem('neon_v4_active_b', JSON.stringify(state.activeBall));
 }
 
-// --- ADMIN FUNCTIONS ---
+// ADMIN LOGIC
 function addAdminPts() {
     const amt = parseInt(document.getElementById('pts-input').value) || 0;
     state.wallet += amt;
@@ -570,10 +570,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('start-btn').onclick = startGame;
     window.addEventListener('keydown', e => {
-        // Admin Trigger
+        // ADMIN KEYWORD TRIGGER
         state.adminCode += e.key.toLowerCase();
         if(state.adminCode.includes("admin")) { 
-            document.getElementById('admin-panel').style.display = 'block'; 
+            const panel = document.getElementById('admin-panel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
             state.adminCode = ""; 
         }
 
