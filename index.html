@@ -7,7 +7,7 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M79X9PGL');</script>
     
-    <script defer src="/_vercel/insights/script.js"></script>
+    <script src="/_vercel/insights/script.js"></script>
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
@@ -238,7 +238,7 @@ const SNAKE_SKINS = [
     { id: 's1', name: 'NEON', head: '#00ffcc', body: '#00bfa5', price: 0 },
     { id: 'svoid', name: 'VOID', head: '#000000', body: '#000000', price: 0, pair: 'bvoid' },
     { id: 's_banana', name: 'BANANA', head: '#ffe135', body: '#ccb52b', price: 0 },
-    { id: 's_pink', name: 'SANJIT FAV', head: 'special_pink_yellow', body: 'special_pink_yellow', price: 15, pair: 'b_yellow' }, 
+    { id: 's_pink', name: 'PINK', head: 'rainbow', body: 'rainbow', price: 0, pair: 'b_yellow' }, 
     { id: 's2', name: 'GOLD', head: '#ffcc00', body: '#aa8800', price: 10 },
     { id: 's3', name: 'RED', head: '#ff0044', body: '#990022', price: 20 },
     { id: 's4', name: 'BLUE', head: '#0088ff', body: '#0044aa', price: 30 },
@@ -250,7 +250,7 @@ const BALL_COLORS = [
     { id: 'b1', name: 'PURPLE', color: '#ff00ff', price: 0 },
     { id: 'bvoid', name: 'VOID', color: '#000000', price: 0, pair: 'svoid' },
     { id: 'b_banana', name: 'BANANA', color: '#ffe135', price: 0 },
-    { id: 'b_yellow', name: 'SANJIT FAV', color: 'special_pink_yellow', price: 15, pair: 's_pink' },
+    { id: 'b_yellow', name: 'YELLOW', color: '#ffff00', price: 0, pair: 's_pink' },
     { id: 'b2', name: 'LIGHT BLUE', color: '#00ffff', price: 10 },
     { id: 'b3', name: 'GREEN', color: '#00ff00', price: 20 },
     { id: 'b4', name: 'ORANGE', color: '#ff8800', price: 30 },
@@ -263,8 +263,8 @@ const state = {
     score: 0, particles: [],
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     username: localStorage.getItem('neon_v4_user') || '',
-    ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1", "svoid", "s_banana"]'),
-    ownedBalls: JSON.parse(localStorage.getItem('neon_v4_balls') || '["b1", "bvoid", "b_banana"]'),
+    ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1", "svoid", "s_banana", "s_pink"]'),
+    ownedBalls: JSON.parse(localStorage.getItem('neon_v4_balls') || '["b1", "bvoid", "b_banana", "b_yellow"]'),
     activeSnake: JSON.parse(localStorage.getItem('neon_v4_active_s')) || SNAKE_SKINS[0],
     activeBall: JSON.parse(localStorage.getItem('neon_v4_active_b')) || BALL_COLORS[0],
     lastTime: 0, accumTime: 0, gameOver: true, shake: 0,
@@ -331,12 +331,7 @@ function renderShops() {
         const isSel = state.activeSnake.id === skin.id;
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        
-        let preview = skin.head;
-        if(skin.id === 's_pink') preview = 'linear-gradient(45deg, #ff00ff, #ffff00)';
-        else if(skin.head === 'rainbow') preview = 'linear-gradient(45deg, red, blue)';
-
-        card.innerHTML = `<div class="swatch" style="background:${preview}; border: ${skin.head==='#000000'?'1px solid #333':'none'}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
+        card.innerHTML = `<div class="swatch" style="background:${skin.head==='rainbow'?'linear-gradient(45deg,red,blue)':skin.head}; border: ${skin.head==='#000000'?'1px solid #333':'none'}"></div><b>${skin.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':skin.price+' pts')}`;
         card.onclick = () => { 
             AudioFX.playClick(); 
             if(isOwned) {
@@ -359,12 +354,7 @@ function renderShops() {
         const isSel = state.activeBall.id === ball.id;
         const card = document.createElement('div');
         card.className = `skin-card ${isSel ? 'selected' : ''}`;
-        
-        let preview = ball.color;
-        if(ball.id === 'b_yellow') preview = 'linear-gradient(45deg, #ff00ff, #ffff00)';
-        else if(ball.color === 'rainbow') preview = 'linear-gradient(45deg, red, blue)';
-
-        card.innerHTML = `<div class="swatch" style="background:${preview}; border: ${ball.color==='#000000'?'1px solid #333':'none'}"></div><b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
+        card.innerHTML = `<div class="swatch" style="background:${ball.color==='rainbow'?'linear-gradient(45deg,red,blue)':ball.color}; border: ${ball.color==='#000000'?'1px solid #333':'none'}"></div><b>${ball.name}</b><br>${isSel?'ACTIVE':(isOwned?'OWNED':ball.price+' pts')}`;
         card.onclick = () => { 
             AudioFX.playClick(); 
             if(isOwned) {
@@ -423,7 +413,8 @@ function update() {
     if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
         state.gameOver = true; state.shake = 10; AudioFX.playDeath();
         canvas.classList.add('death-pulse'); 
-        if (!state.cheatsActive) { state.wallet += state.score; }
+        // FIXED: Only update record if current score is actually higher than best
+        if (state.score > state.wallet) { state.wallet = state.score; }
         save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 800);
         return;
     }
@@ -433,27 +424,12 @@ function update() {
         AudioFX.playEat(); 
         state.shake = 8;
         canvas.classList.remove('eat-flash'); void canvas.offsetWidth; canvas.classList.add('eat-flash'); 
-        
-        let pCol;
-        if(state.activeBall.color === 'special_pink_yellow') {
-            pCol = (Math.random() > 0.5) ? '#ff00ff' : '#ffff00';
-        } else {
-            pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
-        }
-        
+        const pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
         explode(state.food.x, state.food.y, pCol); 
         if(state.activeSnake.id === 'svoid') state.eyeFlash = 1.0;
         spawnFood();
     } else state.snake.pop();
     if(state.eyeFlash > 0) state.eyeFlash -= 0.05;
-}
-
-function getPinkYellowColor(timeOffset) {
-    const cycle = (Math.sin(timeOffset / 400) + 1) / 2;
-    const r = Math.floor(255);
-    const g = Math.floor(255 * cycle);
-    const b = Math.floor(255 * (1 - cycle));
-    return `rgb(${r}, ${g}, ${b})`;
 }
 
 function render(now) {
@@ -465,15 +441,8 @@ function render(now) {
     ctx.stroke();
     state.particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life -= 0.02; if(p.life <= 0) { state.particles.splice(i,1); return; } ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3); });
     ctx.globalAlpha = 1.0;
-    
     const rHue = (now / 5) % 360;
-    
-    let bCol;
-    if(state.activeBall.color === 'special_pink_yellow') {
-        bCol = getPinkYellowColor(now);
-    } else {
-        bCol = state.activeBall.color === 'rainbow' ? `hsl(${rHue}, 100%, 60%)` : state.activeBall.color;
-    }
+    let bCol = state.activeBall.color === 'rainbow' ? `hsl(${rHue}, 100%, 60%)` : state.activeBall.color;
     
     ctx.fillStyle = bCol === '#000000' ? '#111' : bCol; 
     ctx.shadowBlur = bCol === '#000000' ? 0 : 15; ctx.shadowColor = bCol;
@@ -483,21 +452,14 @@ function render(now) {
     ctx.shadowBlur = 0;
 
     state.snake.forEach((seg, i) => {
-        let sColor;
-        if (state.activeSnake.head === 'special_pink_yellow') {
-            sColor = getPinkYellowColor(now - (i * 100));
-        } else if (state.activeSnake.head === 'rainbow') {
-            sColor = (i === 0) ? `hsl(${rHue}, 100%, 50%)` : `hsl(${(rHue-i*10)%360}, 100%, 40%)`;
-        } else {
-            sColor = (i === 0) ? state.activeSnake.head : state.activeSnake.body;
-        }
-
-        ctx.fillStyle = sColor;
+        let sH = state.activeSnake.head === 'rainbow' ? `hsl(${rHue}, 100%, 50%)` : state.activeSnake.head;
+        let sB = state.activeSnake.body === 'rainbow' ? `hsl(${(rHue-i*10)%360}, 100%, 40%)` : state.activeSnake.body;
+        ctx.fillStyle = (i === 0) ? sH : sB;
         const r = i === 0 ? 8 : 4; const x = seg.x*CONFIG.cellSize+1; const y = seg.y*CONFIG.cellSize+1;
         const w = CONFIG.cellSize-2; const h = CONFIG.cellSize-2;
         ctx.beginPath(); 
         if(state.activeSnake.id === 'svoid') { ctx.strokeStyle = '#333333'; ctx.lineWidth = 2; ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.stroke(); } 
-        else { if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sColor; } ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.shadowBlur = 0; }
+        else { if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sH; } ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.shadowBlur = 0; }
         if(i === 0) {
             let eyeColor = (state.activeSnake.id === 'svoid') ? `rgb(255, ${Math.floor(255 * (1 - state.eyeFlash))}, ${Math.floor(255 * (1 - state.eyeFlash))})` : ((state.activeSnake.head === '#000000') ? '#fff' : '#000');
             ctx.fillStyle = eyeColor; if(state.eyeFlash > 0 && state.activeSnake.id === 'svoid') { ctx.shadowBlur = 15; ctx.shadowColor = '#f00'; }
