@@ -8,7 +8,7 @@
     <title>Neon Snake - New skins</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body id="game-body">
     <header>
         <div class="header-left">
             <img src="logo.png" alt="Logo" class="logo-img">
@@ -31,10 +31,13 @@
                     <button class="speed-btn" data-speed="hard">HARD</button>
                     <button class="speed-btn" data-speed="impossible">IMPOSSIBLE</button>
                 </div>
+                
                 <button class="shop-btn" onclick="toggleShop('snake-shop')">SNAKE SKINS <span>▼</span></button>
-                <div id="snake-shop" class="shop-content"><div class="skin-grid" id="snake-grid"></div></div>
+                <div id="snake-shop" class="shop-content scroll-enabled"><div class="skin-grid" id="snake-grid"></div></div>
+                
                 <button class="shop-btn" onclick="toggleShop('ball-shop')">BALL COLORS <span>▼</span></button>
                 <div id="ball-shop" class="shop-content"><div class="skin-grid" id="ball-grid"></div></div>
+                
                 <button class="btn" id="start-btn">START GAME</button>
                 <div class="menu-controls-hint">[<b>WASD</b>] Move &nbsp;•&nbsp; [<b>R/Space</b>] Restart<br>[<b>Q</b>] Exit to Google</div>
             </div>
