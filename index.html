@@ -500,16 +500,26 @@ function render(now) {
         ctx.beginPath(); 
         if(state.activeSnake.id === 'svoid') { ctx.strokeStyle = '#333333'; ctx.lineWidth = 2; ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.stroke(); } 
         else { if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sColor; } ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.shadowBlur = 0; }
+        
         if(i === 0) {
-            let eyeColor = (state.activeSnake.id === 'svoid') ? `rgb(255, ${Math.floor(255 * (1 - state.eyeFlash))}, ${Math.floor(255 * (1 - state.eyeFlash))})` : ((state.activeSnake.head === '#000000') ? '#fff' : '#000');
-            ctx.fillStyle = eyeColor; if(state.eyeFlash > 0 && state.activeSnake.id === 'svoid') { ctx.shadowBlur = 15; ctx.shadowColor = '#f00'; }
+            // Updated Eye logic: VOID flashes red, Black heads get White eyes, all others get Black eyes
+            let eyeColor = (state.activeSnake.id === 'svoid') 
+                ? `rgb(255, ${Math.floor(255 * (1 - state.eyeFlash))}, ${Math.floor(255 * (1 - state.eyeFlash))})` 
+                : ((state.activeSnake.head === '#000000') ? '#fff' : '#000');
+            
+            ctx.fillStyle = eyeColor; 
+            if(state.eyeFlash > 0 && state.activeSnake.id === 'svoid') { ctx.shadowBlur = 15; ctx.shadowColor = '#f00'; }
+            
             const eyeSize = CONFIG.cellSize / 8; const offset = CONFIG.cellSize / 4;
             let e1x, e1y, e2x, e2y;
             if (state.lastD.x === 1) { e1x = e2x = x + w - offset; e1y = y + offset; e2y = y + h - offset; }
             else if (state.lastD.x === -1) { e1x = e2x = x + offset; e1y = y + offset; e2y = y + h - offset; }
             else if (state.lastD.y === -1) { e1y = e2y = y + offset; e1x = x + offset; e2x = x + w - offset; }
             else { e1y = e2y = y + h - offset; e1x = x + offset; e2x = x + w - offset; }
-            ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0;
+            
+            ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill(); 
+            ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill(); 
+            ctx.shadowBlur = 0;
         }
     });
 }
@@ -527,7 +537,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resize); resize();
     if (state.username) document.getElementById('username').value = state.username;
     
-    // Default to Hard mode
     CONFIG.currentMode = 'hard';
     document.querySelectorAll('.speed-btn').forEach(btn => {
         if(btn.dataset.speed === 'hard') btn.classList.add('active');
