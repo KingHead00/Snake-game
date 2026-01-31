@@ -6,8 +6,8 @@
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-M79X9PGL');</script>
-    
     <script defer src="/_vercel/insights/script.js"></script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
@@ -167,6 +167,8 @@
     </style>
 </head>
 <body>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M79X9PGL"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <header>
         <div class="header-left">
             <img src="logo.png" alt="Logo" class="logo-img">
@@ -527,7 +529,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resize); resize();
     if (state.username) document.getElementById('username').value = state.username;
     
-    // Default to Hard mode
     CONFIG.currentMode = 'hard';
     document.querySelectorAll('.speed-btn').forEach(btn => {
         if(btn.dataset.speed === 'hard') btn.classList.add('active');
