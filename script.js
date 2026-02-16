@@ -117,9 +117,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// Listener for the 2 Player Mode button
-document.getElementById('twoPlayerBtn').addEventListener('click', function() {
-    isTwoPlayer = true; // Enable 2 player flag
-    resetGame();        // Reset game state
-    gameLoop();         // Start the game loop
+// Listener for the Start Button (which handles both 1P and 2P based on state)
+document.getElementById('start-btn').addEventListener('click', () => {
+    startGame();
+});
+
+// Target the 2 Player button by its ID from your HTML
+document.getElementById('mode-2p').addEventListener('click', function() {
+    setPlayers(2);
+});
+
+// Target the 1 Player button by its ID from your HTML
+document.getElementById('mode-1p').addEventListener('click', function() {
+    setPlayers(1);
 });
