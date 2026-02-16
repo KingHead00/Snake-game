@@ -115,3 +115,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if(btn.dataset.speed === 'hard') btn.classList.add('active');
     });
 });
+
+
+// Listener for the 2 Player Mode button
+document.getElementById('twoPlayerBtn').addEventListener('click', function() {
+    isTwoPlayer = true; // Enable 2 player flag
+    resetGame();        // Reset game state
+    gameLoop();         // Start the game loop
+});
