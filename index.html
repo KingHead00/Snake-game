@@ -161,9 +161,6 @@
         .speed-btn[data-speed="impossible"] { color: #880022; border-color: #440011; }
         .speed-btn[data-speed="impossible"].active { color: #ff4444; border-color: #ff4444; box-shadow: 0 0 10px rgba(255, 68, 68, 0.3); }
 
-        .mode-label { font-size: 11px; color: #888; font-weight: bold; text-transform: uppercase; margin-top: 10px; display: block; }
-        .mode-selector { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
-
         .menu-controls-hint { margin-top: 25px; padding-top: 15px; border-top: 1px solid #333; font-size: 11px; color: #666; text-transform: uppercase; line-height: 1.6; }
         .menu-controls-hint b { color: var(--primary); }
         footer { padding: 15px; text-align: center; font-size: 12px; color: #333; background: #050505; }
@@ -177,7 +174,7 @@
             <img src="logo.png" alt="Logo" class="logo-img">
             <h1>NEON SNAKE</h1>
         </div>
-        <div class="stats" id="stats-bar">SCORE: <span id="score">0</span> &nbsp;|&nbsp; BEST: <span id="high">0</span></div>
+        <div class="stats">SCORE: <span id="score">0</span> &nbsp;|&nbsp; BEST: <span id="high">0</span></div>
     </header>
 
     <div id="game-container">
@@ -188,13 +185,6 @@
                 <input type="text" id="username" class="user-input" placeholder="YOUR USERNAME..." maxlength="15">
                 
                 <button class="cheat-btn" id="cheat-btn" onclick="applyCheats()">Cheats Mode</button>
-                
-                <span class="mode-label">TWO PLAYER MODE:</span>
-                <div class="mode-selector">
-                    <button class="speed-btn active" id="mode-1p" onclick="setPlayers(1)">1 PLAYER</button>
-                    <button class="speed-btn" id="mode-2p" onclick="setPlayers(2)">2 PLAYERS</button>
-                </div>
-
                 <div class="speed-selector">
                     <button class="speed-btn" data-speed="slow">SLOW</button>
                     <button class="speed-btn" data-speed="normal">NORMAL</button>
@@ -206,11 +196,7 @@
                 <button class="shop-btn" onclick="toggleShop('ball-shop')">BALL COLORS <span>▼</span></button>
                 <div id="ball-shop" class="shop-content"><div class="skin-grid" id="ball-grid"></div></div>
                 <button class="btn" id="start-btn">START GAME</button>
-                <div class="menu-controls-hint">
-                    <span id="hint-1p">[<b>WASD</b>] Move</span>
-                    <span id="hint-2p" style="display:none;">P1 [<b>WASD</b>] &nbsp;•&nbsp; P2 [<b>ARROWS</b>]</span>
-                    <br>[<b>R/Space</b>] Restart • [<b>Q</b>] Exit to Google
-                </div>
+                <div class="menu-controls-hint">[<b>WASD</b>] Move &nbsp;•&nbsp; [<b>R/Space</b>] Restart<br>[<b>Q</b>] Exit to Google</div>
             </div>
         </div>
     </div>
@@ -274,11 +260,9 @@ const BALL_COLORS = [
 ];
 
 const state = {
-    playerCount: 1,
     snake: [], dir: {x:1, y:0}, lastD: {x:1, y:0}, inputQueue: [],
-    snake2: [], dir2: {x:-1, y:0}, lastD2: {x:-1, y:0}, inputQueue2: [], // P2
     food: {x:0, y:0},
-    score: 0, score2: 0, particles: [],
+    score: 0, particles: [],
     wallet: parseInt(localStorage.getItem('neon_v4_best') || '0'), 
     username: localStorage.getItem('neon_v4_user') || '',
     ownedSkins: JSON.parse(localStorage.getItem('neon_v4_owned') || '["s1", "svoid", "s_banana"]'),
@@ -411,17 +395,7 @@ function resize() {
 
 function spawnFood() {
     state.food = { x: Math.floor(Math.random()*CONFIG.cols), y: Math.floor(Math.random()*CONFIG.rows) };
-    if (state.snake.some(p => p.x === state.food.x && p.y === state.food.y) || 
-       (state.playerCount === 2 && state.snake2.some(p => p.x === state.food.x && p.y === state.food.y))) spawnFood();
-}
-
-function setPlayers(n) {
-    AudioFX.playClick();
-    state.playerCount = n;
-    document.getElementById('mode-1p').classList.toggle('active', n === 1);
-    document.getElementById('mode-2p').classList.toggle('active', n === 2);
-    document.getElementById('hint-1p').style.display = n === 1 ? 'inline' : 'none';
-    document.getElementById('hint-2p').style.display = n === 2 ? 'inline' : 'none';
+    if (state.snake.some(p => p.x === state.food.x && p.y === state.food.y)) spawnFood();
 }
 
 function startGame() {
@@ -429,123 +403,52 @@ function startGame() {
     state.username = document.getElementById('username').value;
     save(); 
     if(state.menuTimeout) clearTimeout(state.menuTimeout);
-    
-    // P1 Setup
     state.snake = [{x:8, y:7}, {x:7, y:7}, {x:6, y:7}];
     state.dir = {x:1, y:0}; state.lastD = {x:1, y:0}; state.inputQueue = [];
-    state.score = 0; 
-    
-    // P2 Setup
-    if(state.playerCount === 2) {
-        state.snake2 = [{x:CONFIG.cols-9, y:7}, {x:CONFIG.cols-8, y:7}, {x:CONFIG.cols-7, y:7}];
-        state.dir2 = {x:-1, y:0}; state.lastD2 = {x:-1, y:0}; state.inputQueue2 = [];
-        state.score2 = 0;
-        document.getElementById('stats-bar').innerHTML = 'P1: <span id="score">0</span> &nbsp;|&nbsp; P2: <span id="score2">0</span>';
-    } else {
-        document.getElementById('stats-bar').innerHTML = 'SCORE: <span id="score">0</span> &nbsp;|&nbsp; BEST: <span id="high">' + state.wallet + '</span>';
-    }
-
-    state.shake = 0; state.particles = []; state.eyeFlash = 0;
+    state.score = 0; state.shake = 0; state.particles = []; state.eyeFlash = 0;
+    document.getElementById('score').textContent = '0';
     canvas.className = ""; spawnFood(); state.gameOver = false; state.lastTime = performance.now();
     document.getElementById('ui-layer').classList.add('hidden');
     requestAnimationFrame(loop);
 }
 
-function handleDeath(msg) {
-    state.gameOver = true; state.shake = 10; AudioFX.playDeath();
-    canvas.classList.add('death-pulse'); 
-    if (!state.cheatsActive && state.playerCount === 1 && state.score > state.wallet) { 
-        state.wallet = state.score; 
-    }
-    save(); 
-    state.menuTimeout = setTimeout(() => { 
-        if(state.gameOver) { 
-            document.getElementById('menu-text').textContent = msg || "CRASHED!"; 
-            document.getElementById('ui-layer').classList.remove('hidden'); 
-            renderShops(); 
-        } 
-    }, 800);
-}
-
 function update() {
-    // Player 1 Input
     if (state.inputQueue.length > 0) {
         const nextMove = state.inputQueue.shift();
         if (nextMove.x !== -state.lastD.x || nextMove.y !== -state.lastD.y) {
-            state.dir = nextMove; AudioFX.playTurn();
+            state.dir = nextMove;
+            AudioFX.playTurn();
         }
     }
     state.lastD = state.dir; 
     const head = { x: state.snake[0].x + state.dir.x, y: state.snake[0].y + state.dir.y };
-    
-    // Player 2 Input
-    let head2 = null;
-    if (state.playerCount === 2) {
-        if (state.inputQueue2.length > 0) {
-            const nextMove = state.inputQueue2.shift();
-            if (nextMove.x !== -state.lastD2.x || nextMove.y !== -state.lastD2.y) {
-                state.dir2 = nextMove; AudioFX.playTurn();
-            }
+    if (head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows || state.snake.some(p => p.x === head.x && p.y === head.y)) {
+        state.gameOver = true; state.shake = 10; AudioFX.playDeath();
+        canvas.classList.add('death-pulse'); 
+        if (!state.cheatsActive && state.score > state.wallet) { 
+            state.wallet = state.score; 
         }
-        state.lastD2 = state.dir2;
-        head2 = { x: state.snake2[0].x + state.dir2.x, y: state.snake2[0].y + state.dir2.y };
-    }
-
-    // P1 Collisions
-    const p1HitSelf = state.snake.some(p => p.x === head.x && p.y === head.y);
-    const p1HitWall = head.x < 0 || head.x >= CONFIG.cols || head.y < 0 || head.y >= CONFIG.rows;
-    let p1HitP2 = false;
-    
-    // P2 Collisions
-    let p2HitSelf = false;
-    let p2HitWall = false;
-    let p2HitP1 = false;
-
-    if (state.playerCount === 2) {
-        p1HitP2 = state.snake2.some(p => p.x === head.x && p.y === head.y);
-        p2HitSelf = state.snake2.some(p => p.x === head2.x && p.y === head2.y);
-        p2HitWall = head2.x < 0 || head2.x >= CONFIG.cols || head2.y < 0 || head2.y >= CONFIG.rows;
-        p2HitP1 = state.snake.some(p => p.x === head2.x && p.y === head2.y);
-        
-        // Head to Head
-        if (head.x === head2.x && head.y === head2.y) { handleDeath("DRAW!"); return; }
-    }
-
-    if (p1HitWall || p1HitSelf || p1HitP2) {
-        handleDeath(state.playerCount === 2 ? "P2 WINS!" : "CRASHED!");
+        save(); state.menuTimeout = setTimeout(() => { if(state.gameOver) { document.getElementById('menu-text').textContent="CRASHED!"; document.getElementById('ui-layer').classList.remove('hidden'); renderShops(); } }, 800);
         return;
     }
-    if (state.playerCount === 2 && (p2HitWall || p2HitSelf || p2HitP1)) {
-        handleDeath("P1 WINS!");
-        return;
-    }
-
-    // Move P1
     state.snake.unshift(head);
     if (head.x === state.food.x && head.y === state.food.y) {
         state.score++; document.getElementById('score').textContent = state.score;
-        AudioFX.playEat(); state.shake = 8;
+        AudioFX.playEat(); 
+        state.shake = 8;
         canvas.classList.remove('eat-flash'); void canvas.offsetWidth; canvas.classList.add('eat-flash'); 
+        
         let pCol;
-        if(state.activeBall.color === 'special_pink_yellow') pCol = (Math.random() > 0.5) ? '#ff00ff' : '#ffff00';
-        else pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
+        if(state.activeBall.color === 'special_pink_yellow') {
+            pCol = (Math.random() > 0.5) ? '#ff00ff' : '#ffff00';
+        } else {
+            pCol = state.activeBall.color === 'rainbow' ? `hsl(${Math.random()*360}, 100%, 60%)` : state.activeBall.color;
+        }
+        
         explode(state.food.x, state.food.y, pCol); 
         if(state.activeSnake.id === 'svoid') state.eyeFlash = 1.0;
         spawnFood();
     } else state.snake.pop();
-
-    // Move P2
-    if(state.playerCount === 2) {
-        state.snake2.unshift(head2);
-        if (head2.x === state.food.x && head2.y === state.food.y) {
-            state.score2++; document.getElementById('score2').textContent = state.score2;
-            AudioFX.playEat(); state.shake = 8;
-            canvas.classList.remove('eat-flash'); void canvas.offsetWidth; canvas.classList.add('eat-flash'); 
-            explode(state.food.x, state.food.y, '#ff0044'); // P2 particles red
-            spawnFood();
-        } else state.snake2.pop();
-    }
-
     if(state.eyeFlash > 0) state.eyeFlash -= 0.05;
 }
 
@@ -583,7 +486,6 @@ function render(now) {
     ctx.fill(); if(bCol === '#000000') ctx.stroke();
     ctx.shadowBlur = 0;
 
-    // Render P1
     state.snake.forEach((seg, i) => {
         let sColor;
         if (state.activeSnake.head === 'special_pink_yellow') {
@@ -612,28 +514,6 @@ function render(now) {
             ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0;
         }
     });
-
-    // Render P2 (Red Theme)
-    if(state.playerCount === 2) {
-        state.snake2.forEach((seg, i) => {
-            let sColor = (i === 0) ? '#ff0044' : '#990022';
-            ctx.fillStyle = sColor;
-            const r = i === 0 ? 8 : 4; const x = seg.x*CONFIG.cellSize+1; const y = seg.y*CONFIG.cellSize+1;
-            const w = CONFIG.cellSize-2; const h = CONFIG.cellSize-2;
-            ctx.beginPath(); 
-            if(i === 0) { ctx.shadowBlur = 15; ctx.shadowColor = sColor; } ctx.roundRect(x,y,w,h,r); ctx.fill(); ctx.shadowBlur = 0;
-            if(i === 0) {
-                ctx.fillStyle = '#000';
-                const eyeSize = CONFIG.cellSize / 8; const offset = CONFIG.cellSize / 4;
-                let e1x, e1y, e2x, e2y;
-                if (state.lastD2.x === 1) { e1x = e2x = x + w - offset; e1y = y + offset; e2y = y + h - offset; }
-                else if (state.lastD2.x === -1) { e1x = e2x = x + offset; e1y = y + offset; e2y = y + h - offset; }
-                else if (state.lastD2.y === -1) { e1y = e2y = y + offset; e1x = x + offset; e2x = x + w - offset; }
-                else { e1y = e2y = y + h - offset; e1x = x + offset; e2x = x + w - offset; }
-                ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0;
-            }
-        });
-    }
 }
 
 function loop(now) {
@@ -652,9 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
     CONFIG.currentMode = 'hard';
     document.querySelectorAll('.speed-btn').forEach(btn => {
         if(btn.dataset.speed === 'hard') btn.classList.add('active');
-        if(!btn.id) { // Only add speed logic to speed buttons, not mode buttons
-            btn.onclick = () => { AudioFX.playClick(); document.querySelectorAll('.speed-selector .speed-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); CONFIG.currentMode=btn.dataset.speed; };
-        }
+        btn.onclick = () => { AudioFX.playClick(); document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); CONFIG.currentMode=btn.dataset.speed; };
     });
 
     document.getElementById('start-btn').onclick = startGame;
@@ -664,42 +542,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (k === 'r' || k === ' ') startGame();
         if (k === 'q') window.location.href = "https://www.google.com";
         if (state.gameOver) return;
-        
         let nD = null;
-        let isP2 = false;
-
-        // Controls Logic
-        if (state.playerCount === 1) {
-            // 1 Player: WASD OR Arrows control P1
-            if (k === 'w' || k === 'arrowup') nD = {x:0, y:-1}; 
-            else if (k === 's' || k === 'arrowdown') nD = {x:0, y:1}; 
-            else if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0}; 
-            else if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
-        } else {
-            // 2 Player: WASD = P1, Arrows = P2
-            if (k === 'w') nD = {x:0, y:-1}; 
-            else if (k === 's') nD = {x:0, y:1}; 
-            else if (k === 'a') nD = {x:-1, y:0}; 
-            else if (k === 'd') nD = {x:1, y:0};
-            
-            else if (k === 'arrowup') { nD = {x:0, y:-1}; isP2 = true; }
-            else if (k === 'arrowdown') { nD = {x:0, y:1}; isP2 = true; }
-            else if (k === 'arrowleft') { nD = {x:-1, y:0}; isP2 = true; }
-            else if (k === 'arrowright') { nD = {x:1, y:0}; isP2 = true; }
-        }
-
+        if (k === 'w' || k === 'arrowup') nD = {x:0, y:-1}; else if (k === 's' || k === 'arrowdown') nD = {x:0, y:1}; else if (k === 'a' || k === 'arrowleft') nD = {x:-1, y:0}; else if (k === 'd' || k === 'arrowright') nD = {x:1, y:0};
         if (nD) {
-            if (isP2) {
-                const lastPlanned = state.inputQueue2.length > 0 ? state.inputQueue2[state.inputQueue2.length - 1] : state.lastD2;
-                if ((nD.x !== lastPlanned.x || nD.y !== lastPlanned.y) && (nD.x !== -lastPlanned.x || nD.y !== -lastPlanned.y)) { 
-                    if (state.inputQueue2.length < 2) state.inputQueue2.push(nD); 
-                }
-            } else {
-                const lastPlanned = state.inputQueue.length > 0 ? state.inputQueue[state.inputQueue.length - 1] : state.lastD;
-                if ((nD.x !== lastPlanned.x || nD.y !== lastPlanned.y) && (nD.x !== -lastPlanned.x || nD.y !== -lastPlanned.y)) { 
-                    if (state.inputQueue.length < 2) state.inputQueue.push(nD); 
-                }
-            }
+            const lastPlanned = state.inputQueue.length > 0 ? state.inputQueue[state.inputQueue.length - 1] : state.lastD;
+            if ((nD.x !== lastPlanned.x || nD.y !== lastPlanned.y) && (nD.x !== -lastPlanned.x || nD.y !== -lastPlanned.y)) { if (state.inputQueue.length < 2) state.inputQueue.push(nD); }
         }
     });
     renderShops();
